@@ -35,13 +35,15 @@ import {
   ExternalLink,
   ShieldCheck,
   Key as KeyIcon,
-  HelpCircle
+  HelpCircle,
+  MousePointer2,
+  Lock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const { data, updateData } = useSiteData();
-  const { isAdmin } = useAdmin();
+  const { isAdmin, setShowLogin } = useAdmin();
   const [activeTab, setActiveTab] = useState<'general' | 'branding' | 'pages' | 'ai' | 'maintenance' | 'github'>('general');
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -49,7 +51,31 @@ const AdminDashboard = () => {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isAdmin) return null;
+  // Pantalla de acceso denegado si no es admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-[80vh] flex flex-col items-center justify-center p-4 bg-gray-50 text-center animate-in fade-in zoom-in-95 duration-500">
+        <div className="bg-black p-10 rounded-[4rem] border-4 border-brand shadow-2xl space-y-8 max-w-md w-full">
+          <div className="bg-brand text-white w-24 h-24 rounded-3xl flex items-center justify-center mx-auto shadow-xl border-4 border-white rotate-3">
+            <Lock size={48} />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Área <span className="text-brand">Restringida</span></h2>
+            <p className="text-gray-400 font-bold text-sm">Debes iniciar sesión con tus credenciales de seguridad para acceder al Gestor Central.</p>
+          </div>
+          <div className="pt-4 flex flex-col gap-4">
+            <button 
+              onClick={() => setShowLogin(true)}
+              className="bg-brand text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-all shadow-xl"
+            >
+              INICIAR SESIÓN AHORA
+            </button>
+            <Link to="/" className="text-gray-500 font-black text-[10px] uppercase hover:text-white transition-colors">Volver al Inicio</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const syncWithGitHub = async () => {
     const { token, owner, repo, branch } = data.githubSettings;
@@ -217,42 +243,40 @@ const AdminDashboard = () => {
 
         <main className="md:col-span-3 space-y-10 animate-in fade-in duration-500">
           
-          {/* TAB: GITHUB SYNC CON GUÍA MEJORADA */}
+          {/* TAB: GITHUB SYNC */}
           {activeTab === 'github' && (
             <div className="space-y-10">
-              {/* Sección Guía Paso a Paso */}
               <div className="bg-white p-12 rounded-[4rem] border-4 border-brand shadow-xl space-y-10">
                 <div className="text-center space-y-2">
-                  <h2 className="text-4xl font-black tracking-tighter uppercase">Guía de Configuración <span className="text-brand">Paso a Paso</span></h2>
-                  <p className="text-gray-500 font-bold italic">Copia los datos de tu captura de pantalla de GitHub aquí.</p>
+                  <h2 className="text-4xl font-black tracking-tighter uppercase">Guía de Configuración <span className="text-brand">Final</span></h2>
+                  <p className="text-gray-500 font-bold italic">Completa la vinculación con tu Token de GitHub.</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
                     { 
                       step: "01", 
-                      title: "Crear Repo", 
-                      desc: "Haz clic en 'Crear repositorio' en la pantalla que tienes abierta.",
-                      icon: Database,
-                      link: "https://github.com/new"
+                      title: "Ficha Clásica", 
+                      desc: "Selecciona 'Generar nuevo token (clásico)'.",
+                      icon: KeyIcon,
+                      link: "https://github.com/settings/tokens"
                     },
                     { 
                       step: "02", 
-                      title: "Generar Token", 
-                      desc: "Ve a Developer Settings para obtener tu clave secreta.",
-                      icon: KeyIcon,
-                      link: "https://github.com/settings/tokens/new"
+                      title: "Casilla 'repo'", 
+                      desc: "Marca la primera casilla llamada 'repo' (Control total).",
+                      icon: ShieldCheck
                     },
                     { 
                       step: "03", 
-                      title: "Permisos", 
-                      desc: "Marca 'repo' (Full control of private repositories).",
-                      icon: ShieldCheck
+                      title: "Copiar ghp_", 
+                      desc: "Genera el token y copia el código de inmediato.",
+                      icon: ExternalLink
                     },
                     { 
                       step: "04", 
                       title: "Vincular", 
-                      desc: "Pega los datos en el bloque negro inferior.",
+                      desc: "Pega el código ghp_... en el campo negro de abajo.",
                       icon: Github
                     }
                   ].map((item, i) => (
@@ -271,24 +295,39 @@ const AdminDashboard = () => {
                     </div>
                   ))}
                 </div>
+
+                <div className="bg-blue-600 p-8 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+                  <div className="flex items-center gap-6">
+                    <div className="bg-black p-4 rounded-2xl"><KeyIcon size={32} /></div>
+                    <div>
+                      <h4 className="text-xl font-black uppercase">¡Marca la casilla 'repo'!</h4>
+                      <p className="text-xs font-bold opacity-80">Es la primera de la lista en la pantalla de GitHub.</p>
+                    </div>
+                  </div>
+                  <a 
+                    href="https://github.com/settings/tokens/new?notes=MiPymeSegura&scopes=repo" 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-black flex items-center gap-3 hover:scale-105 transition-transform"
+                  >
+                    GENERAR MI TOKEN AHORA <MousePointer2 size={20} />
+                  </a>
+                </div>
               </div>
 
-              {/* Formulario de Conexión Mejorado con Etiquetas de Captura */}
+              {/* Formulario de Conexión */}
               <div className="bg-black text-white p-12 rounded-[4rem] border-4 border-yellow-400 shadow-xl space-y-12">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <h2 className="text-3xl font-black tracking-tighter uppercase flex items-center gap-4">
                       <Github className="text-yellow-400" size={32} /> Datos de <span className="text-yellow-400">Vinculación</span>
                   </h2>
-                  <div className="bg-white/10 px-4 py-2 rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-yellow-400 border border-white/10">
-                    <HelpCircle size={14} /> Sigue los nombres de tu captura
-                  </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-10">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <label className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                        Token Secreto (PAT) <span className="text-[8px] bg-red-600 text-white px-2 py-0.5 rounded italic">Obligatorio</span>
+                        Token Secreto (ghp_...) <span className="text-[8px] bg-red-600 text-white px-2 py-0.5 rounded italic">Pégalo aquí</span>
                       </label>
                       <input 
                         type="password" 
@@ -300,7 +339,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                        Usuario / Owner <span className="text-[8px] bg-blue-600 text-white px-2 py-0.5 rounded">Tu foto: 'Propietario'</span>
+                        Usuario / Owner <span className="text-[8px] bg-blue-600 text-white px-2 py-0.5 rounded">marcelobarriaar-boceto</span>
                       </label>
                       <input 
                         type="text" 
@@ -315,7 +354,7 @@ const AdminDashboard = () => {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <label className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                        Repositorio <span className="text-[8px] bg-blue-600 text-white px-2 py-0.5 rounded">Tu foto: 'Nombre del repositorio'</span>
+                        Repositorio <span className="text-[8px] bg-blue-600 text-white px-2 py-0.5 rounded">mi-pyme-segura-2026</span>
                       </label>
                       <input 
                         type="text" 
@@ -346,13 +385,13 @@ const AdminDashboard = () => {
                   className="w-full bg-yellow-400 text-black py-6 rounded-3xl font-black uppercase tracking-widest text-lg hover:bg-white transition-all flex items-center justify-center gap-4 shadow-2xl disabled:opacity-50"
                 >
                   {isSyncing ? <Loader2 size={32} className="animate-spin" /> : <Github size={32} />}
-                  {isSyncing ? 'VERIFICANDO CREDENCIALES...' : 'VINCULAR Y RESPALDAR AHORA'}
+                  {isSyncing ? 'VERIFICANDO...' : 'VINCULAR Y RESPALDAR AHORA'}
                 </button>
               </div>
             </div>
           )}
 
-          {/* RESTO DE PESTAÑAS (MANTENIMIENTO, BRANDING, PAGES, GENERAL) */}
+          {/* TAB: MANTENIMIENTO */}
           {activeTab === 'maintenance' && (
             <div className="bg-white p-12 rounded-[4rem] border-4 border-black shadow-xl space-y-12">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

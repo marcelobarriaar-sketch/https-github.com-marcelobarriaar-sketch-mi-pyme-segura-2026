@@ -13,7 +13,10 @@ import {
   Save,
   CheckCircle,
   Star,
-  Plus
+  Plus,
+  AlertCircle,
+  CloudDownload,
+  Loader2
 } from 'lucide-react';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -24,8 +27,7 @@ import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard';
 import { SiteData, AdminState } from './types';
 
-// Logo del candado rojo en Base64 para carga instantánea
-const RED_LOCK_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB8klEQVR4nO2YvUoDQRSFv7NBEAsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsL/8A3vH8K6R0fXNoAAAAASUVORK5CYII=";
+const RED_LOCK_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB8klEQVR4nO2YvUoDQRSFv7NBEAsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsL/8A3vH8K6R0fXNoAAAAASUVORK5CYII=";
 
 const INITIAL_DATA: SiteData = {
   branding: {
@@ -78,7 +80,7 @@ const INITIAL_DATA: SiteData = {
 };
 
 const SiteDataContext = createContext<{ data: SiteData; updateData: (newData: SiteData) => void } | null>(null);
-const AdminContext = createContext<AdminState | null>(null);
+const AdminContext = createContext<AdminState & { setShowLogin: (v: boolean) => void } | null>(null);
 
 export const useSiteData = () => {
   const context = useContext(SiteDataContext);
@@ -148,7 +150,7 @@ const Navbar = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [credentials, setCredentials] = useState({ user: '', pass: '' });
   const { data } = useSiteData();
-  const { isAdmin, setIsAdmin } = useAdmin();
+  const { isAdmin, setIsAdmin, setShowLogin: setGlobalShowLogin } = useAdmin();
   const location = useLocation();
 
   const handleLogin = (e: React.FormEvent) => {
@@ -158,7 +160,7 @@ const Navbar = () => {
       setShowLogin(false);
       setCredentials({ user: '', pass: '' });
     } else {
-      alert('Credenciales incorrectas');
+      alert('Credenciales incorrectas. Intenta con admin / segura2024');
     }
   };
 
@@ -222,29 +224,94 @@ const Navbar = () => {
             </div>
           </div>
         </div>
+
+        {isOpen && (
+          <div className="md:hidden bg-white border-t-2 border-gray-100 animate-in slide-in-from-top duration-300">
+            <div className="px-4 pt-4 pb-8 space-y-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`block px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest ${
+                    location.pathname === item.path ? 'bg-brand text-white' : 'text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+              <div className="pt-4 mt-4 border-t-2 border-gray-100 flex flex-col gap-3">
+                {!isAdmin ? (
+                  <button 
+                    onClick={() => { setShowLogin(true); setIsOpen(false); }}
+                    className="w-full flex items-center justify-center gap-3 bg-gray-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest"
+                  >
+                    <Lock size={18} /> Acceso Administrador
+                  </button>
+                ) : (
+                  <Link 
+                    to="/admin" 
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center justify-center gap-3 bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest"
+                  >
+                    <Settings size={18} /> Panel Panel Gestor
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
-      {showLogin && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-[2rem] p-10 max-w-sm w-full shadow-2xl border-4 border-black">
-            <h2 className="text-3xl font-black text-black tracking-tight mb-6 uppercase">Acceso <span className="text-brand">Admin</span></h2>
+      {/* Login Modal */}
+      {(showLogin || (useAdmin().showLogin)) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[3rem] p-10 max-w-sm w-full shadow-2xl border-4 border-black relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16" />
+            
+            <h2 className="text-4xl font-black text-black tracking-tight mb-2 uppercase">Acceso <span className="text-brand">Admin</span></h2>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Usa tus credenciales de seguridad</p>
+            
             <form onSubmit={handleLogin} className="space-y-4">
-              <input 
-                type="text" 
-                className="w-full bg-gray-100 border-2 border-transparent rounded-xl p-4 outline-none focus:border-brand font-bold" 
-                placeholder="Usuario"
-                value={credentials.user}
-                onChange={e => setCredentials({...credentials, user: e.target.value})}
-              />
-              <input 
-                type="password" 
-                className="w-full bg-gray-100 border-2 border-transparent rounded-xl p-4 outline-none focus:border-brand font-bold" 
-                placeholder="Contraseña"
-                value={credentials.pass}
-                onChange={e => setCredentials({...credentials, pass: e.target.value})}
-              />
-              <button type="submit" className="w-full bg-black text-white py-4 rounded-xl font-black hover:bg-brand transition-all">ENTRAR</button>
-              <button onClick={() => setShowLogin(false)} className="w-full text-gray-400 font-bold text-xs uppercase pt-2">Cancelar</button>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Usuario</label>
+                <input 
+                  type="text" 
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-brand font-bold text-black" 
+                  placeholder="admin"
+                  value={credentials.user}
+                  onChange={e => setCredentials({...credentials, user: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Contraseña</label>
+                <input 
+                  type="password" 
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-brand font-bold text-black" 
+                  placeholder="••••••••"
+                  value={credentials.pass}
+                  onChange={e => setCredentials({...credentials, pass: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 text-center">
+                 <p className="text-[9px] font-black text-blue-600 uppercase leading-tight">
+                    Recordatorio:<br/>admin / segura2024
+                 </p>
+              </div>
+
+              <button type="submit" className="w-full bg-black text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-brand transition-all shadow-xl">
+                ENTRAR AL SISTEMA
+              </button>
+              <button 
+                type="button"
+                onClick={() => { setShowLogin(false); setGlobalShowLogin(false); }} 
+                className="w-full text-gray-400 font-black text-[10px] uppercase pt-2 hover:text-black transition-colors"
+              >
+                Cerrar Ventana
+              </button>
             </form>
           </div>
         </div>
@@ -295,12 +362,56 @@ const App = () => {
     return saved ? JSON.parse(saved) : INITIAL_DATA;
   });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
+
+  // EFECTO DE HIDRATACIÓN DESDE GITHUB
+  useEffect(() => {
+    const hydrateFromGitHub = async () => {
+      const { token, owner, repo, branch } = data.githubSettings;
+      
+      // Solo sincronizar si el usuario ya configuró sus credenciales de GitHub
+      if (token && owner && repo) {
+        setIsCloudSyncing(true);
+        const fileName = 'site_data.json';
+        const path = `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`;
+
+        try {
+          const res = await fetch(path, {
+            headers: { 
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+
+          if (res.ok) {
+            const fileData = await res.json();
+            // El contenido de GitHub viene en Base64
+            const content = decodeURIComponent(escape(atob(fileData.content)));
+            const cloudData = JSON.parse(content);
+            
+            // Actualizar localmente solo si los datos son válidos
+            if (cloudData && cloudData.branding) {
+              setData(cloudData);
+              localStorage.setItem('site_data', JSON.stringify(cloudData));
+              console.log("Sistema sincronizado con GitHub Cloud satisfactoriamente.");
+            }
+          }
+        } catch (err) {
+          console.error("Fallo al sincronizar con la nube:", err);
+        } finally {
+          setIsCloudSyncing(false);
+        }
+      }
+    };
+
+    hydrateFromGitHub();
+  }, []); // Se ejecuta una sola vez al cargar la app
 
   useEffect(() => {
     localStorage.setItem('site_data', JSON.stringify(data));
   }, [data]);
 
-  // Sincronización instantánea entre pestañas
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'site_data' && e.newValue) {
@@ -315,7 +426,7 @@ const App = () => {
 
   return (
     <SiteDataContext.Provider value={{ data, updateData }}>
-      <AdminContext.Provider value={{ isAdmin, setIsAdmin }}>
+      <AdminContext.Provider value={{ isAdmin, setIsAdmin, showLogin, setShowLogin }}>
         <style>
           {`
             :root {
@@ -333,6 +444,14 @@ const App = () => {
             .selection\\:bg-brand::selection { background-color: var(--brand-primary); color: white; }
           `}
         </style>
+        
+        {/* Toast discreto de carga cloud */}
+        {isCloudSyncing && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-black text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest flex items-center gap-2 border border-white/20 shadow-2xl animate-in fade-in slide-in-from-top-4">
+            <Loader2 size={12} className="animate-spin text-brand" /> Sincronizando Cloud...
+          </div>
+        )}
+
         <HashRouter>
           <div className="min-h-screen flex flex-col relative selection:bg-brand selection:text-white">
             <Navbar />
