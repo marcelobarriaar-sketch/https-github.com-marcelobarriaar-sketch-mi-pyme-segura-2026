@@ -80,7 +80,8 @@ const INITIAL_DATA: SiteData = {
 };
 
 const SiteDataContext = createContext<{ data: SiteData; updateData: (newData: SiteData) => void } | null>(null);
-const AdminContext = createContext<AdminState & { setShowLogin: (v: boolean) => void } | null>(null);
+// FIX: Added showLogin to AdminContext type definition to match what is being provided and consumed.
+const AdminContext = createContext<AdminState & { showLogin: boolean; setShowLogin: (v: boolean) => void } | null>(null);
 
 export const useSiteData = () => {
   const context = useContext(SiteDataContext);

@@ -24,6 +24,19 @@ const Home = () => {
     }
   };
 
+  // Función para resaltar palabras clave en el subtítulo
+  const highlightText = (text: string) => {
+    const keywords = ["tecnología de vanguardia", "sistemas autónomos"];
+    let highlighted = text;
+    
+    // Si es admin, mostramos el texto plano para editar, si no, aplicamos el resaltado
+    return text.split(new RegExp(`(${keywords.join('|')})`, 'gi')).map((part, i) => 
+      keywords.some(k => k.toLowerCase() === part.toLowerCase()) 
+        ? <span key={i} className="text-yellow-400 font-bold">{part}</span> 
+        : part
+    );
+  };
+
   return (
     <div className="space-y-0 pb-0">
       {/* Hero Section */}
@@ -41,7 +54,7 @@ const Home = () => {
         {isAdmin && (
           <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
             <div className="bg-yellow-400 text-black px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center gap-2 border-2 border-black animate-in fade-in slide-in-from-top-2">
-              <Info size={14} /> Recomendado: 1920x1080px (Impactante)
+              <span className="animate-pulse">●</span> Edición en Vivo Activa
             </div>
             <input 
               type="file" 
@@ -54,15 +67,18 @@ const Home = () => {
               onClick={() => fileInputRef.current?.click()}
               className="bg-white/10 backdrop-blur-md text-white border border-white/20 p-4 rounded-2xl flex items-center gap-3 font-black text-xs hover:bg-brand hover:border-brand transition-all"
             >
-              <Upload size={18} /> ACTUALIZAR IMAGEN HERO
+              <Upload size={18} /> CAMBIAR FONDO
             </button>
           </div>
         )}
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white w-full">
           <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
-            <div className="inline-flex items-center gap-3 bg-brand/20 backdrop-blur-md border border-brand/50 text-brand px-6 py-2 rounded-full font-black text-xs uppercase tracking-[0.2em]">
-              <Shield size={16} /> SISTEMA DE PROTECCIÓN PROFESIONAL
+            
+            {/* Badge Mejorado */}
+            <div className="inline-flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 px-6 py-2 rounded-full font-black text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-2xl">
+              <Shield size={16} className="text-brand" /> 
+              <span>SISTEMA DE PROTECCIÓN <span className="text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]">PROFESIONAL</span></span>
             </div>
 
             {isAdmin ? (
@@ -72,7 +88,7 @@ const Home = () => {
                 className="w-full bg-white/5 text-4xl md:text-6xl font-black border-4 border-brand p-6 rounded-[3rem] outline-none text-white tracking-tighter"
               />
             ) : (
-              <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter uppercase max-w-3xl">
+              <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter uppercase max-w-3xl drop-shadow-2xl">
                 {data.home.heroTitle.split(' ').map((word, i) => (
                   <span key={i} className={i % 2 === 1 ? 'text-brand' : ''}>{word} </span>
                 ))}
@@ -86,8 +102,8 @@ const Home = () => {
                 className="w-full bg-white/5 text-lg text-gray-300 border-2 border-white/20 p-6 rounded-3xl outline-none"
               />
             ) : (
-              <p className="text-lg md:text-xl text-gray-300 font-medium max-w-2xl border-l-4 border-brand pl-6 leading-relaxed">
-                {data.home.heroSubtitle}
+              <p className="text-lg md:text-2xl text-gray-200 font-medium max-w-2xl border-l-4 border-brand pl-6 leading-relaxed drop-shadow-lg">
+                {highlightText(data.home.heroSubtitle)}
               </p>
             )}
 
@@ -103,7 +119,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Trust Section - Reduced card size for better static balance */}
+      {/* Trust Section */}
       <section className="relative z-20 -mt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8">
         {[
           { icon: Shield, title: "Máxima Seguridad", color: "text-brand", bg: "bg-brand/5", desc: "Monitoreo 24/7 con sistemas anti-sabotaje integrados." },
