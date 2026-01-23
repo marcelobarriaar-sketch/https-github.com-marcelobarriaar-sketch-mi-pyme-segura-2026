@@ -1,4 +1,4 @@
-estoy en app.tsx dime que debo modificar, me aparece esto: import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation, useParams } from 'react-router-dom';
 import { 
   ShieldCheck, 
