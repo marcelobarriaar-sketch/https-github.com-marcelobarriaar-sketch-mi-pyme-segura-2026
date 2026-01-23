@@ -16,7 +16,8 @@ import {
   Plus,
   AlertCircle,
   CloudDownload,
-  Loader2
+  Loader2,
+  MessageCircle
 } from 'lucide-react';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -37,9 +38,9 @@ const INITIAL_DATA: SiteData = {
     siteNameColor: "#000000"
   },
   home: {
-    heroTitle: "Protegemos lo que más te importa",
-    heroSubtitle: "Seguridad inteligente diseñada específicamente para pequeñas y medianas empresas. Tú lo sueñas, nosotros lo instalamos.",
-    featuredImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600"
+    heroTitle: "SEGURIDAD INTELIGENTE PARA TU NEGOCIO",
+    heroSubtitle: "Protegemos tu inversión con tecnología de vanguardia y sistemas autónomos diseñados para la realidad de hoy.",
+    featuredImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1600"
   },
   about: {
     title: "Sobre Mi Pyme Segura",
@@ -142,6 +143,25 @@ const FloatingSaveButton = () => {
         <Save size={28} />
       </button>
     </div>
+  );
+};
+
+const WhatsAppButton = () => {
+  const { data } = useSiteData();
+  const phone = data.contact.phone.replace(/\D/g, '');
+  
+  return (
+    <a 
+      href={`https://wa.me/${phone}`} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="fixed bottom-8 left-8 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all border-4 border-white group flex items-center justify-center animate-bounce-slow"
+    >
+      <MessageCircle size={32} />
+      <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-3 transition-all duration-500 font-black uppercase text-xs whitespace-nowrap">
+        ¡Hablemos ahora!
+      </span>
+    </a>
   );
 };
 
@@ -254,7 +274,7 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                     className="w-full flex items-center justify-center gap-3 bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest"
                   >
-                    <Settings size={18} /> Panel Panel Gestor
+                    <Settings size={18} /> Panel Gestor
                   </Link>
                 )}
               </div>
@@ -365,17 +385,13 @@ const App = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [isCloudSyncing, setIsCloudSyncing] = useState(false);
 
-  // EFECTO DE HIDRATACIÓN DESDE GITHUB
   useEffect(() => {
     const hydrateFromGitHub = async () => {
       const { token, owner, repo, branch } = data.githubSettings;
-      
-      // Solo sincronizar si el usuario ya configuró sus credenciales de GitHub
       if (token && owner && repo) {
         setIsCloudSyncing(true);
         const fileName = 'site_data.json';
         const path = `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`;
-
         try {
           const res = await fetch(path, {
             headers: { 
@@ -383,18 +399,13 @@ const App = () => {
               'Accept': 'application/vnd.github.v3+json'
             }
           });
-
           if (res.ok) {
             const fileData = await res.json();
-            // El contenido de GitHub viene en Base64
             const content = decodeURIComponent(escape(atob(fileData.content)));
             const cloudData = JSON.parse(content);
-            
-            // Actualizar localmente solo si los datos son válidos
             if (cloudData && cloudData.branding) {
               setData(cloudData);
               localStorage.setItem('site_data', JSON.stringify(cloudData));
-              console.log("Sistema sincronizado con GitHub Cloud satisfactoriamente.");
             }
           }
         } catch (err) {
@@ -404,9 +415,8 @@ const App = () => {
         }
       }
     };
-
     hydrateFromGitHub();
-  }, []); // Se ejecuta una sola vez al cargar la app
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('site_data', JSON.stringify(data));
@@ -433,6 +443,11 @@ const App = () => {
               --brand-primary: ${data.branding.primaryColor};
               --site-name-color: ${data.branding.siteNameColor};
             }
+            @keyframes bounce-slow {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+            .animate-bounce-slow { animation: bounce-slow 3s infinite ease-in-out; }
             .text-brand { color: var(--brand-primary) !important; }
             .bg-brand { background-color: var(--brand-primary) !important; }
             .border-brand { border-color: var(--brand-primary) !important; }
@@ -445,7 +460,6 @@ const App = () => {
           `}
         </style>
         
-        {/* Toast discreto de carga cloud */}
         {isCloudSyncing && (
           <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-black text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest flex items-center gap-2 border border-white/20 shadow-2xl animate-in fade-in slide-in-from-top-4">
             <Loader2 size={12} className="animate-spin text-brand" /> Sincronizando Cloud...
@@ -469,6 +483,7 @@ const App = () => {
             </main>
             <Footer />
             <FloatingSaveButton />
+            <WhatsAppButton />
           </div>
         </HashRouter>
       </AdminContext.Provider>

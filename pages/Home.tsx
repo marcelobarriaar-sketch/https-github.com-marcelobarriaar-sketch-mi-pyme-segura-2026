@@ -1,7 +1,7 @@
 
 import React, { useRef } from 'react';
 import { useSiteData, useAdmin } from '../App';
-import { ArrowRight, Shield, Settings, Users, Star, Zap, Upload, Info } from 'lucide-react';
+import { ArrowRight, Shield, Settings, Users, Star, Zap, Upload, Info, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
@@ -25,22 +25,23 @@ const Home = () => {
   };
 
   return (
-    <div className="space-y-20 pb-20">
+    <div className="space-y-0 pb-0">
       {/* Hero Section */}
-      <section className="relative h-[85vh] flex items-center overflow-hidden bg-black">
+      <section className="relative h-[80vh] flex items-center overflow-hidden bg-gray-900">
         <div className="absolute inset-0 z-0">
           <img 
             src={data.home.featuredImage} 
-            alt="Hero" 
+            alt="Hero Background" 
             className="w-full h-full object-cover opacity-60"
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-black via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         </div>
 
         {isAdmin && (
           <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
             <div className="bg-yellow-400 text-black px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center gap-2 border-2 border-black animate-in fade-in slide-in-from-top-2">
-              <Info size={14} /> Sugerido: 1920 x 1080 px (Panorámica)
+              <Info size={14} /> Recomendado: 1920x1080px (Impactante)
             </div>
             <input 
               type="file" 
@@ -51,27 +52,27 @@ const Home = () => {
             />
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="bg-white/10 backdrop-blur-md text-white border border-white/20 p-4 rounded-2xl flex items-center gap-3 font-black text-xs hover:bg-white hover:text-black transition-all"
+              className="bg-white/10 backdrop-blur-md text-white border border-white/20 p-4 rounded-2xl flex items-center gap-3 font-black text-xs hover:bg-brand hover:border-brand transition-all"
             >
-              <Upload size={18} /> SUBIR FONDO DESDE MAC
+              <Upload size={18} /> ACTUALIZAR IMAGEN HERO
             </button>
           </div>
         )}
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
-          <div className="max-w-3xl space-y-8">
-            <div className="inline-flex items-center gap-2 bg-yellow-400 text-black px-4 py-1 rounded-full font-black text-xs uppercase tracking-widest animate-pulse">
-              <Zap size={14} /> Sistema Rural Activo
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white w-full">
+          <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
+            <div className="inline-flex items-center gap-3 bg-brand/20 backdrop-blur-md border border-brand/50 text-brand px-6 py-2 rounded-full font-black text-xs uppercase tracking-[0.2em]">
+              <Shield size={16} /> SISTEMA DE PROTECCIÓN PROFESIONAL
             </div>
 
             {isAdmin ? (
               <textarea
                 value={data.home.heroTitle}
                 onChange={(e) => handleEdit('heroTitle', e.target.value)}
-                className="w-full bg-white/10 text-5xl md:text-7xl font-black border-4 border-brand p-4 rounded-3xl outline-none"
+                className="w-full bg-white/5 text-4xl md:text-6xl font-black border-4 border-brand p-6 rounded-[3rem] outline-none text-white tracking-tighter"
               />
             ) : (
-              <h1 className="text-5xl md:text-8xl font-black leading-[1.05] tracking-tighter">
+              <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter uppercase max-w-3xl">
                 {data.home.heroTitle.split(' ').map((word, i) => (
                   <span key={i} className={i % 2 === 1 ? 'text-brand' : ''}>{word} </span>
                 ))}
@@ -82,74 +83,99 @@ const Home = () => {
               <textarea
                 value={data.home.heroSubtitle}
                 onChange={(e) => handleEdit('heroSubtitle', e.target.value)}
-                className="w-full bg-white/10 text-xl text-gray-300 border-2 border-blue-600 p-4 rounded-3xl outline-none"
+                className="w-full bg-white/5 text-lg text-gray-300 border-2 border-white/20 p-6 rounded-3xl outline-none"
               />
             ) : (
-              <p className="text-xl md:text-2xl text-gray-300 font-bold max-w-xl border-l-4 border-yellow-400 pl-6">
+              <p className="text-lg md:text-xl text-gray-300 font-medium max-w-2xl border-l-4 border-brand pl-6 leading-relaxed">
                 {data.home.heroSubtitle}
               </p>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-6 pt-6">
-              <Link to="/create-project" className="bg-brand hover:bg-white hover:text-brand text-white px-10 py-5 rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 transition-all transform hover:-translate-y-1 shadow-2xl shadow-brand/30">
-                PROYECTO IA <ArrowRight size={24} />
+            <div className="flex flex-col sm:flex-row gap-6 pt-4">
+              <Link to="/create-project" className="bg-brand hover:bg-white hover:text-brand text-white px-10 py-5 rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-2xl shadow-brand/30">
+                DISEÑAR PROYECTO <ArrowRight size={24} />
               </Link>
-              <Link to="/equipment" className="bg-white/5 backdrop-blur-xl hover:bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black text-xl border-2 border-white/20 transition-all text-center">
-                EQUIPOS
+              <Link to="/equipment" className="bg-white/10 backdrop-blur-xl hover:bg-white hover:text-black text-white px-10 py-5 rounded-[2rem] font-black text-xl border-2 border-white/20 transition-all text-center">
+                CATÁLOGO
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8">
+      {/* Trust Section - Reduced card size for better static balance */}
+      <section className="relative z-20 -mt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8">
         {[
-          { icon: Shield, title: "Máxima Seguridad", color: "text-brand", bg: "bg-red-50", desc: "Sistemas robustos blindados contra intrusos." },
-          { icon: Zap, title: "Energía Solar", color: "text-yellow-400", bg: "bg-yellow-50", desc: "Independencia total en zonas sin red eléctrica." },
-          { icon: Star, title: "Soporte IA", color: "text-blue-600", bg: "bg-blue-50", desc: "Análisis inteligente 24/7 de cada movimiento." }
+          { icon: Shield, title: "Máxima Seguridad", color: "text-brand", bg: "bg-brand/5", desc: "Monitoreo 24/7 con sistemas anti-sabotaje integrados." },
+          { icon: Zap, title: "Energía Solar", color: "text-yellow-400", bg: "bg-yellow-400/5", desc: "Independencia eléctrica absoluta para zonas rurales extremas." },
+          { icon: Star, title: "Inteligencia IA", color: "text-blue-600", bg: "bg-blue-600/5", desc: "Análisis predictivo de movimiento para evitar falsas alarmas." }
         ].map((item, i) => (
-          <div key={i} className="bg-white p-10 rounded-[3rem] shadow-xl border-2 border-gray-50 space-y-6 hover:border-black transition-all group">
-            <div className={`${item.bg} w-20 h-20 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+          <div key={i} className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-50 space-y-6 hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-brand opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className={`${item.bg} w-20 h-20 rounded-2xl flex items-center justify-center group-hover:rotate-3 transition-transform`}>
               <item.icon className={`${item.color}`} size={40} />
             </div>
-            <h3 className="text-3xl font-black text-black tracking-tight">{item.title}</h3>
-            <p className="text-gray-500 font-bold leading-relaxed">{item.desc}</p>
+            <div className="space-y-3">
+              <h3 className="text-3xl font-black text-black tracking-tight uppercase leading-none">{item.title}</h3>
+              <p className="text-gray-500 font-semibold leading-snug text-base">{item.desc}</p>
+            </div>
+            <div className="pt-2 flex items-center gap-2 text-brand font-black text-xs uppercase tracking-widest">
+              Saber más <ArrowRight size={12} />
+            </div>
           </div>
         ))}
       </section>
 
-      {/* Dark Info Section */}
-      <section className="bg-black py-24 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-brand/10 blur-[120px]" />
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-16 text-white relative z-10">
-          <div className="flex-1 space-y-10">
-            <h2 className="text-5xl font-black tracking-tighter">EL CAMINO A LA <br/><span className="text-blue-600">TRANQUILIDAD</span></h2>
-            <div className="space-y-8">
+      {/* Features Grid */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
+          <div className="space-y-10">
+            <div className="space-y-4">
+              <span className="text-brand font-black uppercase tracking-widest text-sm">Nuestro Proceso</span>
+              <h2 className="text-5xl font-black text-black tracking-tighter leading-none uppercase">TRANQUILIDAD <br/>SIN <span className="text-brand">EXCUSAS</span></h2>
+            </div>
+            <div className="space-y-6">
               {[
-                { t: "DISEÑO INTELIGENTE", d: "Personalizamos cada sensor según tu plano.", color: "bg-brand" },
-                { t: "COTIZACIÓN REAL", d: "Valores fijos, sin letras chicas.", color: "bg-yellow-400 text-black" },
-                { t: "INSTALACIÓN RÁPIDA", d: "Operativo en menos de 48 horas.", color: "bg-blue-600" }
-              ].map((item, i) => (
-                <div key={i} className="flex gap-6 items-start">
-                  <div className={`${item.color} w-10 h-10 rounded-xl flex items-center justify-center font-black shrink-0 shadow-lg`}>
+                { t: "Estudio de Campo", d: "Analizamos los puntos ciegos de tu propiedad vía satélite o presencial." },
+                { t: "Configuración Cloud", d: "Acceso total a tus cámaras desde cualquier parte del mundo." },
+                { t: "Instalación Certificada", d: "Expertos locales que conocen el terreno y tus necesidades." }
+              ].map((feat, i) => (
+                <div key={i} className="flex gap-6 group">
+                  <div className="bg-black text-white w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shrink-0 group-hover:bg-brand transition-colors">
                     {i+1}
                   </div>
-                  <div>
-                    <h4 className="font-black text-2xl tracking-tight">{item.t}</h4>
-                    <p className="text-gray-400 font-medium">{item.d}</p>
+                  <div className="space-y-1">
+                    <h4 className="text-xl font-black text-black uppercase">{feat.t}</h4>
+                    <p className="text-gray-500 font-medium leading-relaxed">{feat.d}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <Link to="/create-project" className="inline-block bg-white text-black px-12 py-4 rounded-2xl font-black hover:bg-yellow-400 transition-all transform hover:scale-105">
-              COMENZAR DISEÑO
-            </Link>
           </div>
-          <div className="flex-1 relative">
-            <div className="absolute -inset-4 bg-yellow-400 rounded-[3rem] rotate-3" />
-            <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=800" className="relative rounded-[3rem] shadow-2xl grayscale hover:grayscale-0 transition-all duration-700" alt="Installer" />
+          <div className="relative">
+             <div className="absolute -inset-10 bg-brand/5 rounded-full blur-[80px]" />
+             <div className="relative grid grid-cols-2 gap-4">
+                <img src="https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=600" className="rounded-[2.5rem] shadow-xl mt-10 hover:scale-105 transition-transform" alt="Security Cam" />
+                <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=600" className="rounded-[2.5rem] shadow-xl -mt-10 hover:scale-105 transition-transform" alt="Installer" />
+             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="bg-black py-20 border-y-4 border-brand">
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
+          {[
+            { n: "+500", t: "PYMES PROTEGIDAS" },
+            { n: "100%", n2: "AUTÓNOMO", t: "SOLAR READY" },
+            { n: "24/7", t: "MONITOREO CLOUD" },
+            { n: "48H", t: "INSTALACIÓN FULL" }
+          ].map((stat, i) => (
+            <div key={i} className="space-y-1">
+              <p className="text-5xl font-black text-brand tracking-tighter">{stat.n}{stat.n2 && <span className="text-white text-[10px] block">{stat.n2}</span>}</p>
+              <p className="text-white font-black text-[10px] uppercase tracking-widest opacity-60">{stat.t}</p>
+            </div>
+          ))}
         </div>
       </section>
     </div>
