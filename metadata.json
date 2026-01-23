@@ -1,0 +1,7 @@
+{
+  "name": "Mi Pyme Segura",
+  "description": "Plataforma integral de seguridad para PYMES que permite a los clientes configurar sus propios proyectos de seguridad y a los administradores gestionar todo el contenido del sitio.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
