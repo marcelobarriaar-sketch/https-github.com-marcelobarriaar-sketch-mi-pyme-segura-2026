@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation, useParams } from 'react-router-dom';
 import { 
@@ -80,7 +81,6 @@ const INITIAL_DATA: SiteData = {
 };
 
 const SiteDataContext = createContext<{ data: SiteData; updateData: (newData: SiteData) => void } | null>(null);
-// FIX: Added showLogin to AdminContext type definition to match what is being provided and consumed.
 const AdminContext = createContext<AdminState & { showLogin: boolean; setShowLogin: (v: boolean) => void } | null>(null);
 
 export const useSiteData = () => {
@@ -180,7 +180,7 @@ const Navbar = () => {
       setShowLogin(false);
       setCredentials({ user: '', pass: '' });
     } else {
-      alert('Credenciales incorrectas. Intenta con admin / segura2024');
+      alert('Credenciales incorrectas.');
     }
   };
 
@@ -298,7 +298,7 @@ const Navbar = () => {
                 <input 
                   type="text" 
                   className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-brand font-bold text-black" 
-                  placeholder="admin"
+                  placeholder="Usuario"
                   value={credentials.user}
                   onChange={e => setCredentials({...credentials, user: e.target.value})}
                   required
@@ -314,12 +314,6 @@ const Navbar = () => {
                   onChange={e => setCredentials({...credentials, pass: e.target.value})}
                   required
                 />
-              </div>
-              
-              <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-4 text-center">
-                 <p className="text-[9px] font-black text-blue-600 uppercase leading-tight">
-                    Recordatorio:<br/>admin / segura2024
-                 </p>
               </div>
 
               <button type="submit" className="w-full bg-black text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-brand transition-all shadow-xl">
