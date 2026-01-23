@@ -26,7 +26,11 @@ export interface Branding {
   siteName: string;
   logoUrl: string;
   primaryColor: string;
+  secondaryColor: string;
+  textColor: string;
   siteNameColor: string;
+  fontFamily: string;
+  globalBackground: string;
 }
 
 export interface GitHubSettings {
@@ -38,10 +42,16 @@ export interface GitHubSettings {
 
 export interface SiteData {
   branding: Branding;
+  whatsappConfig: {
+    phoneNumber: string;
+    welcomeMessage: string;
+  };
   home: {
     heroTitle: string;
     heroSubtitle: string;
     featuredImage: string;
+    heroBgColor: string;
+    heroTextColor: string;
   };
   about: {
     title: string;
@@ -49,6 +59,8 @@ export interface SiteData {
     mission: string;
     vision: string;
     aboutImage: string;
+    bgColor: string;
+    textColor: string;
   };
   contact: {
     title: string;
@@ -57,18 +69,26 @@ export interface SiteData {
     email: string;
     address: string;
     socials: SocialNetwork[];
+    bgColor: string;
+    textColor: string;
   };
   equipmentHeader: {
     title: string;
     subtitle: string;
+    bgColor: string;
+    textColor: string;
   };
   projectsHeader: {
     title: string;
     subtitle: string;
+    bgColor: string;
+    textColor: string;
   };
   createProjectHeader: {
     title: string;
     subtitle: string;
+    bgColor: string;
+    textColor: string;
   };
   aiSettings: {
     selectedModel: string;
@@ -84,6 +104,8 @@ export interface SiteData {
     title: string;
     content: string;
     slug: string;
+    bgColor?: string;
+    textColor?: string;
   }[];
   githubSettings: GitHubSettings;
 }
@@ -91,4 +113,6 @@ export interface SiteData {
 export interface AdminState {
   isAdmin: boolean;
   setIsAdmin: (val: boolean) => void;
+  showLogin: boolean;
+  setShowLogin: (v: boolean) => void;
 }
