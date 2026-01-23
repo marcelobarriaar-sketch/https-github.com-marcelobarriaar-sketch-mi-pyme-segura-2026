@@ -35,19 +35,31 @@ const INITIAL_DATA: SiteData = {
     siteName: "Mi Pyme Segura",
     logoUrl: RED_LOCK_LOGO, 
     primaryColor: "#E02424",
-    siteNameColor: "#000000"
+    secondaryColor: "#111827",
+    textColor: "#1F2937",
+    siteNameColor: "#000000",
+    fontFamily: "'Inter', sans-serif",
+    globalBackground: "#F9FAFB"
+  },
+  whatsappConfig: {
+    phoneNumber: "+56912345678",
+    welcomeMessage: "Hola Mi Pyme Segura, necesito asesoría."
   },
   home: {
     heroTitle: "SEGURIDAD INTELIGENTE PARA TU NEGOCIO",
     heroSubtitle: "Protegemos tu inversión con tecnología de vanguardia y sistemas autónomos diseñados para la realidad de hoy.",
-    featuredImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1600"
+    featuredImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1600",
+    heroBgColor: "#111827",
+    heroTextColor: "#FFFFFF"
   },
   about: {
     title: "Sobre Mi Pyme Segura",
     content: "En Mi Pyme Segura llevamos más de una década dedicados a un propósito claro: proteger lo que más importa. Nacimos desde la realidad que nos rodea y desde el sur de Chile levantamos una propuesta seria, moderna y al alcance de todos.",
     mission: "Proteger a personas, hogares y organizaciones mediante soluciones de seguridad inteligentes.",
     vision: "Ser referentes en el sur de Chile en soluciones de seguridad inteligentes.",
-    aboutImage: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80&w=800"
+    aboutImage: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80&w=800",
+    bgColor: "#FFFFFF",
+    textColor: "#1F2937"
   },
   contact: {
     title: "Hablemos de tu Seguridad",
@@ -57,20 +69,43 @@ const INITIAL_DATA: SiteData = {
     address: "Av. Providencia 1234, Santiago",
     socials: [
       { id: '1', name: 'Instagram', icon: 'Instagram', url: 'https://instagram.com' }
-    ]
+    ],
+    bgColor: "#F9FAFB",
+    textColor: "#1F2937"
   },
-  equipmentHeader: { title: "Nuestro Equipamiento", subtitle: "Tecnología de última generación seleccionada por expertos." },
-  projectsHeader: { title: "Proyectos Instalados", subtitle: "Historias reales de seguridad y crecimiento." },
-  createProjectHeader: { title: "Crea tu propio Proyecto", subtitle: "Personaliza tu seguridad paso a paso." },
+  equipmentHeader: { title: "Nuestro Equipamiento", subtitle: "Tecnología de última generación seleccionada por expertos.", bgColor: "#FFFFFF", textColor: "#1F2937" },
+  projectsHeader: { title: "Proyectos Instalados", subtitle: "Historias reales de seguridad y crecimiento.", bgColor: "#FFFFFF", textColor: "#1F2937" },
+  createProjectHeader: { title: "Crea tu propio Proyecto", subtitle: "Personaliza tu seguridad paso a paso.", bgColor: "#FFFFFF", textColor: "#1F2937" },
   aiSettings: {
     selectedModel: 'gemini-3-flash-preview',
     systemPrompt: 'Eres un asesor experto en seguridad para "Mi Pyme Segura".',
     isBetaEnabled: false,
     betaPrompt: 'Asistente Beta.'
   },
-  equipment: [],
-  projects: [],
-  brands: [],
+  equipment: [
+    {
+      id: 'eq1',
+      title: 'Cámara Bullet Solar 4K',
+      description: 'Autonomía total con panel solar integrado y conectividad 4G. Ideal para perímetros rurales.',
+      imageUrl: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&q=80&w=800',
+      category: 'Cámaras'
+    }
+  ],
+  projects: [
+    {
+      id: 'pr1',
+      title: 'Instalación en Bodega Industrial',
+      description: 'Implementación de circuito cerrado con IA para detección de intrusos en tiempo real en la zona sur.',
+      imageUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200'
+    }
+  ],
+  brands: [
+    { id: 'b1', name: 'Hikvision', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Hikvision_logo.svg/1200px-Hikvision_logo.svg.png' },
+    { id: 'b2', name: 'Dahua', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Dahua_Technology_logo.svg/1200px-Dahua_Technology_logo.svg.png' },
+    { id: 'b3', name: 'Ubiquiti', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Ubiquiti_Networks_logo.svg/1200px-Ubiquiti_Networks_logo.svg.png' },
+    { id: 'b4', name: 'Ruijie', logo: 'https://www.ruijienetworks.com/resources/kindeditor/attached/image/20211124/20211124112933_349.png' },
+    { id: 'b5', name: 'Bosch', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Bosch-logo.svg/1200px-Bosch-logo.svg.png' }
+  ],
   customPages: [],
   githubSettings: {
     token: '',
@@ -81,7 +116,7 @@ const INITIAL_DATA: SiteData = {
 };
 
 const SiteDataContext = createContext<{ data: SiteData; updateData: (newData: SiteData) => void } | null>(null);
-const AdminContext = createContext<AdminState & { showLogin: boolean; setShowLogin: (v: boolean) => void } | null>(null);
+const AdminContext = createContext<AdminState | null>(null);
 
 export const useSiteData = () => {
   const context = useContext(SiteDataContext);
@@ -103,13 +138,18 @@ const CustomPage = () => {
   if (!page) return <div className="py-40 text-center font-black text-4xl uppercase">Página no encontrada</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-20 animate-in fade-in duration-500">
-      <h1 className="text-6xl font-black tracking-tighter mb-12 uppercase border-b-8 border-brand inline-block">
-        {page.title}
-      </h1>
-      <div className="prose prose-xl max-w-none">
-        <div className="whitespace-pre-wrap text-xl text-gray-700 leading-relaxed font-medium">
-          {page.content}
+    <div 
+      className="min-h-screen animate-in fade-in duration-500"
+      style={{ backgroundColor: page.bgColor || data.branding.globalBackground, color: page.textColor || data.branding.textColor }}
+    >
+      <div className="max-w-4xl mx-auto px-4 py-20">
+        <h1 className="text-6xl font-black tracking-tighter mb-12 uppercase border-b-8 border-brand inline-block">
+          {page.title}
+        </h1>
+        <div className="prose prose-xl max-w-none">
+          <div className="whitespace-pre-wrap text-xl leading-relaxed font-medium">
+            {page.content}
+          </div>
         </div>
       </div>
     </div>
@@ -148,11 +188,12 @@ const FloatingSaveButton = () => {
 
 const WhatsAppButton = () => {
   const { data } = useSiteData();
-  const phone = data.contact.phone.replace(/\D/g, '');
+  const phone = data.whatsappConfig.phoneNumber.replace(/\D/g, '');
+  const msg = encodeURIComponent(data.whatsappConfig.welcomeMessage);
   
   return (
     <a 
-      href={`https://wa.me/${phone}`} 
+      href={`https://wa.me/${phone}?text=${msg}`} 
       target="_blank" 
       rel="noopener noreferrer"
       className="fixed bottom-8 left-8 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all border-4 border-white group flex items-center justify-center animate-bounce-slow"
@@ -167,10 +208,9 @@ const WhatsAppButton = () => {
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [credentials, setCredentials] = useState({ user: '', pass: '' });
   const { data } = useSiteData();
-  const { isAdmin, setIsAdmin, setShowLogin: setGlobalShowLogin } = useAdmin();
+  const { isAdmin, setIsAdmin, showLogin, setShowLogin } = useAdmin();
+  const [credentials, setCredentials] = useState({ user: '', pass: '' });
   const location = useLocation();
 
   const handleLogin = (e: React.FormEvent) => {
@@ -284,7 +324,7 @@ const Navbar = () => {
       </nav>
 
       {/* Login Modal */}
-      {(showLogin || (useAdmin().showLogin)) && (
+      {showLogin && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-[3rem] p-10 max-w-sm w-full shadow-2xl border-4 border-black relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16" />
@@ -321,7 +361,7 @@ const Navbar = () => {
               </button>
               <button 
                 type="button"
-                onClick={() => { setShowLogin(false); setGlobalShowLogin(false); }} 
+                onClick={() => setShowLogin(false)} 
                 className="w-full text-gray-400 font-black text-[10px] uppercase pt-2 hover:text-black transition-colors"
               >
                 Cerrar Ventana
@@ -416,16 +456,6 @@ const App = () => {
     localStorage.setItem('site_data', JSON.stringify(data));
   }, [data]);
 
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'site_data' && e.newValue) {
-        setData(JSON.parse(e.newValue));
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
   const updateData = (newData: SiteData) => setData(newData);
 
   return (
@@ -433,15 +463,28 @@ const App = () => {
       <AdminContext.Provider value={{ isAdmin, setIsAdmin, showLogin, setShowLogin }}>
         <style>
           {`
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&family=Montserrat:wght@300;400;700;900&family=Playfair+Display:wght@400;700;900&family=Fira+Code:wght@300;400;700&display=swap');
+
             :root {
               --brand-primary: ${data.branding.primaryColor};
+              --brand-secondary: ${data.branding.secondaryColor};
+              --site-text: ${data.branding.textColor};
               --site-name-color: ${data.branding.siteNameColor};
+              --global-font: ${data.branding.fontFamily};
             }
+            
+            body {
+              font-family: var(--global-font);
+              background-color: ${data.branding.globalBackground};
+              color: var(--site-text);
+            }
+
             @keyframes bounce-slow {
               0%, 100% { transform: translateY(0); }
               50% { transform: translateY(-10px); }
             }
             .animate-bounce-slow { animation: bounce-slow 3s infinite ease-in-out; }
+            
             .text-brand { color: var(--brand-primary) !important; }
             .bg-brand { background-color: var(--brand-primary) !important; }
             .border-brand { border-color: var(--brand-primary) !important; }
