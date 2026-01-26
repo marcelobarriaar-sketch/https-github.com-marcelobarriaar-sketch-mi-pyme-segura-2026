@@ -411,52 +411,79 @@ const Footer = () => {
 };
 
 const App = () => {
-  const [data, setData] = useState<SiteData>(() => {
-    const saved = localStorage.getItem('site_data');
-    return saved ? JSON.parse(saved) : INITIAL_DATA;
-  });
+  const [data, setData] = useState<SiteData | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [isCloudSyncing, setIsCloudSyncing] = useState(false);
 
   useEffect(() => {
-    const hydrateFromGitHub = async () => {
-      const { token, owner, repo, branch } = data.githubSettings;
-      if (token && owner && repo) {
-        setIsCloudSyncing(true);
-        const fileName = 'site_data.json';
-        const path = `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`;
-        try {
-          const res = await fetch(path, {
-            headers: { 
-              'Authorization': `token ${token}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          });
-          if (res.ok) {
-            const fileData = await res.json();
-            const content = decodeURIComponent(escape(atob(fileData.content)));
-            const cloudData = JSON.parse(content);
-            if (cloudData && cloudData.branding) {
-              setData(cloudData);
-              localStorage.setItem('site_data', JSON.stringify(cloudData));
-            }
-          }
-        } catch (err) {
-          console.error("Fallo al sincronizar con la nube:", err);
-        } finally {
-          setIsCloudSyncing(false);
+    const loadData = async () => {
+      setIsCloudSyncing(true);
+
+      try {
+        // 1) Intentar leer SIEMPRE desde GitHub (archivo site_data.json del repo)
+        const res = await fetch(
+          'https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/site_data.json?ts=' +
+            Date.now()
+        );
+
+        if (res.ok) {
+          const json = await res.json();
+          setData(json);
+          localStorage.setItem('site_data', JSON.stringify(json));
+          return;
         }
+
+        // 2) Si GitHub falla, intentar usar el backup local del mismo navegador
+        const saved = localStorage.getItem('site_data');
+        if (saved) {
+          setData(JSON.parse(saved));
+          return;
+        }
+
+        // 3) Último recurso: INITIAL_DATA
+        console.warn('No se encontró site_data.json en GitHub, usando INITIAL_DATA');
+        setData(INITIAL_DATA);
+        localStorage.setItem('site_data', JSON.stringify(INITIAL_DATA));
+      } catch (err) {
+        console.error('Error cargando configuración, usando backup local/inicial:', err);
+
+        const saved = localStorage.getItem('site_data');
+        if (saved) {
+          setData(JSON.parse(saved));
+        } else {
+          setData(INITIAL_DATA);
+          localStorage.setItem('site_data', JSON.stringify(INITIAL_DATA));
+        }
+      } finally {
+        setIsCloudSyncing(false);
       }
     };
-    hydrateFromGitHub();
+
+    loadData();
   }, []);
 
+  // Cada vez que cambie data, actualizamos el backup local (si ya existe)
   useEffect(() => {
+    if (!data) return;
     localStorage.setItem('site_data', JSON.stringify(data));
   }, [data]);
 
   const updateData = (newData: SiteData) => setData(newData);
+
+  // Mientras data sea null, pantalla de carga
+  if (!data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <div className="text-center space-y-4">
+          <div className="text-2xl font-black">Cargando Mi Pyme Segura...</div>
+          <div className="text-xs uppercase tracking-[0.3em] text-gray-400">
+            Sincronizando configuración
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SiteDataContext.Provider value={{ data, updateData }}>
