@@ -68,12 +68,40 @@ const AdminDashboard = () => {
       </div>
     );
   }
+  
+  const handleManualSave = async () => {
+    
+  // 1) Guardar local (para que el admin vea al tiro el cambio)
+  localStorage.setItem('site_data', JSON.stringify(data));
 
-  const handleManualSave = () => {
-    localStorage.setItem('site_data', JSON.stringify(data));
-    setSaveStatus('¡Sincronizado Local!');
-    setTimeout(() => setSaveStatus(null), 3000);
-  };
+  // 2) Enviar a la API de Vercel para subir a GitHub
+  try {
+    setIsSyncing(true);
+    setSaveStatus('Sincronizando con la nube...');
+
+    const res = await fetch('/api/save-site-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      console.error('Error API:', result);
+      setSaveStatus('⚠️ Error al guardar en GitHub');
+    } else {
+      console.log('Sync OK:', result);
+      setSaveStatus('✅ Guardado en GitHub');
+    }
+  } catch (err) {
+    console.error('Error inesperado:', err);
+    setSaveStatus('⚠️ Error de conexión');
+  } finally {
+    setIsSyncing(false);
+    setTimeout(() => setSaveStatus(null), 4000);
+  }
+};
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
