@@ -86,7 +86,7 @@ const About = () => {
 
   const handleBrandChange = (
     index: number,
-    field: 'name' | 'logo',
+    field: 'name' | 'logo' | 'url',
     value: string
   ) => {
     const updated = [...brands];
@@ -112,7 +112,8 @@ const About = () => {
     updated.push({
       id: 'brand-' + Date.now(),
       name: 'Nueva Marca',
-      logo: ''
+      logo: '',
+      url: ''
     });
     updateData({ ...data, brands: updated });
   };
@@ -329,13 +330,28 @@ const About = () => {
               key={brand.id}
               className="group relative flex flex-col items-center gap-4"
             >
-              <div className="bg-white border-2 border-gray-100 p-8 rounded-[2rem] shadow-sm hover:shadow-2xl hover:border-black transition-all duration-500 w-full flex items-center justify-center aspect-square grayscale group-hover:grayscale-0">
-                <img
-                  src={brand.logo}
-                  alt={brand.name}
-                  className="max-h-full max-w-full object-contain transform group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
+              {brand.url ? (
+                <a
+                  href={brand.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white border-2 border-gray-100 p-8 rounded-[2rem] shadow-sm hover:shadow-2xl hover:border-black transition-all duration-500 w-full flex items-center justify-center aspect-square grayscale group-hover:grayscale-0"
+                >
+                  <img
+                    src={brand.logo}
+                    alt={brand.name}
+                    className="max-h-full max-w-full object-contain transform group-hover:scale-110 transition-transform duration-500"
+                  />
+                </a>
+              ) : (
+                <div className="bg-white border-2 border-gray-100 p-8 rounded-[2rem] shadow-sm hover:shadow-2xl hover:border-black transition-all duration-500 w-full flex items-center justify-center aspect-square grayscale group-hover:grayscale-0">
+                  <img
+                    src={brand.logo}
+                    alt={brand.name}
+                    className="max-h-full max-w-full object-contain transform group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+              )}
               <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors">
                 {brand.name}
               </span>
@@ -371,17 +387,33 @@ const About = () => {
                   key={brand.id}
                   className="border-2 border-gray-100 rounded-2xl p-4 grid md:grid-cols-[2fr,3fr,auto] gap-4 items-start"
                 >
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-gray-400">
-                      Nombre de la marca
-                    </label>
-                    <input
-                      className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-red-600"
-                      value={brand.name}
-                      onChange={(e) =>
-                        handleBrandChange(index, 'name', e.target.value)
-                      }
-                    />
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase text-gray-400">
+                        Nombre de la marca
+                      </label>
+                      <input
+                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-red-600"
+                        value={brand.name}
+                        onChange={(e) =>
+                          handleBrandChange(index, 'name', e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase text-gray-400">
+                        Enlace sitio oficial (opcional)
+                      </label>
+                      <input
+                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-xs font-mono outline-none focus:border-blue-600"
+                        value={brand.url || ''}
+                        onChange={(e) =>
+                          handleBrandChange(index, 'url', e.target.value)
+                        }
+                        placeholder="https://www.marca.com"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
