@@ -1,12 +1,12 @@
-
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSiteData, useAdmin } from '../App';
-import { Target, Rocket, ShieldCheck, Globe, Award, Upload, Info } from 'lucide-react';
+import { Target, Rocket, ShieldCheck, Globe, Award, Upload, Info, X } from 'lucide-react';
 
 const About = () => {
   const { data, updateData } = useSiteData();
   const { isAdmin } = useAdmin();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const handleEdit = (field: 'title' | 'content' | 'mission' | 'vision' | 'aboutImage', val: string) => {
     updateData({ ...data, about: { ...data.about, [field]: val } });
@@ -23,6 +23,54 @@ const About = () => {
     }
   };
 
+  // Ítems de capacidad con texto corto (card) y texto largo (modal)
+  const capacityItems = [
+    {
+      t: 'Sistemas IA',
+      short: 'Cámaras con análisis inteligente de comportamiento.',
+      detail:
+        'Implementamos cámaras y sistemas con análisis inteligente capaces de detectar movimiento sospechoso, merodeo, ingreso a zonas restringidas y otros patrones. Esto reduce falsos positivos y permite respuestas más rápidas y efectivas.'
+    },
+    {
+      t: 'Visualización Remota',
+      short: 'Tu negocio en tu bolsillo, donde sea que estés.',
+      detail:
+        'Configuramos acceso remoto seguro para que puedas ver tus cámaras desde tu celular, tablet o computador, con notificaciones en tiempo real y usuarios personalizados para tu equipo.'
+    },
+    {
+      t: 'Energía Solar',
+      short: 'Autonomía total para sectores rurales extremos.',
+      detail:
+        'Diseñamos sistemas de cámaras alimentadas por paneles solares y baterías de respaldo, pensados para lugares donde no hay red eléctrica o es inestable. Ideal para campos, bodegas agrícolas y zonas aisladas.'
+    },
+    {
+      t: 'Energía Rural',
+      short: 'Sistemas fotovoltaicos para seguridad autónoma.',
+      detail:
+        'Integramos soluciones fotovoltaicas a medida, considerando consumo real de los equipos, horas de sol del sector y autonomía requerida. Así tu sistema de seguridad se mantiene operativo incluso en cortes prolongados.'
+    },
+    {
+      t: 'Enlaces de Larga Distancia',
+      short: 'Conectividad garantizada en zonas remotas.',
+      detail:
+        'Usamos radioenlaces profesionales para llevar internet y señal de cámaras a grandes distancias, salvando cerros, campos y zonas sin cobertura tradicional. Ideal para conectar galpones, parcelas y sucursales.'
+    },
+    {
+      t: 'Integración a Medida',
+      short: 'Tú tienes la necesidad, nosotros la solución.',
+      detail:
+        'No todos los proyectos caben en una plantilla. Integramos cámaras, alarmas, control de acceso, automatización, sensores y software de gestión según la realidad de tu pyme, sin soluciones “enlatadas”.'
+    }
+  ];
+
+  const handleOpenItem = (index: number) => {
+    setSelectedIndex(index);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedIndex(null);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-20 space-y-24">
       {/* Intro Section */}
@@ -37,7 +85,9 @@ const About = () => {
           ) : (
             <h1 className="text-7xl font-black tracking-tighter text-black leading-none uppercase">
               {data.about.title.split(' ').map((w, i) => (
-                <span key={i} className={i % 2 !== 0 ? 'text-red-600' : ''}>{w} </span>
+                <span key={i} className={i % 2 !== 0 ? 'text-red-600' : ''}>
+                  {w}{' '}
+                </span>
               ))}
             </h1>
           )}
@@ -64,9 +114,9 @@ const About = () => {
             <Award size={48} className="text-black" />
           </div>
           <div className="relative z-10">
-            <img 
-              src={data.about.aboutImage} 
-              alt="Equipo Mi Pyme Segura" 
+            <img
+              src={data.about.aboutImage}
+              alt="Equipo Mi Pyme Segura"
               className="w-full aspect-[4/5] object-cover rounded-[4rem] shadow-2xl border-4 border-black grayscale hover:grayscale-0 transition-all duration-700"
             />
             {isAdmin && (
@@ -76,15 +126,17 @@ const About = () => {
                 </div>
                 <div className="w-full bg-white p-6 rounded-3xl shadow-2xl space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Subir desde mi Mac</label>
-                    <input 
-                      type="file" 
-                      className="hidden" 
-                      ref={fileInputRef} 
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">
+                      Subir desde mi Mac
+                    </label>
+                    <input
+                      type="file"
+                      className="hidden"
+                      ref={fileInputRef}
                       onChange={handleFileChange}
                       accept="image/*"
                     />
-                    <button 
+                    <button
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl font-black text-sm hover:bg-red-600 transition-all"
                     >
@@ -92,12 +144,20 @@ const About = () => {
                     </button>
                   </div>
                   <div className="relative">
-                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-200" /></div>
-                    <div className="relative flex justify-center text-[10px] uppercase font-black text-gray-400 bg-white px-2">o vía URL</div>
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-gray-200" />
+                    </div>
+                    <div className="relative flex justify-center text-[10px] uppercase font-black text-gray-400 bg-white px-2">
+                      o vía URL
+                    </div>
                   </div>
-                  <input 
+                  <input
                     className="w-full bg-gray-50 border-2 border-gray-100 p-3 rounded-xl text-xs outline-none focus:border-red-600 font-bold"
-                    value={data.about.aboutImage.startsWith('data:') ? 'Imagen cargada localmente' : data.about.aboutImage}
+                    value={
+                      data.about.aboutImage.startsWith('data:')
+                        ? 'Imagen cargada localmente'
+                        : data.about.aboutImage
+                    }
                     onChange={(e) => handleEdit('aboutImage', e.target.value)}
                     placeholder="https://..."
                   />
@@ -108,29 +168,37 @@ const About = () => {
         </div>
       </div>
 
-      {/* Lo que hacemos */}
+      {/* NUESTRA CAPACIDAD */}
       <section className="bg-black rounded-[5rem] p-12 md:p-24 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 blur-[100px]" />
         <div className="max-w-3xl mb-16 relative z-10">
-          <h2 className="text-5xl font-black mb-6 text-white tracking-tighter uppercase">NUESTRA <span className="text-red-600">CAPACIDAD</span></h2>
-          <p className="text-gray-400 text-xl font-bold border-l-4 border-yellow-400 pl-6">Tecnología aplicada con sentido humano y territorial.</p>
+          <h2 className="text-5xl font-black mb-6 text-white tracking-tighter uppercase">
+            NUESTRA <span className="text-red-600">CAPACIDAD</span>
+          </h2>
+          <p className="text-gray-400 text-xl font-bold border-l-4 border-yellow-400 pl-6">
+            Tecnología aplicada con sentido humano y territorial.
+          </p>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
-          {[
-            { t: "Sistemas IA", d: "Cámaras con análisis inteligente de comportamiento.", c: "text-blue-600" },
-            { t: "Visualización Remota", d: "Tu negocio en tu bolsillo, donde sea que estés.", c: "text-red-600" },
-            { t: "Energía Solar", d: "Autonomía total para sectores rurales extremos.", c: "text-yellow-400" },
-            { t: "Energía Rural", d: "Sistemas fotovoltaicos para seguridad autónoma.", c: "text-white" },
-            { t: "Enlaces de Larga Distancia", d: "Conectividad garantizada en zonas remotas.", c: "text-white" },
-            { t: "Integración a Medida", d: "Tú tienes la necesidad, nosotros la solución.", c: "text-gray-400" }
-          ].map((item, i) => (
-            <div key={i} className="bg-white/5 border-2 border-white/10 p-8 rounded-[2.5rem] hover:bg-white hover:text-black transition-all group">
-              <div className={`${item.c} mb-4`}>
+          {capacityItems.map((item, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => handleOpenItem(i)}
+              className="text-left bg-white/5 border-2 border-white/10 p-8 rounded-[2.5rem] hover:bg-white hover:text-black transition-all group focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer"
+            >
+              <div className="text-red-600 mb-4 group-hover:text-black">
                 <ShieldCheck size={32} />
               </div>
-              <h4 className="font-black text-2xl mb-2 uppercase tracking-tight group-hover:text-black">{item.t}</h4>
-              <p className="text-gray-500 font-bold text-sm group-hover:text-gray-700">{item.d}</p>
-            </div>
+              <h4 className="font-black text-2xl mb-2 uppercase tracking-tight group-hover:text-black">
+                {item.t}
+              </h4>
+              <p className="text-gray-500 font-bold text-sm group-hover:text-gray-700">{item.short}</p>
+              <p className="mt-4 text-[11px] font-black uppercase tracking-widest text-yellow-400 group-hover:text-black">
+                Ver más detalles
+              </p>
+            </button>
           ))}
         </div>
       </section>
@@ -151,7 +219,9 @@ const About = () => {
               onChange={(e) => handleEdit('mission', e.target.value)}
             />
           ) : (
-            <p className="text-2xl text-gray-700 leading-relaxed font-bold border-l-8 border-yellow-400 pl-8">{data.about.mission}</p>
+            <p className="text-2xl text-gray-700 leading-relaxed font-bold border-l-8 border-yellow-400 pl-8">
+              {data.about.mission}
+            </p>
           )}
         </div>
         <div className="bg-black text-white p-16 rounded-[4rem] shadow-2xl border-4 border-blue-600 space-y-8 hover:-translate-y-2 transition-transform">
@@ -168,7 +238,9 @@ const About = () => {
               onChange={(e) => handleEdit('vision', e.target.value)}
             />
           ) : (
-            <p className="text-2xl text-gray-300 leading-relaxed font-bold border-l-8 border-red-600 pl-8">{data.about.vision}</p>
+            <p className="text-2xl text-gray-300 leading-relaxed font-bold border-l-8 border-red-600 pl-8">
+              {data.about.vision}
+            </p>
           )}
         </div>
       </div>
@@ -179,42 +251,84 @@ const About = () => {
           <div className="flex items-center justify-center gap-2 text-blue-600 font-black uppercase tracking-[0.3em] text-xs">
             <Globe size={16} /> Tecnología Global
           </div>
-          <h2 className="text-5xl font-black text-black tracking-tighter uppercase">NUESTROS <span className="text-red-600">ALIADOS</span></h2>
-          <p className="text-gray-500 font-bold max-w-2xl mx-auto">Trabajamos exclusivamente con marcas líderes con soporte mundial para garantizar la continuidad de tu seguridad.</p>
+          <h2 className="text-5xl font-black text-black tracking-tighter uppercase">
+            NUESTROS <span className="text-red-600">ALIADOS</span>
+          </h2>
+          <p className="text-gray-500 font-bold max-w-2xl mx-auto">
+            Trabajamos exclusivamente con marcas líderes con soporte mundial para garantizar la continuidad de tu
+            seguridad.
+          </p>
         </div>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-12 items-center">
           {(data.brands || []).map((brand) => (
             <div key={brand.id} className="group relative flex flex-col items-center gap-4">
               <div className="bg-white border-2 border-gray-100 p-8 rounded-[2rem] shadow-sm hover:shadow-2xl hover:border-black transition-all duration-500 w-full flex items-center justify-center aspect-square grayscale group-hover:grayscale-0">
-                <img 
-                  src={brand.logo} 
-                  alt={brand.name} 
+                <img
+                  src={brand.logo}
+                  alt={brand.name}
                   className="max-h-full max-w-full object-contain transform group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors">{brand.name}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors">
+                {brand.name}
+              </span>
             </div>
           ))}
         </div>
 
         <div className="mt-20 bg-yellow-400 p-8 rounded-[3rem] border-4 border-black flex flex-col md:flex-row items-center justify-between gap-8">
-           <div className="flex items-center gap-6">
-              <div className="bg-black text-white p-4 rounded-2xl">
-                 <ShieldCheck size={32} />
+          <div className="flex items-center gap-6">
+            <div className="bg-black text-white p-4 rounded-2xl">
+              <ShieldCheck size={32} />
+            </div>
+            <p className="text-black font-black text-xl leading-tight">
+              MÁS DE <span className="text-3xl">5.000</span> DISPOSITIVOS <br />
+              OPERANDO EN EL SUR DE CHILE
+            </p>
+          </div>
+          <div className="flex -space-x-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="w-16 h-16 rounded-full border-4 border-black overflow-hidden shadow-lg">
+                <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="Client" />
               </div>
-              <p className="text-black font-black text-xl leading-tight">MÁS DE <span className="text-3xl">5.000</span> DISPOSITIVOS <br/>OPERANDO EN EL SUR DE CHILE</p>
-           </div>
-           <div className="flex -space-x-4">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="w-16 h-16 rounded-full border-4 border-black overflow-hidden shadow-lg">
-                  <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="Client" />
-                </div>
-              ))}
-              <div className="w-16 h-16 rounded-full border-4 border-black bg-black text-white flex items-center justify-center font-black text-xs">+5K</div>
-           </div>
+            ))}
+            <div className="w-16 h-16 rounded-full border-4 border-black bg-black text-white flex items-center justify-center font-black text-xs">
+              +5K
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* MODAL CAPACIDADES */}
+      {selectedIndex !== null && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center px-4"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="bg-white rounded-[3rem] max-w-lg w-full p-8 border-4 border-black shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 bg-black text-white rounded-full p-2 hover:bg-red-600 transition-colors"
+              aria-label="Cerrar"
+            >
+              <X size={18} />
+            </button>
+            <div className="flex items-center gap-3 mb-4 text-red-600">
+              <ShieldCheck size={28} />
+              <h3 className="text-2xl font-black uppercase tracking-tight text-black">
+                {capacityItems[selectedIndex].t}
+              </h3>
+            </div>
+            <p className="text-gray-700 text-lg leading-relaxed font-medium">
+              {capacityItems[selectedIndex].detail}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
