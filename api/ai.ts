@@ -1,15 +1,23 @@
 // api/ai.ts
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+// Handler para la función serverless de Vercel
+// Esta ruta recibe el body tal cual lo manda tu frontend
+// y lo reenvía a la API de Gemini, devolviendo la respuesta.
+
+export default async function handler(req: any, res: any) {
+  // Solo permitimos POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
+
   if (!apiKey) {
+    // Si no hay API key en Vercel, avisamos claro
     return res.status(500).json({
-      error: 'Falta la variable de entorno GEMINI_API_KEY en Vercel',
+      error:
+        'Falta la variable de entorno GEMINI_API_KEY en Vercel. ' +
+        'Configúrala en Project Settings → Environment Variables.',
     });
   }
 
@@ -20,6 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        // Reenviamos exactamente el JSON que mandó el frontend
         body: JSON.stringify(req.body),
       }
     );
@@ -27,12 +36,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const data = await geminiResponse.json();
 
     if (!geminiResponse.ok) {
+      // Pasamos el error de Gemini tal cual al frontend
       return res.status(geminiResponse.status).json(data);
     }
 
+    // Todo OK → respondemos con la data de Gemini
     return res.status(200).json(data);
   } catch (err) {
     console.error('Error en /api/ai:', err);
-    return res.status(500).json({ error: 'Error interno al conectar con Gemini' });
+    return res
+      .status(500)
+      .json({ error: 'Error interno al conectar con Gemini' });
   }
 }
