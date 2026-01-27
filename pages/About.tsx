@@ -385,37 +385,23 @@ const About = () => {
               {brands.map((brand, index) => (
                 <div
                   key={brand.id}
-                  className="border-2 border-gray-100 rounded-2xl p-4 grid md:grid-cols-[2fr,3fr,auto] gap-4 items-start"
+                  className="border-2 border-gray-100 rounded-2xl p-4 grid md:grid-cols-[2fr,3fr,3fr,auto] gap-4 items-start"
                 >
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase text-gray-400">
-                        Nombre de la marca
-                      </label>
-                      <input
-                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-red-600"
-                        value={brand.name}
-                        onChange={(e) =>
-                          handleBrandChange(index, 'name', e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase text-gray-400">
-                        Enlace sitio oficial (opcional)
-                      </label>
-                      <input
-                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-xs font-mono outline-none focus:border-blue-600"
-                        value={brand.url || ''}
-                        onChange={(e) =>
-                          handleBrandChange(index, 'url', e.target.value)
-                        }
-                        placeholder="https://www.marca.com"
-                      />
-                    </div>
+                  {/* Nombre */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-gray-400">
+                      Nombre de la marca
+                    </label>
+                    <input
+                      className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-red-600"
+                      value={brand.name}
+                      onChange={(e) =>
+                        handleBrandChange(index, 'name', e.target.value)
+                      }
+                    />
                   </div>
 
+                  {/* Logo */}
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-gray-400">
                       Logo (URL o archivo)
@@ -448,6 +434,25 @@ const About = () => {
                     </div>
                   </div>
 
+                  {/* URL sitio oficial */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-gray-400">
+                      Enlace sitio oficial
+                    </label>
+                    <input
+                      className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-xs font-mono outline-none focus:border-blue-600"
+                      value={brand.url || ''}
+                      onChange={(e) =>
+                        handleBrandChange(index, 'url', e.target.value)
+                      }
+                      placeholder="https://www.marca.com/"
+                    />
+                    <p className="text-[10px] text-gray-400">
+                      Si lo dejas vacío, el logo no será clickeable.
+                    </p>
+                  </div>
+
+                  {/* Eliminar */}
                   <button
                     type="button"
                     onClick={() => handleRemoveBrand(index)}
