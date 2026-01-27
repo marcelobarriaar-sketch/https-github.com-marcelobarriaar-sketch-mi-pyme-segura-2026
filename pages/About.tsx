@@ -1,6 +1,18 @@
 import React, { useRef, useState } from 'react';
 import { useSiteData, useAdmin } from '../App';
-import { Target, Rocket, ShieldCheck, Globe, Award, Upload, Info, X } from 'lucide-react';
+import { 
+  Target, 
+  Rocket, 
+  ShieldCheck, 
+  Globe, 
+  Award, 
+  Upload, 
+  Info, 
+  X,
+  Plus,
+  Image as ImageIcon,
+  Trash2
+} from 'lucide-react';
 
 const About = () => {
   const { data, updateData } = useSiteData();
@@ -8,7 +20,10 @@ const About = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
-  const handleEdit = (field: 'title' | 'content' | 'mission' | 'vision' | 'aboutImage', val: string) => {
+  const handleEdit = (
+    field: 'title' | 'content' | 'mission' | 'vision' | 'aboutImage', 
+    val: string
+  ) => {
     updateData({ ...data, about: { ...data.about, [field]: val } });
   };
 
@@ -23,7 +38,7 @@ const About = () => {
     }
   };
 
-  // Ítems de capacidad con texto corto (card) y texto largo (modal)
+  // -------- NUESTRA CAPACIDAD (cards + modal) ----------
   const capacityItems = [
     {
       t: 'Sistemas IA',
@@ -63,12 +78,49 @@ const About = () => {
     }
   ];
 
-  const handleOpenItem = (index: number) => {
-    setSelectedIndex(index);
+  const handleOpenItem = (index: number) => setSelectedIndex(index);
+  const handleCloseModal = () => setSelectedIndex(null);
+
+  // -------- ALIADOS: funciones de edición ----------
+  const brands = data.brands || [];
+
+  const handleBrandChange = (
+    index: number,
+    field: 'name' | 'logo',
+    value: string
+  ) => {
+    const updated = [...brands];
+    updated[index] = { ...updated[index], [field]: value };
+    updateData({ ...data, brands: updated });
   };
 
-  const handleCloseModal = () => {
-    setSelectedIndex(null);
+  const handleBrandFileChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      handleBrandChange(index, 'logo', reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddBrand = () => {
+    const updated = [...brands];
+    updated.push({
+      id: 'brand-' + Date.now(),
+      name: 'Nueva Marca',
+      logo: ''
+    });
+    updateData({ ...data, brands: updated });
+  };
+
+  const handleRemoveBrand = (index: number) => {
+    const updated = [...brands];
+    updated.splice(index, 1);
+    updateData({ ...data, brands: updated });
   };
 
   return (
@@ -101,13 +153,17 @@ const About = () => {
           ) : (
             <div className="space-y-6">
               {data.about.content.split('\n\n').map((para, i) => (
-                <p key={i} className="text-xl text-gray-600 leading-relaxed font-medium">
+                <p
+                  key={i}
+                  className="text-xl text-gray-600 leading-relaxed font-medium"
+                >
                   {para}
                 </p>
               ))}
             </div>
           )}
         </div>
+
         <div className="relative group">
           <div className="absolute -top-8 -left-8 w-full h-full border-8 border-red-600 rounded-[4rem] z-0" />
           <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-yellow-400 rounded-full z-20 flex items-center justify-center rotate-12 shadow-xl border-4 border-black">
@@ -127,7 +183,7 @@ const About = () => {
                 <div className="w-full bg-white p-6 rounded-3xl shadow-2xl space-y-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">
-                      Subir desde mi Mac
+                      Subir desde mi equipo
                     </label>
                     <input
                       type="file"
@@ -194,7 +250,9 @@ const About = () => {
               <h4 className="font-black text-2xl mb-2 uppercase tracking-tight group-hover:text-black">
                 {item.t}
               </h4>
-              <p className="text-gray-500 font-bold text-sm group-hover:text-gray-700">{item.short}</p>
+              <p className="text-gray-500 font-bold text-sm group-hover:text-gray-700">
+                {item.short}
+              </p>
               <p className="mt-4 text-[11px] font-black uppercase tracking-widest text-yellow-400 group-hover:text-black">
                 Ver más detalles
               </p>
@@ -203,14 +261,16 @@ const About = () => {
         </div>
       </section>
 
-      {/* Mission & Vision */}
+      {/* Misión & Visión */}
       <div className="grid md:grid-cols-2 gap-12">
         <div className="bg-white p-16 rounded-[4rem] shadow-2xl border-4 border-black space-y-8 hover:-translate-y-2 transition-transform">
           <div className="flex items-center gap-6 text-red-600">
             <div className="bg-red-50 p-4 rounded-3xl">
               <Target size={48} />
             </div>
-            <h2 className="text-5xl font-black text-black uppercase tracking-tighter">Misión</h2>
+            <h2 className="text-5xl font-black text-black uppercase tracking-tighter">
+              Misión
+            </h2>
           </div>
           {isAdmin ? (
             <textarea
@@ -229,7 +289,9 @@ const About = () => {
             <div className="bg-blue-600/10 p-4 rounded-3xl">
               <Rocket size={48} />
             </div>
-            <h2 className="text-5xl font-black uppercase tracking-tighter">Visión</h2>
+            <h2 className="text-5xl font-black uppercase tracking-tighter">
+              Visión
+            </h2>
           </div>
           {isAdmin ? (
             <textarea
@@ -260,9 +322,13 @@ const About = () => {
           </p>
         </div>
 
+        {/* Logos visibles al público */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-12 items-center">
-          {(data.brands || []).map((brand) => (
-            <div key={brand.id} className="group relative flex flex-col items-center gap-4">
+          {brands.map((brand) => (
+            <div
+              key={brand.id}
+              className="group relative flex flex-col items-center gap-4"
+            >
               <div className="bg-white border-2 border-gray-100 p-8 rounded-[2rem] shadow-sm hover:shadow-2xl hover:border-black transition-all duration-500 w-full flex items-center justify-center aspect-square grayscale group-hover:grayscale-0">
                 <img
                   src={brand.logo}
@@ -277,6 +343,100 @@ const About = () => {
           ))}
         </div>
 
+        {/* Editor de aliados solo para admin */}
+        {isAdmin && (
+          <div className="mt-16 bg-white p-8 rounded-[3rem] border-4 border-black space-y-6">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-xl font-black uppercase tracking-widest">
+                Editor de aliados tecnológicos
+              </h3>
+              <button
+                type="button"
+                onClick={handleAddBrand}
+                className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-600 transition-all"
+              >
+                <Plus size={16} /> Agregar aliado
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500 font-bold">
+              Puedes usar imágenes <strong>PNG o JPG</strong>, ya sea pegando una URL válida o subiendo un archivo
+              desde tu equipo. Los cambios se guardan cuando presionas el botón de guardar en la esquina inferior
+              derecha del sitio.
+            </p>
+
+            <div className="space-y-4">
+              {brands.map((brand, index) => (
+                <div
+                  key={brand.id}
+                  className="border-2 border-gray-100 rounded-2xl p-4 grid md:grid-cols-[2fr,3fr,auto] gap-4 items-start"
+                >
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-gray-400">
+                      Nombre de la marca
+                    </label>
+                    <input
+                      className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-red-600"
+                      value={brand.name}
+                      onChange={(e) =>
+                        handleBrandChange(index, 'name', e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-400">
+                      Logo (URL o archivo)
+                    </label>
+                    <input
+                      className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-xs font-mono outline-none focus:border-blue-600"
+                      value={
+                        brand.logo && brand.logo.startsWith('data:')
+                          ? 'Imagen cargada localmente'
+                          : brand.logo || ''
+                      }
+                      onChange={(e) =>
+                        handleBrandChange(index, 'logo', e.target.value)
+                      }
+                      placeholder="https://ruta-de-la-imagen.png"
+                    />
+                    <div className="flex items-center gap-2">
+                      <label className="cursor-pointer inline-flex items-center gap-2 text-[11px] font-black uppercase px-3 py-2 rounded-xl bg-gray-900 text-white hover:bg-red-600 transition-all">
+                        <ImageIcon size={14} /> Subir archivo
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleBrandFileChange(index, e)}
+                        />
+                      </label>
+                      <span className="text-[10px] text-gray-400">
+                        PNG / JPG recomendado, fondo transparente si es posible.
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveBrand(index)}
+                    className="mt-6 md:mt-0 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all rounded-2xl px-3 py-2"
+                    title="Eliminar aliado"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+
+              {brands.length === 0 && (
+                <p className="text-xs text-gray-500">
+                  No tienes aliados configurados todavía. Usa el botón{' '}
+                  <strong>“Agregar aliado”</strong> para crear el primero.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="mt-20 bg-yellow-400 p-8 rounded-[3rem] border-4 border-black flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-6">
             <div className="bg-black text-white p-4 rounded-2xl">
@@ -289,7 +449,10 @@ const About = () => {
           </div>
           <div className="flex -space-x-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="w-16 h-16 rounded-full border-4 border-black overflow-hidden shadow-lg">
+              <div
+                key={i}
+                className="w-16 h-16 rounded-full border-4 border-black overflow-hidden shadow-lg"
+              >
                 <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="Client" />
               </div>
             ))}
