@@ -1,8 +1,23 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Shield, Bell, ChevronRight, Check, ShoppingBag, Factory, Building, Coffee, Bot, User, Send, Sparkles, ArrowLeft, Loader2, Zap } from 'lucide-react';
+import { 
+  Camera, 
+  Shield, 
+  Bell, 
+  ChevronRight, 
+  Check, 
+  ShoppingBag, 
+  Factory, 
+  Building, 
+  Coffee, 
+  Bot, 
+  User, 
+  Send, 
+  Sparkles, 
+  ArrowLeft, 
+  Loader2, 
+  Zap 
+} from 'lucide-react';
 import { useSiteData, useAdmin } from '../App';
-import { GoogleGenAI } from "@google/genai";
 
 const SME_TYPES = [
   { id: 'retail', name: 'Comercio / Retail', icon: ShoppingBag, color: 'bg-blue-600' },
@@ -73,28 +88,49 @@ const CreateProject = () => {
 
   const sendMessage = async () => {
     if (!userInput.trim()) return;
-    
+
     const userMsg = userInput.trim();
-    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+
+    // construimos la nueva conversación localmente
+    const newMessages = [...messages, { role: 'user' as const, text: userMsg }];
+
+    setMessages(newMessages);
     setUserInput('');
     setIsTyping(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const activePrompt = data.aiSettings.isBetaEnabled ? data.aiSettings.betaPrompt : data.aiSettings.systemPrompt;
-      
-      const response = await ai.models.generateContent({
-        model: data.aiSettings.selectedModel || 'gemini-3-flash-preview',
-        contents: [...messages.map(m => (m.role === 'user' ? 'Usuario: ' + m.text : 'Asistente: ' + m.text)), 'Usuario: ' + userMsg].join('\n'),
-        config: {
-          systemInstruction: activePrompt,
-        },
+      const activePrompt = data.aiSettings.isBetaEnabled
+        ? data.aiSettings.betaPrompt
+        : data.aiSettings.systemPrompt;
+
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemPrompt: activePrompt,
+          messages: newMessages,
+          model: data.aiSettings.selectedModel || 'gemini-3-flash-preview',
+        }),
       });
 
-      const aiText = response.text || 'Lo siento, no pude procesar tu solicitud.';
+      if (!res.ok) {
+        console.error('Error en /api/ai:', await res.text());
+        throw new Error('Respuesta no OK del servidor');
+      }
+
+      const dataRes = await res.json();
+      const aiText = dataRes.reply || 'Lo siento, no pude procesar tu solicitud.';
+
       setMessages(prev => [...prev, { role: 'ai', text: aiText }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'ai', text: 'Error de conexión con el asistente. Por favor intenta de nuevo.' }]);
+      console.error('Error llamando a /api/ai:', error);
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'ai',
+          text: 'Error de conexión con el asistente. Por favor intenta de nuevo.',
+        },
+      ]);
     } finally {
       setIsTyping(false);
     }
@@ -199,7 +235,13 @@ const CreateProject = () => {
                   ))}
                 </div>
                 <div className="flex justify-end pt-8">
-                  <button disabled={!smeType} onClick={() => setStep(2)} className="bg-black text-white px-12 py-5 rounded-[2rem] font-black text-xl hover:bg-red-600 transition-all shadow-xl disabled:opacity-30">SIGUIENTE PASO</button>
+                  <button 
+                    disabled={!smeType} 
+                    onClick={() => setStep(2)} 
+                    className="bg-black text-white px-12 py-5 rounded-[2rem] font-black text-xl hover:bg-red-600 transition-all shadow-xl disabled:opacity-30"
+                  >
+                    SIGUIENTE PASO
+                  </button>
                 </div>
               </div>
             )}
@@ -211,18 +253,37 @@ const CreateProject = () => {
                 </div>
                 <div className="grid gap-6">
                   {TOOLS.map(tool => (
-                    <div key={tool.id} className="flex items-center justify-between p-8 bg-gray-50 rounded-[2.5rem] border-4 border-transparent hover:border-blue-600 transition-all">
+                    <div 
+                      key={tool.id} 
+                      className="flex items-center justify-between p-8 bg-gray-50 rounded-[2.5rem] border-4 border-transparent hover:border-blue-600 transition-all"
+                    >
                       <div className="flex items-center gap-6 text-black">
-                        <div className="bg-black p-4 rounded-2xl text-white shadow-xl"><tool.icon size={30} /></div>
+                        <div className="bg-black p-4 rounded-2xl text-white shadow-xl">
+                          <tool.icon size={30} />
+                        </div>
                         <div>
                           <h4 className="font-black text-2xl tracking-tight">{tool.name}</h4>
-                          <p className="text-blue-600 font-black text-sm uppercase">{formatCLP(tool.price)} / UNIDAD</p>
+                          <p className="text-blue-600 font-black text-sm uppercase">
+                            {formatCLP(tool.price)} / UNIDAD
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-6">
-                        <button onClick={() => toggleTool(tool.id, -1)} className="w-12 h-12 rounded-2xl border-2 border-black flex items-center justify-center font-black text-2xl hover:bg-red-600 hover:text-white transition-all">-</button>
-                        <span className="text-3xl font-black w-8 text-center">{getToolQty(tool.id)}</span>
-                        <button onClick={() => toggleTool(tool.id, 1)} className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center font-black text-2xl hover:bg-blue-600 transition-all">+</button>
+                        <button 
+                          onClick={() => toggleTool(tool.id, -1)} 
+                          className="w-12 h-12 rounded-2xl border-2 border-black flex items-center justify-center font-black text-2xl hover:bg-red-600 hover:text-white transition-all"
+                        >
+                          -
+                        </button>
+                        <span className="text-3xl font-black w-8 text-center">
+                          {getToolQty(tool.id)}
+                        </span>
+                        <button 
+                          onClick={() => toggleTool(tool.id, 1)} 
+                          className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center font-black text-2xl hover:bg-blue-600 transition-all"
+                        >
+                          +
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -232,7 +293,13 @@ const CreateProject = () => {
                     <p className="text-gray-400 text-sm font-black uppercase tracking-widest">Inversión Estimada</p>
                     <p className="text-5xl font-black text-yellow-400 tracking-tighter">{formatCLP(total)}</p>
                   </div>
-                  <button disabled={selectedTools.length === 0} onClick={() => setMode('finished')} className="bg-red-600 text-white px-10 py-5 rounded-2xl font-black text-xl hover:bg-white hover:text-red-600 transition-all shadow-xl disabled:opacity-30">FINALIZAR</button>
+                  <button 
+                    disabled={selectedTools.length === 0} 
+                    onClick={() => setMode('finished')} 
+                    className="bg-red-600 text-white px-10 py-5 rounded-2xl font-black text-xl hover:bg:white hover:text-red-600 transition-all shadow-xl disabled:opacity-30"
+                  >
+                    FINALIZAR
+                  </button>
                 </div>
               </div>
             )}
@@ -243,24 +310,46 @@ const CreateProject = () => {
       {/* AI Chat Flow */}
       {mode === 'ai' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col h-[700px]">
-          <button onClick={() => setMode('selection')} className={`mb-6 flex items-center gap-2 font-black uppercase text-xs transition-colors ${data.aiSettings.isBetaEnabled ? 'text-yellow-400 hover:text-white' : 'text-blue-600 hover:text-black'}`}>
+          <button 
+            onClick={() => setMode('selection')} 
+            className={`mb-6 flex items-center gap-2 font-black uppercase text-xs transition-colors ${
+              data.aiSettings.isBetaEnabled ? 'text-yellow-400 hover:text:white' : 'text-blue-600 hover:text-black'
+            }`}
+          >
             <ArrowLeft size={16} /> CAMBIAR MODO
           </button>
 
-          <div className={`flex-1 rounded-[4rem] shadow-2xl border-4 flex flex-col overflow-hidden ${data.aiSettings.isBetaEnabled ? 'bg-black border-yellow-400' : 'bg-white border-black'}`}>
+          <div 
+            className={`flex-1 rounded-[4rem] shadow-2xl border-4 flex flex-col overflow-hidden ${
+              data.aiSettings.isBetaEnabled ? 'bg-black border-yellow-400' : 'bg-white border-black'
+            }`}
+          >
             {/* Chat Area */}
             <div className="flex-1 p-8 overflow-y-auto space-y-8 scrollbar-thin scrollbar-thumb-gray-800">
               {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div 
+                  key={i} 
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
                   <div className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xl ${msg.role === 'user' ? 'bg-red-600 text-white' : (data.aiSettings.isBetaEnabled ? 'bg-yellow-400 text-black' : 'bg-blue-600 text-white')}`}>
+                    <div 
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xl ${
+                        msg.role === 'user' 
+                          ? 'bg-red-600 text-white' 
+                          : (data.aiSettings.isBetaEnabled ? 'bg-yellow-400 text-black' : 'bg-blue-600 text-white')
+                      }`}
+                    >
                       {msg.role === 'user' ? <User size={24} /> : (data.aiSettings.isBetaEnabled ? <Zap size={24} /> : <Bot size={24} />)}
                     </div>
-                    <div className={`p-6 rounded-[2rem] text-sm font-bold leading-relaxed whitespace-pre-wrap ${
-                      msg.role === 'user' 
-                        ? 'bg-red-50 text-black border-2 border-red-100 rounded-tr-none' 
-                        : (data.aiSettings.isBetaEnabled ? 'bg-white/5 text-white border-2 border-white/10 rounded-tl-none' : 'bg-blue-50 text-black border-2 border-blue-100 rounded-tl-none')
-                    }`}>
+                    <div 
+                      className={`p-6 rounded-[2rem] text-sm font-bold leading-relaxed whitespace-pre-wrap ${
+                        msg.role === 'user' 
+                          ? 'bg-red-50 text-black border-2 border-red-100 rounded-tr-none' 
+                          : (data.aiSettings.isBetaEnabled 
+                              ? 'bg-white/5 text-white border-2 border-white/10 rounded-tl-none' 
+                              : 'bg-blue-50 text-black border-2 border-blue-100 rounded-tl-none')
+                      }`}
+                    >
                       {msg.text}
                     </div>
                   </div>
@@ -268,11 +357,19 @@ const CreateProject = () => {
               ))}
               {isTyping && (
                 <div className="flex justify-start">
-                   <div className="flex gap-4 max-w-[85%] items-center">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${data.aiSettings.isBetaEnabled ? 'bg-yellow-400 text-black' : 'bg-blue-600 text-white'}`}>
+                  <div className="flex gap-4 max-w-[85%] items-center">
+                    <div 
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                        data.aiSettings.isBetaEnabled ? 'bg-yellow-400 text-black' : 'bg-blue-600 text-white'
+                      }`}
+                    >
                       <Loader2 size={24} className="animate-spin" />
                     </div>
-                    <div className={`p-6 rounded-[2rem] font-black italic text-xs uppercase tracking-widest ${data.aiSettings.isBetaEnabled ? 'bg-white/5 text-yellow-400' : 'bg-gray-100 text-gray-500'}`}>
+                    <div 
+                      className={`p-6 rounded-[2rem] font-black italic text-xs uppercase tracking-widest ${
+                        data.aiSettings.isBetaEnabled ? 'bg-white/5 text-yellow-400' : 'bg-gray-100 text-gray-500'
+                      }`}
+                    >
                       Analizando riesgos...
                     </div>
                   </div>
@@ -282,7 +379,11 @@ const CreateProject = () => {
             </div>
 
             {/* Input Area */}
-            <div className={`p-8 border-t-4 ${data.aiSettings.isBetaEnabled ? 'border-white/10 bg-white/5' : 'border-black bg-gray-50'}`}>
+            <div 
+              className={`p-8 border-t-4 ${
+                data.aiSettings.isBetaEnabled ? 'border-white/10 bg-white/5' : 'border-black bg-gray-50'
+              }`}
+            >
               <form 
                 className="relative" 
                 onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
@@ -310,17 +411,21 @@ const CreateProject = () => {
                 </button>
               </form>
               <div className="flex justify-between items-center mt-6">
-                 <p className={`text-[10px] uppercase font-black tracking-widest ${data.aiSettings.isBetaEnabled ? 'text-yellow-400' : 'text-gray-400'}`}>
-                   {data.aiSettings.isBetaEnabled ? 'SISTEMA BETA MULTIMODAL' : 'CORE IA MI PYME SEGURA'}
-                 </p>
-                 <button 
+                <p 
+                  className={`text-[10px] uppercase font-black tracking-widest ${
+                    data.aiSettings.isBetaEnabled ? 'text-yellow-400' : 'text-gray-400'
+                  }`}
+                >
+                  {data.aiSettings.isBetaEnabled ? 'SISTEMA BETA MULTIMODAL' : 'CORE IA MI PYME SEGURA'}
+                </p>
+                <button 
                   onClick={() => setMode('finished')}
                   className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                     data.aiSettings.isBetaEnabled ? 'bg-white/10 text-white hover:bg-yellow-400 hover:text-black' : 'bg-black text-white hover:bg-red-600'
                   }`}
-                 >
+                >
                   Finalizar
-                 </button>
+                </button>
               </div>
             </div>
           </div>
@@ -334,8 +439,13 @@ const CreateProject = () => {
             <Check size={56} className="font-black" />
           </div>
           <div className="space-y-4">
-            <h2 className="text-5xl font-black text-black tracking-tighter uppercase">PROYECTO <br/><span className="text-red-600">CONSOLIDADO</span></h2>
-            <p className="text-xl text-gray-500 font-bold max-w-md mx-auto leading-relaxed">Nuestro equipo ha recibido tu diseño. En menos de 24 horas te contactaremos.</p>
+            <h2 className="text-5xl font-black text-black tracking-tighter uppercase">
+              PROYECTO <br/>
+              <span className="text-red-600">CONSOLIDADO</span>
+            </h2>
+            <p className="text-xl text-gray-500 font-bold max-w-md mx-auto leading-relaxed">
+              Nuestro equipo ha recibido tu diseño. En menos de 24 horas te contactaremos.
+            </p>
           </div>
           <button 
             onClick={() => window.location.href = '#/contact'}
