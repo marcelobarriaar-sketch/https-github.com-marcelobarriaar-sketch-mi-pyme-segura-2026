@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react';
 import { useSiteData, useAdmin } from '../App';
-import { 
-  Target, 
-  Rocket, 
-  ShieldCheck, 
-  Globe, 
-  Award, 
-  Upload, 
-  Info, 
+import {
+  Target,
+  Rocket,
+  ShieldCheck,
+  Globe,
+  Award,
+  Upload,
+  Info,
   X,
   Plus,
   Image as ImageIcon,
@@ -21,7 +21,7 @@ const About = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const handleEdit = (
-    field: 'title' | 'content' | 'mission' | 'vision' | 'aboutImage', 
+    field: 'title' | 'content' | 'mission' | 'vision' | 'aboutImage',
     val: string
   ) => {
     updateData({ ...data, about: { ...data.about, [field]: val } });
@@ -59,10 +59,22 @@ const About = () => {
         'Diseñamos sistemas de cámaras alimentadas por paneles solares y baterías de respaldo, pensados para lugares donde no hay red eléctrica o es inestable. Ideal para campos, bodegas agrícolas y zonas aisladas.'
     },
     {
-      t: 'Energía Rural',
-      short: 'Sistemas fotovoltaicos para seguridad autónoma.',
+      t: 'Alarmas Inteligentes',
+      short: 'Detección avanzada y notificaciones en tiempo real.',
       detail:
-        'Integramos soluciones fotovoltaicas a medida, considerando consumo real de los equipos, horas de sol del sector y autonomía requerida. Así tu sistema de seguridad se mantiene operativo incluso en cortes prolongados.'
+        'Instalamos sistemas de alarma con sensores perimetrales, volumétricos y de apertura, integrados a aplicaciones móviles, sirenas y protocolos de respuesta. Menos falsas alarmas y más control sobre lo que pasa en tu pyme.'
+    },
+    {
+      t: 'Control de Acceso',
+      short: 'Ingreso seguro y trazable a tus instalaciones.',
+      detail:
+        'Implementamos control de acceso con tarjetas, claves, huella o reconocimiento facial, registrando horarios de entrada y salida, restricciones por zona y perfiles de usuario para mejorar la seguridad interna.'
+    },
+    {
+      t: 'Internet Rural',
+      short: 'Conectividad estable para sectores apartados.',
+      detail:
+        'Llevamos internet a sectores rurales utilizando radioenlaces y soluciones híbridas, para que tus cámaras, alarmas y sistemas de gestión funcionen aunque estés lejos de la ciudad.'
     },
     {
       t: 'Enlaces de Larga Distancia',
@@ -243,15 +255,15 @@ const About = () => {
               key={i}
               type="button"
               onClick={() => handleOpenItem(i)}
-              className="text-left bg-white/5 border-2 border-white/10 p-8 rounded-[2.5rem] hover:bg-white hover:text-black transition-all group focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer"
+              className="text-left bg-[#050505] border border-white/15 p-8 rounded-[2.5rem] hover:bg-white hover:text-black transition-all group focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer"
             >
-              <div className="text-red-600 mb-4 group-hover:text-black">
+              <div className="mb-4 text-red-500 group-hover:text-black">
                 <ShieldCheck size={32} />
               </div>
-              <h4 className="font-black text-2xl mb-2 uppercase tracking-tight group-hover:text-black">
+              <h4 className="font-black text-2xl mb-2 uppercase tracking-tight text-white group-hover:text-black">
                 {item.t}
               </h4>
-              <p className="text-gray-500 font-bold text-sm group-hover:text-gray-700">
+              <p className="text-gray-200 font-semibold text-sm group-hover:text-gray-700">
                 {item.short}
               </p>
               <p className="mt-4 text-[11px] font-black uppercase tracking-widest text-yellow-400 group-hover:text-black">
