@@ -20,6 +20,7 @@ export interface Brand {
   id: string;
   name: string;
   logo: string;
+  url?: string; // NUEVO: enlace oficial (opcional)
 }
 
 export interface Branding {
