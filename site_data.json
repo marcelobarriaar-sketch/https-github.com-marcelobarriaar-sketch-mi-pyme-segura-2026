@@ -65,7 +65,7 @@
     "textColor": "#1F2937"
   },
   "aiSettings": {
-    "selectedModel": "openai-gpt-4.1-expert",
+    "selectedModel": "openai-gpt-4.1-mini",
     "systemPrompt": "Eres un asesor experto en seguridad para \"Mi Pyme Segura\".",
     "isBetaEnabled": false,
     "betaPrompt": "Asistente Beta."
