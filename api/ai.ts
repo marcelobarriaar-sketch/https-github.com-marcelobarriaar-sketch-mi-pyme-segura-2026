@@ -1,51 +1,52 @@
-// api/ai.ts
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Handler para la función serverless de Vercel
-// Esta ruta recibe el body tal cual lo manda tu frontend
-// y lo reenvía a la API de Gemini, devolviendo la respuesta.
-
-export default async function handler(req: any, res: any) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Solo permitimos POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
 
+  // Validamos API KEY
   if (!apiKey) {
-    // Si no hay API key en Vercel, avisamos claro
     return res.status(500).json({
-      error:
-        'Falta la variable de entorno GEMINI_API_KEY en Vercel. ' +
-        'Configúrala en Project Settings → Environment Variables.',
+      error: 'Falta la variable de entorno OPENAI_API_KEY en Vercel'
     });
   }
 
   try {
-    const geminiResponse = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-002:generateContent?key=' +
-        apiKey,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // Reenviamos exactamente el JSON que mandó el frontend
-        body: JSON.stringify(req.body),
-      }
-    );
+    const { prompt } = req.body;
 
-    const data = await geminiResponse.json();
-
-    if (!geminiResponse.ok) {
-      // Pasamos el error de Gemini tal cual al frontend
-      return res.status(geminiResponse.status).json(data);
+    if (!prompt) {
+      return res.status(400).json({
+        error: 'Falta el campo prompt en el body'
+      });
     }
 
-    // Todo OK → respondemos con la data de Gemini
+    // Llamamos a OpenAI
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'Eres un asistente útil.' },
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    // Devolvemos la respuesta al frontend
     return res.status(200).json(data);
-  } catch (err) {
-    console.error('Error en /api/ai:', err);
-    return res
-      .status(500)
-      .json({ error: 'Error interno al conectar con Gemini' });
+  } catch (err: any) {
+    return res.status(500).json({
+      error: err.message || 'Error interno del servidor'
+    });
   }
 }
