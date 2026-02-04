@@ -10,24 +10,27 @@ const Home = () => {
   const { isAdmin } = useAdmin();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ✅ FIX TS: SiteData no declara pages/media/styles → leemos como any (compat)
+  const d: any = data;
+
   // ========= Compat: lee NUEVO primero y cae a VIEJO =========
   const heroTitle =
-    data?.pages?.home?.title ??
-    (data as any)?.home?.heroTitle ??
+    d?.pages?.home?.title ??
+    d?.home?.heroTitle ??
     "Mi Pyme Segura";
 
   const heroSubtitle =
-    data?.pages?.home?.subtitle ??
-    (data as any)?.home?.heroSubtitle ??
+    d?.pages?.home?.subtitle ??
+    d?.home?.heroSubtitle ??
     "Cámaras, alarmas, control de acceso y proyectos de seguridad a medida.";
 
   const heroImage =
-    data?.media?.assets?.homeHero ??
-    (data as any)?.home?.featuredImage ??
+    d?.media?.assets?.homeHero ??
+    d?.home?.featuredImage ??
     "/images/home/hero.jpg";
 
   // ========= STYLES (desde site_data.json) =========
-  const heroStyles = data?.styles?.home?.hero || {};
+  const heroStyles = d?.styles?.home?.hero || {};
 
   const sizeMap: Record<string, string> = {
     xs: "text-xs",
@@ -78,14 +81,16 @@ const Home = () => {
       : "text-left items-start";
 
   const overlayOpacity =
-    typeof heroStyles.overlayOpacity === "number" ? heroStyles.overlayOpacity : 0.6;
+    typeof heroStyles.overlayOpacity === "number"
+      ? heroStyles.overlayOpacity
+      : 0.6;
 
   const titleColor = heroStyles.titleColor || "#FFFFFF";
   const subtitleColor = heroStyles.subtitleColor || "#E5E7EB";
 
   // ========= Update helpers =========
   const setHeroField = (field: HeroField, val: string) => {
-    const next: any = { ...(data || {}) };
+    const next: any = { ...(d || {}) };
 
     // Nuevo esquema
     next.pages = next.pages || {};
@@ -166,13 +171,17 @@ const Home = () => {
         )}
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white w-full">
-          <div className={`max-w-4xl space-y-8 animate-in fade-in slide-in-from-left-8 duration-700 flex flex-col ${heroAlign}`}>
+          <div
+            className={`max-w-4xl space-y-8 animate-in fade-in slide-in-from-left-8 duration-700 flex flex-col ${heroAlign}`}
+          >
             {/* Badge */}
             <div className="inline-flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 px-6 py-2 rounded-full font-black text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-2xl">
               <Shield size={16} className="text-brand" />
               <span>
                 SISTEMA DE PROTECCIÓN{" "}
-                <span className="text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]">PROFESIONAL</span>
+                <span className="text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]">
+                  PROFESIONAL
+                </span>
               </span>
             </div>
 
@@ -251,12 +260,18 @@ const Home = () => {
             className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-50 space-y-6 hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden"
           >
             <div className="absolute top-0 left-0 w-1.5 h-full bg-brand opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className={`${item.bg} w-20 h-20 rounded-2xl flex items-center justify-center group-hover:rotate-3 transition-transform`}>
+            <div
+              className={`${item.bg} w-20 h-20 rounded-2xl flex items-center justify-center group-hover:rotate-3 transition-transform`}
+            >
               <item.icon className={`${item.color}`} size={40} />
             </div>
             <div className="space-y-3">
-              <h3 className="text-3xl font-black text-black tracking-tight uppercase leading-none">{item.title}</h3>
-              <p className="text-gray-500 font-semibold leading-snug text-base">{item.desc}</p>
+              <h3 className="text-3xl font-black text-black tracking-tight uppercase leading-none">
+                {item.title}
+              </h3>
+              <p className="text-gray-500 font-semibold leading-snug text-base">
+                {item.desc}
+              </p>
             </div>
             <div className="pt-2 flex items-center gap-2 text-brand font-black text-xs uppercase tracking-widest">
               Saber más <ArrowRight size={12} />
