@@ -35,7 +35,8 @@
       { "label": "Gestor", "path": "/gestor" }
     ]
   },
-    "styles": {
+
+  "styles": {
     "global": {
       "fontFamily": "'Inter', sans-serif",
       "textColor": "#111827",
@@ -66,6 +67,115 @@
     }
   },
 
+  "pages": {
+    "home": {
+      "title": "Mi Pyme Segura",
+      "subtitle": "Cámaras, alarmas, control de acceso y proyectos de seguridad a medida.",
+      "ctaPrimary": { "label": "Ver Equipos", "path": "/equipos" },
+      "ctaSecondary": { "label": "Cotizar", "path": "/contacto" },
+
+      "highlights": [
+        { "title": "Instalación Profesional", "text": "Montaje limpio, configuración completa y entrega final." },
+        { "title": "Soporte y Mantención", "text": "Acompañamiento y continuidad operacional." },
+        { "title": "Soluciones a Medida", "text": "Diseño según lugar, presupuesto y objetivos." }
+      ]
+    },
+
+    "services": {
+      "title": "Servicios",
+      "intro": "Soluciones integrales de seguridad para hogares, pymes e instituciones.",
+      "items": [
+        {
+          "id": "cctv",
+          "title": "CCTV / Cámaras",
+          "description": "Instalación y configuración de cámaras IP y análogas, NVR/DVR, acceso remoto, optimización de red.",
+          "image": "/images/services/cctv.jpg"
+        },
+        {
+          "id": "alarmas",
+          "title": "Alarmas",
+          "description": "Sistemas de alarma con sensores, sirena, control remoto y notificaciones.",
+          "image": "/images/services/alarmas.jpg"
+        },
+        {
+          "id": "acceso",
+          "title": "Control de Acceso",
+          "description": "Control por huella, tarjeta, clave, cerraduras inteligentes y registro.",
+          "image": "/images/services/acceso.jpg"
+        },
+        {
+          "id": "redes",
+          "title": "Enlaces y Redes",
+          "description": "Enlaces punto a punto / multipunto, PoE, switches, routers y WiFi para CCTV.",
+          "image": "/images/services/redes.jpg"
+        }
+      ]
+    },
+
+    "about": {
+      "title": "Sobre Nosotros",
+      "intro": "Somos una empresa orientada a implementar seguridad real, estable y mantenible.",
+      "bullets": [
+        "Diagnóstico en terreno (o remoto) con propuesta clara.",
+        "Instalación con estándares y buenas prácticas.",
+        "Soporte, mantención y escalabilidad."
+      ]
+    },
+
+    "contact": {
+      "title": "Contacto",
+      "subtitle": "Cuéntanos tu necesidad y te orientamos.",
+      "channels": {
+        "phone": "+56 9 0000 0000",
+        "email": "contacto@mipymesegura.cl",
+        "whatsapp": "+56 9 0000 0000"
+      },
+      "address": {
+        "city": "Fresia",
+        "region": "Región de Los Lagos",
+        "country": "Chile"
+      }
+    }
+  },
+
+  "catalog": {
+    "equipments": [
+      {
+        "id": "cam-001",
+        "name": "Cámara 2MP ColorVu (Ejemplo)",
+        "brand": "Hikvision",
+        "category": "cctv",
+        "shortDescription": "Buena de noche, ideal para patios y accesos.",
+        "specs": {
+          "resolution": "2MP",
+          "lens": "2.8mm",
+          "ir": "Sí",
+          "audio": "Opcional",
+          "poe": "Sí"
+        },
+        "price": {
+          "currency": "CLP",
+          "amount": 0,
+          "note": "Precio referencial, puede variar por stock y dólar."
+        },
+        "images": [
+          "/images/equipos/cam-001/1.jpg",
+          "/images/equipos/cam-001/2.jpg"
+        ],
+        "mainImage": "/images/equipos/cam-001/1.jpg",
+        "tags": ["exterior", "noche", "2mp"],
+        "active": true
+      },
+      {
+        "id": "nvr-001",
+        "name": "NVR 8 Canales (Ejemplo)",
+        "brand": "Hikvision",
+        "category": "grabacion",
+        "shortDescription": "Grabador para 8 cámaras IP"
+      }
+    ]
+  }
+}
   "pages": {
     "home": {
       "title": "Mi Pyme Segura",
