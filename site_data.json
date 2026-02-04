@@ -35,6 +35,36 @@
       { "label": "Gestor", "path": "/gestor" }
     ]
   },
+    "styles": {
+    "global": {
+      "fontFamily": "'Inter', sans-serif",
+      "textColor": "#111827",
+      "backgroundColor": "#FFFFFF",
+      "primaryColor": "#F59E0B",
+      "secondaryColor": "#111827"
+    },
+
+    "home": {
+      "hero": {
+        "titleSize": "7xl",
+        "titleWeight": "black",
+        "titleColor": "#FFFFFF",
+
+        "subtitleSize": "2xl",
+        "subtitleWeight": "medium",
+        "subtitleColor": "#E5E7EB",
+
+        "align": "left",
+        "overlayOpacity": 0.6
+      }
+    },
+
+    "customPagesDefaults": {
+      "contentSize": "md",
+      "contentWeight": "regular",
+      "contentAlign": "left"
+    }
+  },
 
   "pages": {
     "home": {
