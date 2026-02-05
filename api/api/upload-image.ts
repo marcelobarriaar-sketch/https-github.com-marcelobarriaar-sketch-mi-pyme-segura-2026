@@ -43,14 +43,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const path = `${folder}/${filename}`;
 
     const token = process.env.GITHUB_TOKEN;
-    const repo = process.env.GITHUB_REPO; // owner/repo
-    const branch = process.env.GITHUB_BRANCH || 'main';
+const owner = process.env.GITHUB_OWNER;
+const repo = process.env.GITHUB_REPO;
+const branch = process.env.GITHUB_BRANCH || 'main';
 
-    if (!token || !repo) {
-      return res.status(500).json({ error: 'Missing GitHub env vars' });
-    }
+if (!token || !owner || !repo) {
+  return res.status(500).json({ error: 'Missing GitHub env vars (GITHUB_TOKEN/OWNER/REPO)' });
+}
 
-    const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+const repoFull = `${owner}/${repo}`;
+
+const url = `https://api.github.com/repos/${repoFull}/contents/${path}`;
+...
+const publicUrl = `https://raw.githubusercontent.com/${repoFull}/${branch}/${path}`;
 
     const ghRes = await fetch(url, {
       method: 'PUT',
