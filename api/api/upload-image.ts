@@ -3,8 +3,10 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 function sanitize(name: string) {
   return name
     .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9.-]/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -13,13 +15,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const {
-      dataUrl,
-      filenameHint = 'image',
-      folder = 'public/images/uploads'
-    } = req.body;
+    const { dataUrl, filenameHint = 'image', folder = 'public/images/uploads' } = req.body || {};
 
-    if (!dataUrl || !dataUrl.startsWith('data:')) {
+    if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
       return res.status(400).json({ error: 'Invalid dataUrl' });
     }
 
@@ -39,29 +37,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       'jpg';
 
     const ts = Date.now();
-    const filename = `${ts}-${sanitize(filenameHint)}.${ext}`;
+    const safeHint = sanitize(filenameHint) || 'image';
+    const filename = `${ts}-${safeHint}.${ext}`;
     const path = `${folder}/${filename}`;
 
     const token = process.env.GITHUB_TOKEN;
-const owner = process.env.GITHUB_OWNER;
-const repo = process.env.GITHUB_REPO;
-const branch = process.env.GITHUB_BRANCH || 'main';
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const branch = process.env.GITHUB_BRANCH || 'main';
 
-if (!token || !owner || !repo) {
-  return res.status(500).json({ error: 'Missing GitHub env vars (GITHUB_TOKEN/OWNER/REPO)' });
-}
+    if (!token || !owner || !repo) {
+      return res.status(500).json({
+        error: 'Missing GitHub env vars (GITHUB_TOKEN / GITHUB_OWNER / GITHUB_REPO)'
+      });
+    }
 
-const repoFull = `${owner}/${repo}`;
+    const repoFull = `${owner}/${repo}`;
+    const ghUrl = `https://api.github.com/repos/${repoFull}/contents/${path}`;
 
-const url = `https://api.github.com/repos/${repoFull}/contents/${path}`;
-...
-const publicUrl = `https://raw.githubusercontent.com/${repoFull}/${branch}/${path}`;
-
-    const ghRes = await fetch(url, {
+    const ghRes = await fetch(ghUrl, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github+json'
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         message: `upload image ${filename}`,
@@ -75,15 +74,14 @@ const publicUrl = `https://raw.githubusercontent.com/${repoFull}/${branch}/${pat
       return res.status(500).json({ error: t });
     }
 
-    const publicUrl = `https://raw.githubusercontent.com/${repo}/${branch}/${path}`;
+    const publicUrl = `https://raw.githubusercontent.com/${repoFull}/${branch}/${path}`;
 
     return res.status(200).json({
       ok: true,
       path,
       url: publicUrl
     });
-
   } catch (e: any) {
-    return res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e?.message || 'Unknown error' });
   }
 }
