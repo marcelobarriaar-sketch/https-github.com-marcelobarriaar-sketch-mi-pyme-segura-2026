@@ -2,18 +2,18 @@
 
 import React, { useState, useRef } from 'react';
 import { useSiteData, useAdmin } from '../App';
-import { 
-  Layout, 
-  Save, 
-  Plus, 
-  ArrowLeft, 
-  Download, 
-  Upload, 
-  Database, 
-  Bot, 
-  Zap, 
-  Palette, 
-  ImageIcon, 
+import {
+  Layout,
+  Save,
+  Plus,
+  ArrowLeft,
+  Download,
+  Upload,
+  Database,
+  Bot,
+  Zap,
+  Palette,
+  ImageIcon,
   Layers,
   Wrench,
   Github,
@@ -30,18 +30,23 @@ import {
   Pipette,
   CheckCircle,
   Smartphone,
-  X
+  X,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const { data, updateData } = useSiteData();
   const { isAdmin, setShowLogin } = useAdmin();
-  const [activeTab, setActiveTab] = useState<'branding' | 'pages' | 'whatsapp' | 'ai' | 'maintenance' | 'github'>('branding');
+  const [activeTab, setActiveTab] = useState<
+    'branding' | 'pages' | 'whatsapp' | 'ai' | 'maintenance' | 'github'
+  >('branding');
   const [activePageEditor, setActivePageEditor] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
-  
+
+  // NUEVO: status para subida de imágenes
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,7 +66,7 @@ const AdminDashboard = () => {
             </p>
           </div>
           <div className="pt-4 flex flex-col gap-4">
-            <button 
+            <button
               onClick={() => setShowLogin(true)}
               className="bg-brand text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-all shadow-xl"
             >
@@ -78,7 +83,7 @@ const AdminDashboard = () => {
       </div>
     );
   }
-  
+
   const handleManualSave = async () => {
     // 1) Guardar local
     localStorage.setItem('site_data', JSON.stringify(data));
@@ -112,7 +117,48 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
+  // OJO: esto es para subir ARCHIVOS a GitHub vía una serverless function en Vercel.
+  // Requiere que exista /api/upload-image
+  const uploadImageToCloud = async (file: File, targetPath: string) => {
+    try {
+      setUploadStatus('Subiendo imagen a la nube...');
+
+      const form = new FormData();
+      form.append('file', file);
+      form.append('targetPath', targetPath); // ej: "public/images/home/hero-123.webp"
+
+      const res = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: form,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        console.error('Upload error:', result);
+        setUploadStatus('⚠️ Error al subir imagen');
+        setTimeout(() => setUploadStatus(null), 3500);
+        return null;
+      }
+
+      setUploadStatus('✅ Imagen subida');
+      setTimeout(() => setUploadStatus(null), 2500);
+
+      return result.publicUrl as string; // ej: "/images/home/hero-123.webp"
+    } catch (err) {
+      console.error(err);
+      setUploadStatus('⚠️ Error de conexión al subir');
+      setTimeout(() => setUploadStatus(null), 3500);
+      return null;
+    }
+  };
+
+  // Mantengo tu función anterior para casos locales (logo actual), pero OJO:
+  // esto genera data:base64 y NO es persistente como archivo.
+  const handleFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    callback: (url: string) => void
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -128,6 +174,9 @@ const AdminDashboard = () => {
     { name: 'Playfair Display', value: "'Playfair Display', serif" },
     { name: 'Fira Code', value: "'Fira Code', monospace" },
   ];
+
+  // Fallback de imagen por si aún no se define
+  const heroFallback = '/images/default-hero.jpg';
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 text-black">
@@ -145,9 +194,7 @@ const AdminDashboard = () => {
         </div>
         <div className="flex items-center gap-4">
           {saveStatus && (
-            <span className="text-green-600 font-black animate-pulse">
-              {saveStatus}
-            </span>
+            <span className="text-green-600 font-black animate-pulse">{saveStatus}</span>
           )}
           <button
             onClick={handleManualSave}
@@ -166,11 +213,14 @@ const AdminDashboard = () => {
             { id: 'whatsapp', label: 'WhatsApp Personal', icon: MessageCircle },
             { id: 'ai', label: 'Cerebro IA', icon: BrainCircuit },
             { id: 'github', label: 'GitHub Cloud', icon: Github },
-            { id: 'maintenance', label: 'Soporte Técnico', icon: Wrench }
-          ].map(tab => (
-            <button 
+            { id: 'maintenance', label: 'Soporte Técnico', icon: Wrench },
+          ].map((tab) => (
+            <button
               key={tab.id}
-              onClick={() => { setActiveTab(tab.id as any); setActivePageEditor(null); }}
+              onClick={() => {
+                setActiveTab(tab.id as any);
+                setActivePageEditor(null);
+              }}
               className={`w-full flex items-center gap-4 px-6 py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest transition-all ${
                 activeTab === tab.id
                   ? 'bg-brand text-white shadow-xl scale-105'
@@ -183,20 +233,19 @@ const AdminDashboard = () => {
         </aside>
 
         <main className="md:col-span-3 space-y-10 min-h-[600px]">
-          
           {/* TAB: BRANDING */}
           {activeTab === 'branding' && (
             <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
               <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-brand">
                 <Palette size={32} /> PERSONALIZACIÓN DE MARCA
               </h2>
-              
+
               <div className="grid md:grid-cols-2 gap-10">
                 <div className="space-y-4">
                   <label className="text-xs font-black uppercase tracking-widest text-gray-400">
                     Nombre de la Pyme
                   </label>
-                  <input 
+                  <input
                     className="w-full bg-gray-50 border-2 border-gray-200 p-4 rounded-2xl font-black text-xl outline-none focus:border-brand"
                     value={data.branding.siteName}
                     onChange={(e) =>
@@ -211,7 +260,7 @@ const AdminDashboard = () => {
                   <label className="text-xs font-black uppercase tracking-widest text-gray-400">
                     Fuente Global
                   </label>
-                  <select 
+                  <select
                     className="w-full bg-gray-50 border-2 border-gray-100 p-4 rounded-2xl font-bold outline-none focus:border-brand"
                     value={data.branding.fontFamily}
                     onChange={(e) =>
@@ -221,7 +270,7 @@ const AdminDashboard = () => {
                       })
                     }
                   >
-                    {fonts.map(f => (
+                    {fonts.map((f) => (
                       <option key={f.value} value={f.value}>
                         {f.name}
                       </option>
@@ -236,14 +285,14 @@ const AdminDashboard = () => {
                   { label: 'Secundario', key: 'secondaryColor' },
                   { label: 'Texto', key: 'textColor' },
                   { label: 'Fondo Global', key: 'globalBackground' },
-                ].map(col => (
+                ].map((col) => (
                   <div key={col.key} className="space-y-3">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                       {col.label}
                     </label>
                     <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border-2 border-gray-100">
-                      <input 
-                        type="color" 
+                      <input
+                        type="color"
                         className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-none"
                         value={(data.branding as any)[col.key]}
                         onChange={(e) =>
@@ -256,7 +305,7 @@ const AdminDashboard = () => {
                           })
                         }
                       />
-                      <input 
+                      <input
                         type="text"
                         className="bg-transparent font-bold text-xs w-full outline-none"
                         value={(data.branding as any)[col.key]}
@@ -282,10 +331,7 @@ const AdminDashboard = () => {
                   </label>
                   <div className="flex items-center gap-6">
                     <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center p-2 border-2 border-dashed border-gray-300 overflow-hidden">
-                      <img
-                        src={data.branding.logoUrl}
-                        className="max-w-full max-h-full object-contain"
-                      />
+                      <img src={data.branding.logoUrl} className="max-w-full max-h-full object-contain" />
                     </div>
                     <div className="flex-1 space-y-2">
                       <input
@@ -302,27 +348,18 @@ const AdminDashboard = () => {
                         }
                       />
                       <button
-                        onClick={() =>
-                          document.getElementById('logo-upload')?.click()
-                        }
+                        onClick={() => document.getElementById('logo-upload')?.click()}
                         className="w-full bg-black text-white py-3 rounded-xl font-black text-xs hover:bg-brand transition-all"
                       >
                         SUBIR LOGO
                       </button>
                       <input
                         className="w-full bg-gray-50 border-2 border-gray-100 p-2 rounded-xl text-[10px] outline-none"
-                        value={
-                          data.branding.logoUrl.startsWith('data:')
-                            ? 'Local'
-                            : data.branding.logoUrl
-                        }
+                        value={data.branding.logoUrl.startsWith('data:') ? 'Local' : data.branding.logoUrl}
                         onChange={(e) =>
                           updateData({
                             ...data,
-                            branding: {
-                              ...data.branding,
-                              logoUrl: e.target.value,
-                            },
+                            branding: { ...data.branding, logoUrl: e.target.value },
                           })
                         }
                         placeholder="URL de imagen..."
@@ -343,23 +380,20 @@ const AdminDashboard = () => {
               <p className="text-gray-500 font-bold">
                 Configura el número al que se enviarán las consultas de tus clientes desde el botón flotante.
               </p>
-              
+
               <div className="grid md:grid-cols-2 gap-10">
                 <div className="space-y-4">
                   <label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                     <Smartphone size={14} /> WhatsApp Personal
                   </label>
-                  <input 
+                  <input
                     className="w-full bg-gray-50 border-2 border-gray-200 p-5 rounded-2xl font-black text-2xl outline-none focus:border-green-500"
                     placeholder="+56912345678"
                     value={data.whatsappConfig.phoneNumber}
                     onChange={(e) =>
                       updateData({
                         ...data,
-                        whatsappConfig: {
-                          ...data.whatsappConfig,
-                          phoneNumber: e.target.value,
-                        },
+                        whatsappConfig: { ...data.whatsappConfig, phoneNumber: e.target.value },
                       })
                     }
                   />
@@ -371,16 +405,13 @@ const AdminDashboard = () => {
                   <label className="text-xs font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                     <Type size={14} /> Mensaje de Bienvenida
                   </label>
-                  <textarea 
+                  <textarea
                     className="w-full bg-gray-50 border-2 border-gray-200 p-5 rounded-2xl font-bold outline-none focus:border-green-500 h-32"
                     value={data.whatsappConfig.welcomeMessage}
                     onChange={(e) =>
                       updateData({
                         ...data,
-                        whatsappConfig: {
-                          ...data.whatsappConfig,
-                          welcomeMessage: e.target.value,
-                        },
+                        whatsappConfig: { ...data.whatsappConfig, welcomeMessage: e.target.value },
                       })
                     }
                   />
@@ -397,7 +428,7 @@ const AdminDashboard = () => {
                   <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-orange-500">
                     <Layers size={32} /> GESTOR DE SUB-PÁGINAS
                   </h2>
-                  <button 
+                  <button
                     onClick={() => {
                       const id = Date.now().toString();
                       const newPage = {
@@ -420,7 +451,6 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="grid gap-4">
-                  {/* Main Pages Editors */}
                   {[
                     { id: 'home', title: 'Página de Inicio', color: 'bg-red-500' },
                     { id: 'about', title: 'Sobre Nosotros', color: 'bg-blue-500' },
@@ -428,27 +458,21 @@ const AdminDashboard = () => {
                     { id: 'projects', title: 'Proyectos', color: 'bg-gray-500' },
                     { id: 'design', title: 'Diseño IA', color: 'bg-purple-500' },
                     { id: 'contact', title: 'Contacto', color: 'bg-green-500' },
-                  ].map(page => (
-                    <button 
+                  ].map((page) => (
+                    <button
                       key={page.id}
                       onClick={() => setActivePageEditor(page.id)}
                       className="w-full flex items-center justify-between p-6 bg-gray-50 rounded-2xl border-2 border-transparent hover:border-black transition-all group"
                     >
                       <div className="flex items-center gap-4">
                         <div className={`w-3 h-3 rounded-full ${page.color}`} />
-                        <span className="font-black uppercase text-sm tracking-widest">
-                          {page.title}
-                        </span>
+                        <span className="font-black uppercase text-sm tracking-widest">{page.title}</span>
                       </div>
-                      <ChevronRight
-                        size={20}
-                        className="group-hover:translate-x-1 transition-transform"
-                      />
+                      <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </button>
                   ))}
 
-                  {/* Custom Pages */}
-                  {data.customPages.map(page => (
+                  {data.customPages.map((page) => (
                     <div
                       key={page.id}
                       className="w-full flex items-center justify-between p-6 bg-white border-2 border-gray-100 rounded-2xl group"
@@ -458,12 +482,8 @@ const AdminDashboard = () => {
                         className="flex items-center gap-4 flex-1 text-left"
                       >
                         <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                        <span className="font-black uppercase text-sm tracking-widest">
-                          {page.title}
-                        </span>
-                        <span className="text-[10px] text-gray-400 font-bold italic">
-                          /p/{page.slug}
-                        </span>
+                        <span className="font-black uppercase text-sm tracking-widest">{page.title}</span>
+                        <span className="text-[10px] text-gray-400 font-bold italic">/p/{page.slug}</span>
                       </button>
                       <div className="flex items-center gap-2">
                         <button
@@ -476,9 +496,7 @@ const AdminDashboard = () => {
                           onClick={() =>
                             updateData({
                               ...data,
-                              customPages: data.customPages.filter(
-                                p => p.id !== page.id
-                              ),
+                              customPages: data.customPages.filter((p) => p.id !== page.id),
                             })
                           }
                           className="p-2 text-red-400 hover:text-red-600 transition-colors"
@@ -491,7 +509,6 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* EDITOR MODAL INFERIOR (Simple CMS Overlay) */}
               {activePageEditor && (
                 <div className="bg-white p-10 rounded-[3rem] border-4 border-brand shadow-2xl space-y-10 animate-in slide-in-from-top-10 duration-500">
                   <div className="flex justify-between items-center border-b-2 border-gray-100 pb-6">
@@ -506,17 +523,15 @@ const AdminDashboard = () => {
                     </button>
                   </div>
 
-                  {/* Editor Condicional según página */}
+                  {/* HOME EDITOR */}
                   {activePageEditor === 'home' && (
                     <div className="grid gap-8">
                       <div className="space-y-4">
-                        <label className="text-xs font-black uppercase tracking-widest">
-                          Título Hero
-                        </label>
+                        <label className="text-xs font-black uppercase tracking-widest">Título Hero</label>
                         <textarea
                           className="w-full bg-gray-50 p-4 border-2 rounded-xl font-black text-2xl"
                           value={data.home.heroTitle}
-                          onChange={e =>
+                          onChange={(e) =>
                             updateData({
                               ...data,
                               home: { ...data.home, heroTitle: e.target.value },
@@ -524,14 +539,13 @@ const AdminDashboard = () => {
                           }
                         />
                       </div>
+
                       <div className="space-y-4">
-                        <label className="text-xs font-black uppercase tracking-widest">
-                          Subtítulo Hero
-                        </label>
+                        <label className="text-xs font-black uppercase tracking-widest">Subtítulo Hero</label>
                         <textarea
                           className="w-full bg-gray-50 p-4 border-2 rounded-xl font-bold"
                           value={data.home.heroSubtitle}
-                          onChange={e =>
+                          onChange={(e) =>
                             updateData({
                               ...data,
                               home: { ...data.home, heroSubtitle: e.target.value },
@@ -539,6 +553,7 @@ const AdminDashboard = () => {
                           }
                         />
                       </div>
+
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black uppercase tracking-widest">
@@ -548,13 +563,10 @@ const AdminDashboard = () => {
                             type="color"
                             className="w-full h-12 rounded-xl cursor-pointer"
                             value={data.home.heroBgColor}
-                            onChange={e =>
+                            onChange={(e) =>
                               updateData({
                                 ...data,
-                                home: {
-                                  ...data.home,
-                                  heroBgColor: e.target.value,
-                                },
+                                home: { ...data.home, heroBgColor: e.target.value },
                               })
                             }
                           />
@@ -567,45 +579,114 @@ const AdminDashboard = () => {
                             type="color"
                             className="w-full h-12 rounded-xl cursor-pointer"
                             value={data.home.heroTextColor}
-                            onChange={e =>
+                            onChange={(e) =>
                               updateData({
                                 ...data,
-                                home: {
-                                  ...data.home,
-                                  heroTextColor: e.target.value,
-                                },
+                                home: { ...data.home, heroTextColor: e.target.value },
                               })
                             }
                           />
+                        </div>
+                      </div>
+
+                      {/* NUEVO: IMAGEN HERO */}
+                      <div className="space-y-4">
+                        <label className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                          <ImageIcon size={16} /> Imagen de Fondo (Hero)
+                        </label>
+
+                        <div className="grid md:grid-cols-2 gap-6 items-start">
+                          <div className="space-y-3">
+                            <div className="w-full h-40 bg-gray-100 rounded-2xl overflow-hidden border-2 border-dashed border-gray-300">
+                              <img
+                                src={(data.home as any).heroBgImageUrl || heroFallback}
+                                className="w-full h-full object-cover"
+                                alt="Hero background preview"
+                              />
+                            </div>
+
+                            {uploadStatus && (
+                              <div className="text-xs font-black text-gray-600">{uploadStatus}</div>
+                            )}
+
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              id="hero-bg-upload"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+
+                                // Validaciones rápidas
+                                const maxMB = 0.6;
+                                if (file.size > maxMB * 1024 * 1024) {
+                                  setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                                  setTimeout(() => setUploadStatus(null), 3500);
+                                  return;
+                                }
+
+                                const targetPath = `public/images/home/hero-${Date.now()}.webp`;
+                                const publicUrl = await uploadImageToCloud(file, targetPath);
+                                if (!publicUrl) return;
+
+                                updateData({
+                                  ...data,
+                                  home: { ...data.home, heroBgImageUrl: publicUrl } as any,
+                                });
+                              }}
+                            />
+
+                            <button
+                              onClick={() => document.getElementById('hero-bg-upload')?.click()}
+                              className="w-full bg-black text-white py-3 rounded-xl font-black text-xs hover:bg-brand transition-all"
+                            >
+                              SUBIR IMAGEN HERO
+                            </button>
+
+                            <p className="text-[10px] text-gray-400 font-bold">
+                              Recomendado: WEBP/JPG 1920×900 aprox, ideal &lt; 350KB (máx 600KB).
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                              URL actual (debe ser /images/...)
+                            </label>
+                            <input
+                              className="w-full bg-gray-50 border-2 border-gray-100 p-3 rounded-xl text-xs outline-none"
+                              value={(data.home as any).heroBgImageUrl || ''}
+                              onChange={(e) =>
+                                updateData({
+                                  ...data,
+                                  home: { ...data.home, heroBgImageUrl: e.target.value } as any,
+                                })
+                              }
+                              placeholder="/images/home/hero.webp"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
                   )}
 
                   {/* Custom Page Editor */}
-                  {data.customPages.some(p => p.id === activePageEditor) && (
+                  {data.customPages.some((p) => p.id === activePageEditor) && (
                     <div className="grid gap-8">
                       <div className="space-y-4">
-                        <label className="text-xs font-black uppercase tracking-widest">
-                          Título de Página
-                        </label>
+                        <label className="text-xs font-black uppercase tracking-widest">Título de Página</label>
                         <input
                           className="w-full bg-gray-50 p-4 border-2 rounded-xl font-black text-xl"
-                          value={
-                            data.customPages.find(p => p.id === activePageEditor)
-                              ?.title
-                          }
-                          onChange={e =>
+                          value={data.customPages.find((p) => p.id === activePageEditor)?.title}
+                          onChange={(e) =>
                             updateData({
                               ...data,
-                              customPages: data.customPages.map(p =>
+                              customPages: data.customPages.map((p) =>
                                 p.id === activePageEditor
                                   ? {
                                       ...p,
                                       title: e.target.value,
-                                      slug: e.target.value
-                                        .toLowerCase()
-                                        .replace(/\s+/g, '-'),
+                                      slug: e.target.value.toLowerCase().replace(/\s+/g, '-'),
                                     }
                                   : p
                               ),
@@ -613,72 +694,51 @@ const AdminDashboard = () => {
                           }
                         />
                       </div>
+
                       <div className="space-y-4">
-                        <label className="text-xs font-black uppercase tracking-widest">
-                          Contenido (Texto Largo)
-                        </label>
+                        <label className="text-xs font-black uppercase tracking-widest">Contenido (Texto Largo)</label>
                         <textarea
                           className="w-full bg-gray-50 p-4 border-2 rounded-xl h-64 font-medium leading-relaxed"
-                          value={
-                            data.customPages.find(p => p.id === activePageEditor)
-                              ?.content
-                          }
-                          onChange={e =>
+                          value={data.customPages.find((p) => p.id === activePageEditor)?.content}
+                          onChange={(e) =>
                             updateData({
                               ...data,
-                              customPages: data.customPages.map(p =>
-                                p.id === activePageEditor
-                                  ? { ...p, content: e.target.value }
-                                  : p
+                              customPages: data.customPages.map((p) =>
+                                p.id === activePageEditor ? { ...p, content: e.target.value } : p
                               ),
                             })
                           }
                         />
                       </div>
+
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest">
-                            Color Fondo
-                          </label>
+                          <label className="text-[10px] font-black uppercase tracking-widest">Color Fondo</label>
                           <input
                             type="color"
                             className="w-full h-12 rounded-xl cursor-pointer"
-                            value={
-                              data.customPages.find(
-                                p => p.id === activePageEditor
-                              )?.bgColor || '#FFFFFF'
-                            }
-                            onChange={e =>
+                            value={data.customPages.find((p) => p.id === activePageEditor)?.bgColor || '#FFFFFF'}
+                            onChange={(e) =>
                               updateData({
                                 ...data,
-                                customPages: data.customPages.map(p =>
-                                  p.id === activePageEditor
-                                    ? { ...p, bgColor: e.target.value }
-                                    : p
+                                customPages: data.customPages.map((p) =>
+                                  p.id === activePageEditor ? { ...p, bgColor: e.target.value } : p
                                 ),
                               })
                             }
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest">
-                            Color Texto
-                          </label>
+                          <label className="text-[10px] font-black uppercase tracking-widest">Color Texto</label>
                           <input
                             type="color"
                             className="w-full h-12 rounded-xl cursor-pointer"
-                            value={
-                              data.customPages.find(
-                                p => p.id === activePageEditor
-                              )?.textColor || '#000000'
-                            }
-                            onChange={e =>
+                            value={data.customPages.find((p) => p.id === activePageEditor)?.textColor || '#000000'}
+                            onChange={(e) =>
                               updateData({
                                 ...data,
-                                customPages: data.customPages.map(p =>
-                                  p.id === activePageEditor
-                                    ? { ...p, textColor: e.target.value }
-                                    : p
+                                customPages: data.customPages.map((p) =>
+                                  p.id === activePageEditor ? { ...p, textColor: e.target.value } : p
                                 ),
                               })
                             }
@@ -701,7 +761,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* TAB: AI CEREBRO */}
+          {/* TAB: AI */}
           {activeTab === 'ai' && (
             <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-10 animate-in fade-in duration-500">
               <div className="flex justify-between items-center">
@@ -709,9 +769,7 @@ const AdminDashboard = () => {
                   <BrainCircuit size={32} /> CEREBRO INTELIGENTE
                 </h2>
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-black uppercase text-gray-400">
-                    Estado Beta:
-                  </span>
+                  <span className="text-[10px] font-black uppercase text-gray-400">Estado Beta:</span>
                   <button
                     onClick={() =>
                       updateData({
@@ -723,9 +781,7 @@ const AdminDashboard = () => {
                       })
                     }
                     className={`p-1 rounded-full w-14 transition-colors ${
-                      data.aiSettings.isBetaEnabled
-                        ? 'bg-yellow-400'
-                        : 'bg-gray-200'
+                      data.aiSettings.isBetaEnabled ? 'bg-yellow-400' : 'bg-gray-200'
                     }`}
                   >
                     <div
@@ -748,36 +804,16 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       updateData({
                         ...data,
-                        aiSettings: {
-                          ...data.aiSettings,
-                          selectedModel: e.target.value,
-                        },
+                        aiSettings: { ...data.aiSettings, selectedModel: e.target.value },
                       })
                     }
                   >
-                    {/* GEMINI */}
-                    <option value="gemini-3-flash-preview">
-                      Gemini 3 Flash (Velocidad)
-                    </option>
-                    <option value="gemini-3-pro-preview">
-                      Gemini 3 Pro (Razonamiento)
-                    </option>
-                    <option value="gemini-2.5-flash-image">
-                      Gemini 2.5 Flash Image (Multimodal)
-                    </option>
-
-                    {/* CHATGPT – EXPERTO Y RÁPIDO */}
-                    <option value="openai-gpt-4.1-expert">
-                      ChatGPT · Experto Mi Pyme Segura
-                    </option>
-                    <option value="openai-gpt-4.1-mini">
-                      ChatGPT · Rápido (Óptimo para dudas frecuentes)
-                    </option>
-
-                    {/* PERFIL EXTRA RÁPIDO */}
-                    <option value="fast-routing-ia">
-                      IA Ultra Rápida · Respuestas Inmediatas
-                    </option>
+                    <option value="gemini-3-flash-preview">Gemini 3 Flash (Velocidad)</option>
+                    <option value="gemini-3-pro-preview">Gemini 3 Pro (Razonamiento)</option>
+                    <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image (Multimodal)</option>
+                    <option value="openai-gpt-4.1-expert">ChatGPT · Experto Mi Pyme Segura</option>
+                    <option value="openai-gpt-4.1-mini">ChatGPT · Rápido (Óptimo para dudas frecuentes)</option>
+                    <option value="fast-routing-ia">IA Ultra Rápida · Respuestas Inmediatas</option>
                   </select>
                 </div>
 
@@ -789,70 +825,55 @@ const AdminDashboard = () => {
                     <Zap size={16} /> ENLAZAR OTRO MOTOR
                   </button>
                   <p className="text-[10px] text-gray-400 font-bold leading-relaxed">
-                    Las opciones como <strong>ChatGPT Experto</strong>,{' '}
-                    <strong>ChatGPT Rápido</strong> e{' '}
-                    <strong>IA Ultra Rápida</strong> son perfiles lógicos. En el
-                    backend podrás mapear cada uno a un proveedor específico
-                    (OpenAI, Gemini, etc.) para que el cerebro IA responda tal
+                    Las opciones como <strong>ChatGPT Experto</strong>, <strong>ChatGPT Rápido</strong> e{' '}
+                    <strong>IA Ultra Rápida</strong> son perfiles lógicos. En el backend podrás mapear cada
+                    uno a un proveedor específico (OpenAI, Gemini, etc.) para que el cerebro IA responda tal
                     como lo necesitas.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4 pt-4">
-                <label className="text-xs font-black uppercase tracking-widest">
-                  Instrucciones de Sistema
-                </label>
+                <label className="text-xs font-black uppercase tracking-widest">Instrucciones de Sistema</label>
                 <textarea
                   className="w-full bg-gray-50 border-2 border-gray-100 p-6 rounded-[2.5rem] min-h-[150px] font-medium outline-none focus:border-blue-600"
                   value={data.aiSettings.systemPrompt}
                   onChange={(e) =>
                     updateData({
                       ...data,
-                      aiSettings: {
-                        ...data.aiSettings,
-                        systemPrompt: e.target.value,
-                      },
+                      aiSettings: { ...data.aiSettings, systemPrompt: e.target.value },
                     })
                   }
                 />
                 <p className="text-[10px] text-gray-400 font-bold">
                   Ejemplo sugerido:{' '}
                   <span className="italic">
-                    “Eres un asesor experto en seguridad y proyectos
-                    tecnológicos para ‘Mi Pyme Segura’. Hablas en un lenguaje
-                    cercano, claro y orientado a negocios, y ayudas a los
-                    clientes a diseñar soluciones de cámaras, enlaces de datos,
-                    alarmas e IA a la medida de su realidad.”
+                    “Eres un asesor experto en seguridad y proyectos tecnológicos para ‘Mi Pyme Segura’.
+                    Hablas en un lenguaje cercano, claro y orientado a negocios, y ayudas a los clientes a
+                    diseñar soluciones de cámaras, enlaces de datos, alarmas e IA a la medida de su realidad.”
                   </span>
                 </p>
               </div>
             </div>
           )}
 
-          {/* TAB: MAINTENANCE / SOPORTE */}
+          {/* TAB: MAINTENANCE */}
           {activeTab === 'maintenance' && (
             <div className="bg-white p-12 rounded-[4rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <h2 className="text-4xl font-black tracking-tighter uppercase flex items-center gap-4">
-                  <Database className="text-brand" size={36} /> Soporte{' '}
-                  <span className="text-brand">Técnico</span>
+                  <Database className="text-brand" size={36} /> Soporte <span className="text-brand">Técnico</span>
                 </h2>
               </div>
+
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="p-8 bg-gray-50 rounded-[3rem] border-2 border-transparent hover:border-brand transition-all flex flex-col items-center text-center gap-4">
                   <Download className="text-brand" size={32} />
-                  <h3 className="font-black tracking-tight uppercase text-sm">
-                    Descargar Copia
-                  </h3>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase">
-                    Backup total de configuración.
-                  </p>
+                  <h3 className="font-black tracking-tight uppercase text-sm">Descargar Copia</h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">Backup total de configuración.</p>
                   <button
                     onClick={() => {
-                      const blob = new Blob([JSON.stringify(data, null, 2)], {
-                        type: 'application/json',
-                      });
+                      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                       const link = document.createElement('a');
                       link.href = URL.createObjectURL(blob);
                       link.download = `mipymesegura_backup_${new Date().getTime()}.json`;
@@ -863,14 +884,11 @@ const AdminDashboard = () => {
                     Exportar JSON
                   </button>
                 </div>
+
                 <div className="p-8 bg-gray-50 rounded-[3rem] border-2 border-transparent hover:border-blue-600 transition-all flex flex-col items-center text-center gap-4">
                   <Upload className="text-blue-600" size={32} />
-                  <h3 className="font-black tracking-tight uppercase text-sm">
-                    Cargar Copia
-                  </h3>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase">
-                    Restaurar desde un backup.
-                  </p>
+                  <h3 className="font-black tracking-tight uppercase text-sm">Cargar Copia</h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">Restaurar desde un backup.</p>
                   <input
                     type="file"
                     accept=".json"
@@ -880,9 +898,7 @@ const AdminDashboard = () => {
                         const reader = new FileReader();
                         reader.onload = (ev) => {
                           try {
-                            updateData(
-                              JSON.parse(ev.target?.result as string)
-                            );
+                            updateData(JSON.parse(ev.target?.result as string));
                             setSaveStatus('¡Restaurado!');
                           } catch (err) {
                             alert('Error en el archivo');
@@ -895,22 +911,17 @@ const AdminDashboard = () => {
                     id="import-data"
                   />
                   <button
-                    onClick={() =>
-                      document.getElementById('import-data')?.click()
-                    }
+                    onClick={() => document.getElementById('import-data')?.click()}
                     className="w-full bg-black text-white py-3 rounded-xl font-black uppercase text-[10px] hover:bg-blue-600 transition-all"
                   >
                     Importar JSON
                   </button>
                 </div>
+
                 <div className="p-8 bg-gray-50 rounded-[3rem] border-2 border-transparent hover:border-yellow-400 transition-all flex flex-col items-center text-center gap-4">
                   <RefreshCw className="text-yellow-500" size={32} />
-                  <h3 className="font-black tracking-tight uppercase text-sm">
-                    Limpiar Caché
-                  </h3>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase">
-                    Resetear datos locales.
-                  </p>
+                  <h3 className="font-black tracking-tight uppercase text-sm">Limpiar Caché</h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">Resetear datos locales.</p>
                   <button
                     onClick={() => {
                       if (
@@ -944,13 +955,10 @@ const AdminDashboard = () => {
                   placeholder="Token"
                   type="password"
                   value={data.githubSettings.token}
-                  onChange={e =>
+                  onChange={(e) =>
                     updateData({
                       ...data,
-                      githubSettings: {
-                        ...data.githubSettings,
-                        token: e.target.value,
-                      },
+                      githubSettings: { ...data.githubSettings, token: e.target.value },
                     })
                   }
                 />
@@ -958,13 +966,10 @@ const AdminDashboard = () => {
                   className="bg-white/5 border-2 border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-400"
                   placeholder="Owner"
                   value={data.githubSettings.owner}
-                  onChange={e =>
+                  onChange={(e) =>
                     updateData({
                       ...data,
-                      githubSettings: {
-                        ...data.githubSettings,
-                        owner: e.target.value,
-                      },
+                      githubSettings: { ...data.githubSettings, owner: e.target.value },
                     })
                   }
                 />
@@ -972,20 +977,16 @@ const AdminDashboard = () => {
                   className="bg-white/5 border-2 border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-400"
                   placeholder="Repo"
                   value={data.githubSettings.repo}
-                  onChange={e =>
+                  onChange={(e) =>
                     updateData({
                       ...data,
-                      githubSettings: {
-                        ...data.githubSettings,
-                        repo: e.target.value,
-                      },
+                      githubSettings: { ...data.githubSettings, repo: e.target.value },
                     })
                   }
                 />
               </div>
             </div>
           )}
-          
         </main>
       </div>
     </div>
