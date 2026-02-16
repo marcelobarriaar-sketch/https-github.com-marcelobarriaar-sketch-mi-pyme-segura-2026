@@ -22,6 +22,10 @@ export type Branding = {
   siteNameColor: string;
   fontFamily: string;
   globalBackground: string;
+
+  // ✅ NUEVOS (opcionales) — usados por AdminDashboard
+  footerText?: string;
+  footerSubText?: string;
 };
 
 // =========================
@@ -39,13 +43,24 @@ export type WhatsAppConfig = {
 
 export type HomeFeatureItem = {
   title: string;
+
+  // ✅ compat: en algunos lados usan description, en AdminDashboard usa desc
   description?: string;
+  desc?: string;
+
   icon?: string;
+
+  // ✅ CTA/Link desde admin
+  linkLabel?: string;
+  linkUrl?: string;
 };
 
 export type HomeProcessStep = {
   title: string;
   description?: string;
+
+  // ✅ numeración (AdminDashboard usa number)
+  number?: number;
 };
 
 export type HomeLegacy = {
@@ -114,6 +129,11 @@ export type EquipmentItem = {
   description: string;
   imageUrl: string;
   category: string;
+
+  // ✅ NUEVOS (opcionales) — usados por AdminDashboard
+  price?: string;
+  fileUrl?: string;
+  videoUrl?: string;
 };
 
 export type ProjectItem = {
