@@ -127,11 +127,15 @@ export type EquipmentItem = {
   id: string;
   title: string;
   description: string;
-  imageUrl: string;
+
+  // ✅ opcional — el AdminDashboard crea items sin imagen al inicio
+  imageUrl?: string;
+
   category: string;
 
-  // ✅ NUEVOS (opcionales) — usados por AdminDashboard
-  price?: string;
+  // ✅ acepta número o string (inputs del admin)
+  price?: number | string;
+
   fileUrl?: string;
   videoUrl?: string;
 };
@@ -140,7 +144,9 @@ export type ProjectItem = {
   id: string;
   title: string;
   description: string;
-  imageUrl: string;
+
+  // ✅ opcional por compat con creación inicial
+  imageUrl?: string;
 };
 
 // =========================
