@@ -1,4 +1,4 @@
-// =========================
+tt// =========================
 // ADMIN
 // =========================
 
@@ -60,7 +60,7 @@ export type HomeProcessStep = {
   description?: string;
 
   // ✅ numeración (AdminDashboard usa number)
-  number?: number;
+  number?: number | string;
 };
 
 export type HomeLegacy = {
