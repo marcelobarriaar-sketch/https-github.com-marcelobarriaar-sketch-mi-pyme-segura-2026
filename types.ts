@@ -37,12 +37,30 @@ export type WhatsAppConfig = {
 // HOME (LEGACY)
 // =========================
 
+export type HomeFeatureItem = {
+  title: string;
+  description?: string;
+  icon?: string;
+};
+
+export type HomeProcessStep = {
+  title: string;
+  description?: string;
+};
+
 export type HomeLegacy = {
   heroTitle: string;
   heroSubtitle: string;
   featuredImage: string;
   heroBgColor?: string;
   heroTextColor?: string;
+
+  // ✅ NUEVOS (opcionales para compat con legacy)
+  features?: HomeFeatureItem[];
+
+  processTitle?: string;
+  processSubtitle?: string;
+  processSteps?: HomeProcessStep[];
 };
 
 // =========================
@@ -80,6 +98,10 @@ export type SimpleHeader = {
   subtitle: string;
   bgColor?: string;
   textColor?: string;
+
+  // ✅ NUEVOS (opcionales)
+  installationInfo?: string;
+  evaluationInfo?: string;
 };
 
 // =========================
@@ -112,6 +134,9 @@ export type BrandLegacy = {
   // 👇 compatibilidad doble — About.tsx usa url, INITIAL_DATA usa logo
   logo?: string;
   url?: string;
+
+  // ✅ NUEVO (para el error footerSubText)
+  footerSubText?: string;
 };
 
 // =========================
