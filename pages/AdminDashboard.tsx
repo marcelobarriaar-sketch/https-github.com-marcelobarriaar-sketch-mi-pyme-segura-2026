@@ -685,6 +685,177 @@ const AdminDashboard = () => {
                     </div>
                   )}
 
+                  {/* ABOUT */}
+{activePageEditor === 'about' && (
+  <div className="space-y-12">
+    <div className="p-8 bg-gray-50 rounded-3xl space-y-6">
+      <h4 className="text-xl font-black uppercase text-brand flex items-center gap-2">
+        <Type size={24} /> SOBRE NOSOTROS (ABOUT)
+      </h4>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400">Título</label>
+          <input
+            className="w-full bg-white border-2 p-4 rounded-xl font-black outline-none focus:border-brand"
+            value={data.about.title}
+            onChange={(e) =>
+              updateData({ ...data, about: { ...data.about, title: e.target.value } })
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400">Contenido (párrafo)</label>
+          <textarea
+            className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-32"
+            value={data.about.content}
+            onChange={(e) =>
+              updateData({ ...data, about: { ...data.about, content: e.target.value } })
+            }
+          />
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400">Misión</label>
+          <textarea
+            className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-28"
+            value={data.about.mission}
+            onChange={(e) =>
+              updateData({ ...data, about: { ...data.about, mission: e.target.value } })
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400">Visión</label>
+          <textarea
+            className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-28"
+            value={data.about.vision}
+            onChange={(e) =>
+              updateData({ ...data, about: { ...data.about, vision: e.target.value } })
+            }
+          />
+        </div>
+      </div>
+
+      {/* Imagen ABOUT - cloud real (GitHub) */}
+      <div className="space-y-4 pt-6 border-t border-gray-200">
+        <label className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+          <ImageIcon size={16} /> Imagen (About) — permanente (GitHub)
+        </label>
+
+        <div className="grid md:grid-cols-2 gap-6 items-start">
+          <div className="space-y-3">
+            <div className="w-full h-40 bg-gray-100 rounded-2xl overflow-hidden border-2 border-dashed border-gray-300">
+              <img
+                src={data.about.aboutImage || '/images/default-hero.jpg'}
+                className="w-full h-full object-cover"
+                alt="About preview"
+              />
+            </div>
+
+            {uploadStatus && <div className="text-xs font-black text-gray-600">{uploadStatus}</div>}
+
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              id="about-image-upload"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                const maxMB = 0.6;
+                if (file.size > maxMB * 1024 * 1024) {
+                  setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                  setTimeout(() => setUploadStatus(null), 3500);
+                  return;
+                }
+
+                const ext = (() => {
+                  const name = file.name.toLowerCase();
+                  if (name.endsWith('.webp')) return 'webp';
+                  if (name.endsWith('.png')) return 'png';
+                  if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'jpg';
+                  return 'jpg';
+                })();
+
+                const targetPath = `public/images/about/about-${Date.now()}.${ext}`;
+                const publicUrl = await uploadImageToCloud(file, targetPath);
+                if (!publicUrl) return;
+
+                updateData({
+                  ...data,
+                  about: { ...data.about, aboutImage: publicUrl },
+                });
+              }}
+            />
+
+            <button
+              onClick={() => document.getElementById('about-image-upload')?.click()}
+              className="w-full bg-black text-white py-3 rounded-xl font-black text-xs hover:bg-brand transition-all"
+            >
+              SUBIR IMAGEN ABOUT (CLOUD)
+            </button>
+
+            <p className="text-[10px] text-gray-400 font-bold">
+              Recomendado: 1920×900 aprox, ideal &lt; 350KB (máx 600KB).
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                URL actual (debe ser /images/...)
+              </label>
+              <input
+                className="w-full bg-gray-50 border-2 border-gray-100 p-3 rounded-xl text-xs outline-none"
+                value={data.about.aboutImage || ''}
+                onChange={(e) =>
+                  updateData({ ...data, about: { ...data.about, aboutImage: e.target.value } })
+                }
+                placeholder="/images/about/about.jpg"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-gray-400">Color Fondo</label>
+                <input
+                  type="color"
+                  className="w-full h-12 rounded-lg cursor-pointer"
+                  value={data.about.bgColor}
+                  onChange={(e) =>
+                    updateData({ ...data, about: { ...data.about, bgColor: e.target.value } })
+                  }
+                />
+                <div className="text-[10px] font-mono text-gray-500">{data.about.bgColor}</div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-gray-400">Color Texto</label>
+                <input
+                  type="color"
+                  className="w-full h-12 rounded-lg cursor-pointer"
+                  value={data.about.textColor}
+                  onChange={(e) =>
+                    updateData({ ...data, about: { ...data.about, textColor: e.target.value } })
+                  }
+                />
+                <div className="text-[10px] font-mono text-gray-500">{data.about.textColor}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
                   {/* EQUIPMENT (del primer código, intacto) */}
                   {activePageEditor === 'equipment' && (
                     <div className="space-y-12">
