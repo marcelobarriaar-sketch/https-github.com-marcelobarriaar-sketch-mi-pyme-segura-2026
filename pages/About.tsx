@@ -93,8 +93,27 @@ const About = () => {
   const handleOpenItem = (index: number) => setSelectedIndex(index);
   const handleCloseModal = () => setSelectedIndex(null);
 
-  // -------- ALIADOS: funciones de edición ----------
-  const brands = data.brands || [];
+  // -------- ALIADOS (ahora dentro de about.allies) ----------
+  const allies =
+    (data.about as any)?.allies || {
+      eyebrow: 'TECNOLOGÍA GLOBAL',
+      title: 'NUESTROS ALIADOS',
+      subtitle:
+        'Trabajamos exclusivamente con marcas líderes con soporte mundial para garantizar la continuidad de tu seguridad.',
+      items: []
+    };
+
+  const brands = (allies.items || []) as any[];
+
+  const updateAllies = (nextAllies: any) => {
+    updateData({
+      ...data,
+      about: {
+        ...data.about,
+        allies: nextAllies
+      }
+    });
+  };
 
   const handleBrandChange = (
     index: number,
@@ -103,7 +122,7 @@ const About = () => {
   ) => {
     const updated = [...brands];
     updated[index] = { ...updated[index], [field]: value };
-    updateData({ ...data, brands: updated });
+    updateAllies({ ...allies, items: updated });
   };
 
   const handleBrandFileChange = (
@@ -122,18 +141,18 @@ const About = () => {
   const handleAddBrand = () => {
     const updated = [...brands];
     updated.push({
-      id: 'brand-' + Date.now(),
+      id: 'ally-' + Date.now(),
       name: 'Nueva Marca',
       logo: '',
       url: ''
     });
-    updateData({ ...data, brands: updated });
+    updateAllies({ ...allies, items: updated });
   };
 
   const handleRemoveBrand = (index: number) => {
     const updated = [...brands];
     updated.splice(index, 1);
-    updateData({ ...data, brands: updated });
+    updateAllies({ ...allies, items: updated });
   };
 
   return (
@@ -324,14 +343,18 @@ const About = () => {
       <section className="pt-20">
         <div className="text-center mb-16 space-y-4">
           <div className="flex items-center justify-center gap-2 text-blue-600 font-black uppercase tracking-[0.3em] text-xs">
-            <Globe size={16} /> Tecnología Global
+            <Globe size={16} /> {allies.eyebrow}
           </div>
+
           <h2 className="text-5xl font-black text-black tracking-tighter uppercase">
-            NUESTROS <span className="text-red-600">ALIADOS</span>
+            {String(allies.title || '').split(' ').slice(0, 1).join(' ')}{' '}
+            <span className="text-red-600">
+              {String(allies.title || '').split(' ').slice(1).join(' ')}
+            </span>
           </h2>
+
           <p className="text-gray-500 font-bold max-w-2xl mx-auto">
-            Trabajamos exclusivamente con marcas líderes con soporte mundial para garantizar la continuidad de tu
-            seguridad.
+            {allies.subtitle}
           </p>
         </div>
 
@@ -385,6 +408,48 @@ const About = () => {
               >
                 <Plus size={16} /> Agregar aliado
               </button>
+            </div>
+
+            {/* ✅ Editor de textos del bloque */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-gray-400">
+                  Eyebrow
+                </label>
+                <input
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-blue-600"
+                  value={allies.eyebrow || ''}
+                  onChange={(e) =>
+                    updateAllies({ ...allies, eyebrow: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-gray-400">
+                  Título
+                </label>
+                <input
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-blue-600"
+                  value={allies.title || ''}
+                  onChange={(e) =>
+                    updateAllies({ ...allies, title: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="space-y-1 md:col-span-3">
+                <label className="text-[10px] font-black uppercase text-gray-400">
+                  Subtítulo
+                </label>
+                <textarea
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-blue-600 min-h-[80px]"
+                  value={allies.subtitle || ''}
+                  onChange={(e) =>
+                    updateAllies({ ...allies, subtitle: e.target.value })
+                  }
+                />
+              </div>
             </div>
 
             <p className="text-xs text-gray-500 font-bold">
