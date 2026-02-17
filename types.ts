@@ -82,6 +82,21 @@ export type HomeLegacy = {
 // ABOUT / CONTACT / HEADERS
 // =========================
 
+// ✅ NUEVO: ALIADOS (ABOUT)
+export type AllyItem = {
+  id: string;
+  name: string;
+  logo: string;
+  url?: string;
+};
+
+export type AlliesBlock = {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  items: AllyItem[];
+};
+
 export type AboutData = {
   title: string;
   content: string;
@@ -90,6 +105,9 @@ export type AboutData = {
   aboutImage: string;
   bgColor?: string;
   textColor?: string;
+
+  // ✅ NUEVO: Aliados dentro de About
+  allies?: AlliesBlock;
 };
 
 export type ContactData = {
@@ -226,7 +244,7 @@ export type StylesHero = {
   subtitleSize?: string;
   titleWeight?: string;
   subtitleWeight?: string;
-  align?: "left" | "center" | "right";
+  align?: 'left' | 'center' | 'right';
   overlayOpacity?: number;
   titleColor?: string;
   subtitleColor?: string;
