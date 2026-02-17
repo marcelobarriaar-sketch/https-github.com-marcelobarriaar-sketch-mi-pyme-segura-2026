@@ -32,20 +32,17 @@
     "vision": "Ser referentes en el sur de Chile en soluciones de seguridad inteligentes.",
     "aboutImage": "/images/about/about-1771348863136.png",
     "bgColor": "#FFFFFF",
-    "textColor": "#1F2937"
+    "textColor": "#1F2937",
     "allies": {
-  "eyebrow": "TECNOLOGÍA GLOBAL",
-  "title": "NUESTROS ALIADOS",
-  "subtitle": "Trabajamos exclusivamente con marcas líderes con soporte mundial para garantizar la continuidad de tu seguridad.",
-  "items": [
-    { "id": "hikvision", "name": "Hikvision", "logo": "/images/partners/hikvision.png", "url": "https://www.hikvision.com" },
-    { "id": "dahua", "name": "Dahua", "logo": "/images/partners/dahua.png", "url": "https://www.dahuasecurity.com" },
-    { "id": "ubiquiti", "name": "Ubiquiti", "logo": "/images/partners/ubiquiti.png", "url": "https://ui.com" },
-    { "id": "ruijie", "name": "Ruijie", "logo": "/images/partners/ruijie.png", "url": "https://www.ruijienetworks.com" },
-    { "id": "bosch", "name": "Bosch", "logo": "/images/partners/bosch.png", "url": "https://www.boschsecurity.com" },
-    { "id": "ezviz", "name": "EZVIZ", "logo": "/images/partners/ezviz.png", "url": "https://www.ezviz.com" }
-  ]
-}
+      "items": [
+        {
+          "id": "ally-1771314923895",
+          "name": "Hikvision",
+          "logo": "/images/partners/ally-1771314923895-1771314980737.png",
+          "url": "https://https://www.hikvision.com/es-la/"
+        }
+      ]
+    }
   },
   "contact": {
     "title": "Hablemos de tu Seguridad",
