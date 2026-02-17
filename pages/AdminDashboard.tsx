@@ -740,6 +740,216 @@ const AdminDashboard = () => {
           />
         </div>
       </div>
+{/* ALIADOS */}
+<div className="space-y-6 pt-6 border-t border-gray-200">
+  <h4 className="text-xl font-black uppercase text-brand flex items-center gap-2">
+    <Globe size={22} /> NUESTROS ALIADOS
+  </h4>
+
+  <div className="grid md:grid-cols-2 gap-6">
+    <div className="space-y-2">
+      <label className="text-xs font-black uppercase text-gray-400">Eyebrow</label>
+      <input
+        className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand"
+        value={(data.about as any)?.allies?.eyebrow ?? ''}
+        onChange={(e) =>
+          updateData({
+            ...data,
+            about: {
+              ...data.about,
+              allies: { ...(data.about as any).allies, eyebrow: e.target.value },
+            },
+          })
+        }
+      />
+    </div>
+
+    <div className="space-y-2">
+      <label className="text-xs font-black uppercase text-gray-400">Título</label>
+      <input
+        className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand"
+        value={(data.about as any)?.allies?.title ?? ''}
+        onChange={(e) =>
+          updateData({
+            ...data,
+            about: {
+              ...data.about,
+              allies: { ...(data.about as any).allies, title: e.target.value },
+            },
+          })
+        }
+      />
+    </div>
+
+    <div className="md:col-span-2 space-y-2">
+      <label className="text-xs font-black uppercase text-gray-400">Subtítulo</label>
+      <textarea
+        className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand h-24"
+        value={(data.about as any)?.allies?.subtitle ?? ''}
+        onChange={(e) =>
+          updateData({
+            ...data,
+            about: {
+              ...data.about,
+              allies: { ...(data.about as any).allies, subtitle: e.target.value },
+            },
+          })
+        }
+      />
+    </div>
+  </div>
+
+  <div className="grid gap-6">
+    {(((data.about as any)?.allies?.items ?? []) as any[]).map((it, idx) => (
+      <div key={it.id || idx} className="p-6 bg-gray-50 rounded-3xl border-2 space-y-4 relative">
+        <button
+          onClick={() => {
+            const items = [ ...((data.about as any).allies.items || []) ];
+            items.splice(idx, 1);
+            updateData({
+              ...data,
+              about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+            });
+          }}
+          className="absolute top-4 right-4 text-red-500 hover:scale-110 transition"
+          title="Eliminar aliado"
+        >
+          <Trash2 size={18} />
+        </button>
+
+        <div className="grid md:grid-cols-3 gap-4 items-start">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Nombre</label>
+            <input
+              className="w-full bg-white p-3 rounded-xl border-2 font-bold"
+              value={it.name ?? ''}
+              onChange={(e) => {
+                const items = [ ...((data.about as any).allies.items || []) ];
+                items[idx] = { ...items[idx], name: e.target.value };
+                updateData({
+                  ...data,
+                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                });
+              }}
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Link (URL)</label>
+            <input
+              className="w-full bg-white p-3 rounded-xl border-2 font-mono text-xs"
+              placeholder="https://..."
+              value={it.url ?? ''}
+              onChange={(e) => {
+                const items = [ ...((data.about as any).allies.items || []) ];
+                items[idx] = { ...items[idx], url: e.target.value };
+                updateData({
+                  ...data,
+                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                });
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4 items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-28 h-20 bg-white rounded-2xl border-2 flex items-center justify-center overflow-hidden">
+              <img src={it.logo || '/images/default-hero.jpg'} className="max-w-full max-h-full object-contain" />
+            </div>
+
+            <input
+              className="flex-1 bg-white p-3 rounded-xl border-2 text-xs font-mono"
+              placeholder="/images/partners/xxx.png"
+              value={it.logo ?? ''}
+              onChange={(e) => {
+                const items = [ ...((data.about as any).allies.items || []) ];
+                items[idx] = { ...items[idx], logo: e.target.value };
+                updateData({
+                  ...data,
+                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                });
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              id={`ally-logo-upload-${idx}`}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                const maxMB = 0.6;
+                if (file.size > maxMB * 1024 * 1024) {
+                  setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                  setTimeout(() => setUploadStatus(null), 3500);
+                  return;
+                }
+
+                const ext = (() => {
+                  const name = file.name.toLowerCase();
+                  if (name.endsWith('.webp')) return 'webp';
+                  if (name.endsWith('.png')) return 'png';
+                  if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'jpg';
+                  return 'png';
+                })();
+
+                const safe = (it.id || it.name || `ally-${idx}`)
+                  .toString()
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, '-')
+                  .replace(/^-|-$/g, '');
+
+                const targetPath = `public/images/partners/${safe}-${Date.now()}.${ext}`;
+                const publicUrl = await uploadImageToCloud(file, targetPath);
+                if (!publicUrl) return;
+
+                const items = [ ...((data.about as any).allies.items || []) ];
+                items[idx] = { ...items[idx], logo: publicUrl };
+                updateData({
+                  ...data,
+                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                });
+              }}
+            />
+
+            <button
+              onClick={() => document.getElementById(`ally-logo-upload-${idx}`)?.click()}
+              className="w-full bg-black text-white py-3 rounded-xl font-black text-xs hover:bg-brand transition-all"
+            >
+              SUBIR LOGO (CLOUD)
+            </button>
+
+            {uploadStatus && <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>}
+          </div>
+        </div>
+      </div>
+    ))}
+
+    <button
+      onClick={() => {
+        const items = [ ...(((data.about as any)?.allies?.items ?? []) as any[]) ];
+        items.push({
+          id: `ally-${Date.now()}`,
+          name: 'Nuevo Aliado',
+          logo: '',
+          url: 'https://',
+        });
+        updateData({
+          ...data,
+          about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+        });
+      }}
+      className="w-full py-8 border-4 border-dashed rounded-[3rem] text-gray-400 font-black hover:text-brand hover:border-brand transition-all"
+    >
+      <Plus size={24} className="mx-auto mb-2" /> AÑADIR ALIADO
+    </button>
+  </div>
+</div>
 
       {/* Imagen ABOUT - cloud real (GitHub) */}
       <div className="space-y-4 pt-6 border-t border-gray-200">
