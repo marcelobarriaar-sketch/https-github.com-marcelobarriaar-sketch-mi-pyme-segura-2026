@@ -39,7 +39,37 @@
           "id": "ally-1771314923895",
           "name": "Hikvision",
           "logo": "/images/partners/ally-1771314923895-1771314980737.png",
-          "url": "https://https://www.hikvision.com/es-la/"
+          "url": "https://www.hikvision.com/es-la/"
+        },
+        {
+          "id": "ally-1771315181538",
+          "name": "Dahua",
+          "logo": "https://www.dahuasecurity.com/_nuxt/img/LOGO.e093234.png",
+          "url": "https://www.dahuasecurity.com/la"
+        },
+        {
+          "id": "ally-1771315277139",
+          "name": "Ezviz",
+          "logo": "https://images.seeklogo.com/logo-png/34/1/ezviz-logo-png_seeklogo-340396.png",
+          "url": "https://www.ezviz.com/la"
+        },
+        {
+          "id": "ally-1771315355240",
+          "name": "Ubiquiti",
+          "logo": "https://upload.wikimedia.org/wikipedia/commons/7/71/Ubiquiti_Logo.png",
+          "url": "https://https://ui.com"
+        },
+        {
+          "id": "ally-1771315386618",
+          "name": "Ruijie",
+          "logo": "https://mirayconsulting.com/wp-content/uploads/2024/11/logo-ruijie.png",
+          "url": "https://www.ruijie.com/es-latam/"
+        },
+        {
+          "id": "ally-1771315444837",
+          "name": "Starlink",
+          "logo": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Starlink_Logo.svg",
+          "url": "https://starlink.com/cl/residential?referral=RC-481067-34312-6&utm_source=google&utm_medium=paid&utm_campaign=sls_cl_src_ggl_brd_stk-pe&utm_content=sls_cl_src_ggl_brd_stk-pe_res_gsa_v4s_txt_es-419_egn&utm_term=stk-pe_starlink&utm_id=&gad_source=1&gad_campaignid=20973151562&gbraid=0AAAAAok2xKkfDTqGYS8gQLKHv4UDqUUFS&gclid=CjwKCAiAwNDMBhBfEiwAd7ti1Ofx3SaJiawb0gnfe8x1QhTKhzxgIYgeYJQZxynlrYao-MMbK12TZRoCuZwQAvD_BwE"
         }
       ],
       "eyebrow": "TECNOLOGÍA GLOBAL",
