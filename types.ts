@@ -138,7 +138,7 @@ export type SimpleHeader = {
 };
 
 // =========================
-// EQUIPMENT / PROJECTS
+// EQUIPMENT / PROJECTS (LEGACY)
 // =========================
 
 export type EquipmentItem = {
@@ -219,7 +219,43 @@ export type GithubSettings = {
 };
 
 // =========================
-// NUEVO SITE_DATA.JSON SCHEMA
+// NUEVO: CATALOGO (EQUIPOS PRO)
+// =========================
+
+export type CatalogSubcategory = {
+  id: string;
+  name: string;
+};
+
+export type CatalogCategory = {
+  id: string;
+  name: string;
+  subcategories?: CatalogSubcategory[];
+};
+
+export type CatalogProduct = {
+  id: string;
+  name: string;
+  brand: string;
+  model: string;
+  sku: string;
+  categoryId: string;
+  subcategoryId?: string;
+  priceNet: number;
+  features?: string[];
+  imageUrl?: string;
+  datasheetUrl?: string;
+  videoUrl?: string;
+  active?: boolean;
+};
+
+export type CatalogData = {
+  categories: CatalogCategory[];
+  products: CatalogProduct[];
+};
+
+// =========================
+// NUEVO SITE_DATA.JSON SCHEMA (OTROS)
 // =========================
 
 export type MediaAssets = {
@@ -282,12 +318,16 @@ export type SiteData = {
 
   aiSettings: AISettings;
 
+  // --- legacy arrays (mantener por compat mientras migramos) ---
   equipment: EquipmentItem[];
   projects: ProjectItem[];
   brands: BrandLegacy[];
   customPages: CustomPage[];
 
   githubSettings: GithubSettings;
+
+  // ✅ NUEVO: catálogo pro para Equipos y Diseña tu proyecto
+  catalog?: CatalogData;
 
   // --- nuevo esquema (opcionales para compat) ---
   pages?: PagesConfig;
@@ -303,3 +343,4 @@ export type SiteData = {
     version?: number;
   };
 };
+
