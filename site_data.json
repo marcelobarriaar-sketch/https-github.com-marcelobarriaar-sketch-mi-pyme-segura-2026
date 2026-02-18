@@ -223,7 +223,18 @@
     "isBetaEnabled": false,
     "betaPrompt": "Asistente Beta."
   },
-  "equipment": [],
+  "equipment": [
+    {
+      "id": "1771387040915",
+      "title": "PRUEBA EQUIPO 1",
+      "category": "Cámaras",
+      "description": "...",
+      "price": 30000,
+      "fileUrl": "",
+      "videoUrl": "",
+      "imageUrl": "https://github.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/blob/main/public/images/camara-ip-4mp-wifi-dual-light-30m-ds-2cv1043g2-lidwf-28mm-b-hikvision.jpg?raw=true"
+    }
+  ],
   "projects": [
     {
       "id": "1769460618466",
