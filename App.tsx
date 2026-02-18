@@ -228,7 +228,7 @@ const Navbar = () => {
     { name: 'Inicio', path: '/' },
     { name: 'Sobre Nosotros', path: '/about' },
     { name: 'Equipos', path: '/equipment' },
-    { name: 'Proyectos', path: '/projects' },
+    { name: 'Proyectos Ejecutados', path: '/projects' },
     { name: 'Crea tu Proyecto', path: '/create-project' },
     { name: 'Contacto', path: '/contact' },
     ...data.customPages.map(p => ({ name: p.title, path: `/p/${p.slug}` }))
