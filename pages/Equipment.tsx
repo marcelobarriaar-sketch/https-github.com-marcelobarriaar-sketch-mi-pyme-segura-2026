@@ -369,23 +369,22 @@ const Equipment = () => {
               </div>
 
               <div className="p-6 space-y-3">
-                {/* BADGES */}
+              
+                               {/* BADGES */}
                 <div className="flex flex-wrap gap-2">
                   {categoryName && (
                     <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-gray-100">
                       {categoryName}
                     </span>
                   )}
+
                   {subcategoryName && (
                     <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-gray-100">
                       {subcategoryName}
                     </span>
                   )}
-                  {canInlineEdit && p.active === false && (
-              <span ...>Inactivo</span>
-              )}
 
-              
+                  {canInlineEdit && p.active === false && (
                     <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-700">
                       Inactivo
                     </span>
