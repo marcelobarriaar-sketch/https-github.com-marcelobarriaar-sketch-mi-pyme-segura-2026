@@ -21,7 +21,6 @@ import {
   Type,
   ChevronRight,
   Trash2,
-  Settings,
   Image as IconImage,
   Smartphone,
   X,
@@ -189,7 +188,11 @@ const AdminDashboard = () => {
 
         <div className="flex items-center gap-4">
           {saveStatus && (
-            <span className={`font-black animate-pulse ${saveStatus.includes('Error') ? 'text-red-600' : 'text-green-600'}`}>
+            <span
+              className={`font-black animate-pulse ${
+                saveStatus.includes('Error') ? 'text-red-600' : 'text-green-600'
+              }`}
+            >
               {saveStatus}
             </span>
           )}
@@ -236,7 +239,7 @@ const AdminDashboard = () => {
 
         {/* MAIN */}
         <main className="md:col-span-3 space-y-10">
-          {/* TAB: BRANDING (del primer código, simple y funcional) */}
+          {/* TAB: BRANDING */}
           {activeTab === 'branding' && (
             <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
               <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-brand">
@@ -245,25 +248,35 @@ const AdminDashboard = () => {
 
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-xs font-black uppercase text-gray-400">Nombre de la Pyme</label>
+                  <label className="text-xs font-black uppercase text-gray-400">
+                    Nombre de la Pyme
+                  </label>
                   <input
                     className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-xl outline-none focus:border-brand"
                     value={data.branding.siteName}
                     onChange={(e) =>
-                      updateData({ ...data, branding: { ...data.branding, siteName: e.target.value } })
+                      updateData({
+                        ...data,
+                        branding: { ...data.branding, siteName: e.target.value },
+                      })
                     }
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black uppercase text-gray-400">Color Primario</label>
+                  <label className="text-xs font-black uppercase text-gray-400">
+                    Color Primario
+                  </label>
                   <div className="flex gap-4 items-center">
                     <input
                       type="color"
                       className="w-12 h-12 rounded-lg cursor-pointer"
                       value={data.branding.primaryColor}
                       onChange={(e) =>
-                        updateData({ ...data, branding: { ...data.branding, primaryColor: e.target.value } })
+                        updateData({
+                          ...data,
+                          branding: { ...data.branding, primaryColor: e.target.value },
+                        })
                       }
                     />
                     <span className="font-mono text-xs">{data.branding.primaryColor}</span>
@@ -279,7 +292,11 @@ const AdminDashboard = () => {
 
                 <div className="flex items-center gap-6">
                   <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center p-2 border-2 border-dashed border-gray-300 overflow-hidden">
-                    <img src={data.branding.logoUrl} className="max-w-full max-h-full object-contain" />
+                    <img
+                      src={data.branding.logoUrl}
+                      className="max-w-full max-h-full object-contain"
+                      alt="Logo"
+                    />
                   </div>
 
                   <div className="flex-1">
@@ -301,7 +318,8 @@ const AdminDashboard = () => {
                       <Upload size={16} /> SUBIR LOGO (LOCAL)
                     </button>
                     <p className="text-[10px] text-gray-400 mt-2 font-black uppercase">
-                      Tip: si querís que el logo sea permanente en otros dispositivos, súbelo por /api/upload-image y pega la URL /images/...
+                      Tip: si querís que el logo sea permanente en otros dispositivos, súbelo por
+                      /api/upload-image y pega la URL /images/...
                     </p>
                   </div>
                 </div>
@@ -314,17 +332,24 @@ const AdminDashboard = () => {
                 </h3>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-xs font-black uppercase text-gray-400">Texto Principal</label>
+                    <label className="text-xs font-black uppercase text-gray-400">
+                      Texto Principal
+                    </label>
                     <input
                       className="w-full bg-gray-50 border-2 p-4 rounded-xl font-bold outline-none focus:border-brand"
                       value={data.branding.footerText}
                       onChange={(e) =>
-                        updateData({ ...data, branding: { ...data.branding, footerText: e.target.value } })
+                        updateData({
+                          ...data,
+                          branding: { ...data.branding, footerText: e.target.value },
+                        })
                       }
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-black uppercase text-gray-400">Razón Social / Secundario</label>
+                    <label className="text-xs font-black uppercase text-gray-400">
+                      Razón Social / Secundario
+                    </label>
                     <input
                       className="w-full bg-gray-50 border-2 p-4 rounded-xl font-bold outline-none focus:border-brand"
                       value={data.branding.footerSubText}
@@ -341,7 +366,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* TAB: PAGES (merge: mantiene Home/Equipment del primer código + Hero BG cloud del segundo) */}
+          {/* TAB: PAGES */}
           {activeTab === 'pages' && (
             <div className="space-y-8">
               <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-8">
@@ -368,8 +393,13 @@ const AdminDashboard = () => {
               {activePageEditor && (
                 <div className="bg-white p-10 rounded-[4rem] border-4 border-brand shadow-2xl space-y-12 animate-in slide-in-from-top-10 duration-500">
                   <div className="flex justify-between items-center border-b pb-6">
-                    <h3 className="text-3xl font-black uppercase">Editando: {activePageEditor.toUpperCase()}</h3>
-                    <button onClick={() => setActivePageEditor(null)} className="p-2 bg-gray-100 rounded-xl">
+                    <h3 className="text-3xl font-black uppercase">
+                      Editando: {activePageEditor.toUpperCase()}
+                    </h3>
+                    <button
+                      onClick={() => setActivePageEditor(null)}
+                      className="p-2 bg-gray-100 rounded-xl"
+                    >
                       <X />
                     </button>
                   </div>
@@ -377,7 +407,6 @@ const AdminDashboard = () => {
                   {/* HOME */}
                   {activePageEditor === 'home' && (
                     <div className="space-y-12">
-                      {/* HERO EDITOR (primero: título/subtítulo + featuredImage) */}
                       <div className="p-8 bg-gray-50 rounded-3xl space-y-6">
                         <h4 className="text-xl font-black uppercase text-brand flex items-center gap-2">
                           <IconImage size={24} /> PORTADA (HERO)
@@ -385,23 +414,33 @@ const AdminDashboard = () => {
 
                         <div className="grid md:grid-cols-2 gap-8">
                           <div className="space-y-4">
-                            <label className="text-xs font-black uppercase text-gray-400">Título Principal</label>
+                            <label className="text-xs font-black uppercase text-gray-400">
+                              Título Principal
+                            </label>
                             <textarea
                               className="w-full bg-white p-4 border-2 rounded-xl font-black text-2xl h-32"
                               value={data.home.heroTitle}
                               onChange={(e) =>
-                                updateData({ ...data, home: { ...data.home, heroTitle: e.target.value } })
+                                updateData({
+                                  ...data,
+                                  home: { ...data.home, heroTitle: e.target.value },
+                                })
                               }
                             />
                           </div>
 
                           <div className="space-y-4">
-                            <label className="text-xs font-black uppercase text-gray-400">Subtítulo</label>
+                            <label className="text-xs font-black uppercase text-gray-400">
+                              Subtítulo
+                            </label>
                             <textarea
                               className="w-full bg-white p-4 border-2 rounded-xl font-bold h-32"
                               value={data.home.heroSubtitle}
                               onChange={(e) =>
-                                updateData({ ...data, home: { ...data.home, heroSubtitle: e.target.value } })
+                                updateData({
+                                  ...data,
+                                  home: { ...data.home, heroSubtitle: e.target.value },
+                                })
                               }
                             />
                           </div>
@@ -409,11 +448,14 @@ const AdminDashboard = () => {
 
                         {/* Featured image (base64 compat) */}
                         <div className="space-y-4">
-                          <label className="text-xs font-black uppercase text-gray-400">Imagen de Portada (Featured)</label>
+                          <label className="text-xs font-black uppercase text-gray-400">
+                            Imagen de Portada (Featured)
+                          </label>
                           <div className="flex items-center gap-6">
                             <img
                               src={data.home.featuredImage}
                               className="w-40 h-24 object-cover rounded-xl border-2 border-black"
+                              alt="Featured"
                             />
                             <div className="flex-1">
                               <input
@@ -423,18 +465,24 @@ const AdminDashboard = () => {
                                 accept="image/png,image/jpeg,image/webp"
                                 onChange={(e) =>
                                   handleFileUpload(e, (url) =>
-                                    updateData({ ...data, home: { ...data.home, featuredImage: url } })
+                                    updateData({
+                                      ...data,
+                                      home: { ...data.home, featuredImage: url },
+                                    })
                                   )
                                 }
                               />
                               <button
-                                onClick={() => document.getElementById('home-featured-upload')?.click()}
+                                onClick={() =>
+                                  document.getElementById('home-featured-upload')?.click()
+                                }
                                 className="bg-black text-white px-8 py-3 rounded-xl font-black text-xs hover:bg-brand transition-all flex items-center gap-2"
                               >
                                 <Upload size={16} /> CAMBIAR FOTO (LOCAL)
                               </button>
                               <p className="text-[10px] text-gray-400 mt-2 font-black uppercase">
-                                Esta opción es local/base64 (compat). Para que quede permanente: usa “Imagen de Fondo (Hero)”.
+                                Esta opción es local/base64 (compat). Para que quede permanente:
+                                usa “Imagen de Fondo (Hero)”.
                               </p>
                             </div>
                           </div>
@@ -457,7 +505,9 @@ const AdminDashboard = () => {
                               </div>
 
                               {uploadStatus && (
-                                <div className="text-xs font-black text-gray-600">{uploadStatus}</div>
+                                <div className="text-xs font-black text-gray-600">
+                                  {uploadStatus}
+                                </div>
                               )}
 
                               <input
@@ -527,7 +577,7 @@ const AdminDashboard = () => {
                         </div>
                       </div>
 
-                      {/* FEATURES EDITOR (del primer código) */}
+                      {/* FEATURES EDITOR */}
                       <div className="space-y-6">
                         <h4 className="text-xl font-black uppercase flex items-center gap-2 text-blue-600">
                           <Zap /> TARJETAS DE CARACTERÍSTICAS
@@ -541,7 +591,9 @@ const AdminDashboard = () => {
                             >
                               <div className="grid md:grid-cols-3 gap-6">
                                 <div className="space-y-2">
-                                  <label className="text-[10px] font-black uppercase text-gray-400">Icono</label>
+                                  <label className="text-[10px] font-black uppercase text-gray-400">
+                                    Icono
+                                  </label>
                                   <select
                                     className="w-full bg-gray-50 p-3 rounded-xl font-black text-xs"
                                     value={feature.icon}
@@ -561,7 +613,9 @@ const AdminDashboard = () => {
                                 </div>
 
                                 <div className="md:col-span-2 space-y-2">
-                                  <label className="text-[10px] font-black uppercase text-gray-400">Título Tarjeta</label>
+                                  <label className="text-[10px] font-black uppercase text-gray-400">
+                                    Título Tarjeta
+                                  </label>
                                   <input
                                     className="w-full bg-gray-50 p-3 rounded-xl font-black uppercase tracking-tight"
                                     value={feature.title}
@@ -575,7 +629,9 @@ const AdminDashboard = () => {
                               </div>
 
                               <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-gray-400">Descripción Corta</label>
+                                <label className="text-[10px] font-black uppercase text-gray-400">
+                                  Descripción Corta
+                                </label>
                                 <input
                                   className="w-full bg-gray-50 p-3 rounded-xl font-bold"
                                   value={feature.desc}
@@ -589,7 +645,9 @@ const AdminDashboard = () => {
 
                               <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <label className="text-[10px] font-black uppercase text-gray-400">Etiqueta Botón</label>
+                                  <label className="text-[10px] font-black uppercase text-gray-400">
+                                    Etiqueta Botón
+                                  </label>
                                   <input
                                     className="w-full bg-gray-50 p-3 rounded-xl font-black text-xs"
                                     value={feature.linkLabel}
@@ -602,7 +660,9 @@ const AdminDashboard = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                  <label className="text-[10px] font-black uppercase text-gray-400">Ruta / Link</label>
+                                  <label className="text-[10px] font-black uppercase text-gray-400">
+                                    Ruta / Link
+                                  </label>
                                   <input
                                     className="w-full bg-gray-50 p-3 rounded-xl font-bold text-xs"
                                     value={feature.linkUrl}
@@ -619,7 +679,7 @@ const AdminDashboard = () => {
                         </div>
                       </div>
 
-                      {/* PROCESO EDITOR (del primer código) */}
+                      {/* PROCESO EDITOR */}
                       <div className="space-y-4">
                         <h4 className="text-xl font-black uppercase flex items-center gap-2 text-brand">
                           <ListOrdered size={24} /> NUESTRO PROCESO
@@ -686,387 +746,409 @@ const AdminDashboard = () => {
                   )}
 
                   {/* ABOUT */}
-{activePageEditor === 'about' && (
-  <div className="space-y-12">
-    <div className="p-8 bg-gray-50 rounded-3xl space-y-6">
-      <h4 className="text-xl font-black uppercase text-brand flex items-center gap-2">
-        <Type size={24} /> SOBRE NOSOTROS (ABOUT)
-      </h4>
+                  {activePageEditor === 'about' && (
+                    <div className="space-y-12">
+                      <div className="p-8 bg-gray-50 rounded-3xl space-y-6">
+                        <h4 className="text-xl font-black uppercase text-brand flex items-center gap-2">
+                          <Type size={24} /> SOBRE NOSOTROS (ABOUT)
+                        </h4>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-2">
-          <label className="text-xs font-black uppercase text-gray-400">Título</label>
-          <input
-            className="w-full bg-white border-2 p-4 rounded-xl font-black outline-none focus:border-brand"
-            value={data.about.title}
-            onChange={(e) =>
-              updateData({ ...data, about: { ...data.about, title: e.target.value } })
-            }
-          />
-        </div>
+                        <div className="grid md:grid-cols-2 gap-8">
+                          <div className="space-y-2">
+                            <label className="text-xs font-black uppercase text-gray-400">Título</label>
+                            <input
+                              className="w-full bg-white border-2 p-4 rounded-xl font-black outline-none focus:border-brand"
+                              value={data.about.title}
+                              onChange={(e) =>
+                                updateData({ ...data, about: { ...data.about, title: e.target.value } })
+                              }
+                            />
+                          </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-black uppercase text-gray-400">Contenido (párrafo)</label>
-          <textarea
-            className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-32"
-            value={data.about.content}
-            onChange={(e) =>
-              updateData({ ...data, about: { ...data.about, content: e.target.value } })
-            }
-          />
-        </div>
-      </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-black uppercase text-gray-400">
+                              Contenido (párrafo)
+                            </label>
+                            <textarea
+                              className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-32"
+                              value={data.about.content}
+                              onChange={(e) =>
+                                updateData({ ...data, about: { ...data.about, content: e.target.value } })
+                              }
+                            />
+                          </div>
+                        </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-2">
-          <label className="text-xs font-black uppercase text-gray-400">Misión</label>
-          <textarea
-            className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-28"
-            value={data.about.mission}
-            onChange={(e) =>
-              updateData({ ...data, about: { ...data.about, mission: e.target.value } })
-            }
-          />
-        </div>
+                        <div className="grid md:grid-cols-2 gap-8">
+                          <div className="space-y-2">
+                            <label className="text-xs font-black uppercase text-gray-400">Misión</label>
+                            <textarea
+                              className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-28"
+                              value={data.about.mission}
+                              onChange={(e) =>
+                                updateData({ ...data, about: { ...data.about, mission: e.target.value } })
+                              }
+                            />
+                          </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-black uppercase text-gray-400">Visión</label>
-          <textarea
-            className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-28"
-            value={data.about.vision}
-            onChange={(e) =>
-              updateData({ ...data, about: { ...data.about, vision: e.target.value } })
-            }
-          />
-        </div>
-      </div>
-{/* ALIADOS */}
-<div className="space-y-6 pt-6 border-t border-gray-200">
-  <h4 className="text-xl font-black uppercase text-brand flex items-center gap-2">
-    <Globe size={22} /> NUESTROS ALIADOS
-  </h4>
+                          <div className="space-y-2">
+                            <label className="text-xs font-black uppercase text-gray-400">Visión</label>
+                            <textarea
+                              className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none focus:border-brand h-28"
+                              value={data.about.vision}
+                              onChange={(e) =>
+                                updateData({ ...data, about: { ...data.about, vision: e.target.value } })
+                              }
+                            />
+                          </div>
+                        </div>
 
-  <div className="grid md:grid-cols-2 gap-6">
-    <div className="space-y-2">
-      <label className="text-xs font-black uppercase text-gray-400">Eyebrow</label>
-      <input
-        className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand"
-        value={(data.about as any)?.allies?.eyebrow ?? ''}
-        onChange={(e) =>
-          updateData({
-            ...data,
-            about: {
-              ...data.about,
-              allies: { ...(data.about as any).allies, eyebrow: e.target.value },
-            },
-          })
-        }
-      />
-    </div>
+                        {/* ALIADOS */}
+                        <div className="space-y-6 pt-6 border-t border-gray-200">
+                          <h4 className="text-xl font-black uppercase text-brand flex items-center gap-2">
+                            <Globe size={22} /> NUESTROS ALIADOS
+                          </h4>
 
-    <div className="space-y-2">
-      <label className="text-xs font-black uppercase text-gray-400">Título</label>
-      <input
-        className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand"
-        value={(data.about as any)?.allies?.title ?? ''}
-        onChange={(e) =>
-          updateData({
-            ...data,
-            about: {
-              ...data.about,
-              allies: { ...(data.about as any).allies, title: e.target.value },
-            },
-          })
-        }
-      />
-    </div>
+                          <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              <label className="text-xs font-black uppercase text-gray-400">Eyebrow</label>
+                              <input
+                                className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand"
+                                value={(data.about as any)?.allies?.eyebrow ?? ''}
+                                onChange={(e) =>
+                                  updateData({
+                                    ...data,
+                                    about: {
+                                      ...data.about,
+                                      allies: { ...(data.about as any).allies, eyebrow: e.target.value },
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
 
-    <div className="md:col-span-2 space-y-2">
-      <label className="text-xs font-black uppercase text-gray-400">Subtítulo</label>
-      <textarea
-        className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand h-24"
-        value={(data.about as any)?.allies?.subtitle ?? ''}
-        onChange={(e) =>
-          updateData({
-            ...data,
-            about: {
-              ...data.about,
-              allies: { ...(data.about as any).allies, subtitle: e.target.value },
-            },
-          })
-        }
-      />
-    </div>
-  </div>
+                            <div className="space-y-2">
+                              <label className="text-xs font-black uppercase text-gray-400">Título</label>
+                              <input
+                                className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand"
+                                value={(data.about as any)?.allies?.title ?? ''}
+                                onChange={(e) =>
+                                  updateData({
+                                    ...data,
+                                    about: {
+                                      ...data.about,
+                                      allies: { ...(data.about as any).allies, title: e.target.value },
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
 
-  <div className="grid gap-6">
-    {(((data.about as any)?.allies?.items ?? []) as any[]).map((it, idx) => (
-      <div key={it.id || idx} className="p-6 bg-gray-50 rounded-3xl border-2 space-y-4 relative">
-        <button
-          onClick={() => {
-            const items = [ ...((data.about as any).allies.items || []) ];
-            items.splice(idx, 1);
-            updateData({
-              ...data,
-              about: { ...data.about, allies: { ...(data.about as any).allies, items } },
-            });
-          }}
-          className="absolute top-4 right-4 text-red-500 hover:scale-110 transition"
-          title="Eliminar aliado"
-        >
-          <Trash2 size={18} />
-        </button>
+                            <div className="md:col-span-2 space-y-2">
+                              <label className="text-xs font-black uppercase text-gray-400">Subtítulo</label>
+                              <textarea
+                                className="w-full bg-white border-2 p-3 rounded-xl font-bold outline-none focus:border-brand h-24"
+                                value={(data.about as any)?.allies?.subtitle ?? ''}
+                                onChange={(e) =>
+                                  updateData({
+                                    ...data,
+                                    about: {
+                                      ...data.about,
+                                      allies: { ...(data.about as any).allies, subtitle: e.target.value },
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                          </div>
 
-        <div className="grid md:grid-cols-3 gap-4 items-start">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-gray-500">Nombre</label>
-            <input
-              className="w-full bg-white p-3 rounded-xl border-2 font-bold"
-              value={it.name ?? ''}
-              onChange={(e) => {
-                const items = [ ...((data.about as any).allies.items || []) ];
-                items[idx] = { ...items[idx], name: e.target.value };
-                updateData({
-                  ...data,
-                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
-                });
-              }}
-            />
-          </div>
+                          <div className="grid gap-6">
+                            {(((data.about as any)?.allies?.items ?? []) as any[]).map((it, idx) => (
+                              <div
+                                key={it.id || idx}
+                                className="p-6 bg-gray-50 rounded-3xl border-2 space-y-4 relative"
+                              >
+                                <button
+                                  onClick={() => {
+                                    const items = [...((data.about as any).allies.items || [])];
+                                    items.splice(idx, 1);
+                                    updateData({
+                                      ...data,
+                                      about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                                    });
+                                  }}
+                                  className="absolute top-4 right-4 text-red-500 hover:scale-110 transition"
+                                  title="Eliminar aliado"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
 
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-[10px] font-black uppercase text-gray-500">Link (URL)</label>
-            <input
-              className="w-full bg-white p-3 rounded-xl border-2 font-mono text-xs"
-              placeholder="https://..."
-              value={it.url ?? ''}
-              onChange={(e) => {
-                const items = [ ...((data.about as any).allies.items || []) ];
-                items[idx] = { ...items[idx], url: e.target.value };
-                updateData({
-                  ...data,
-                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
-                });
-              }}
-            />
-          </div>
-        </div>
+                                <div className="grid md:grid-cols-3 gap-4 items-start">
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase text-gray-500">Nombre</label>
+                                    <input
+                                      className="w-full bg-white p-3 rounded-xl border-2 font-bold"
+                                      value={it.name ?? ''}
+                                      onChange={(e) => {
+                                        const items = [...((data.about as any).allies.items || [])];
+                                        items[idx] = { ...items[idx], name: e.target.value };
+                                        updateData({
+                                          ...data,
+                                          about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                                        });
+                                      }}
+                                    />
+                                  </div>
 
-        <div className="grid md:grid-cols-2 gap-4 items-center">
-          <div className="flex items-center gap-4">
-            <div className="w-28 h-20 bg-white rounded-2xl border-2 flex items-center justify-center overflow-hidden">
-              <img src={it.logo || '/images/default-hero.jpg'} className="max-w-full max-h-full object-contain" />
-            </div>
+                                  <div className="space-y-2 md:col-span-2">
+                                    <label className="text-[10px] font-black uppercase text-gray-500">Link (URL)</label>
+                                    <input
+                                      className="w-full bg-white p-3 rounded-xl border-2 font-mono text-xs"
+                                      placeholder="https://..."
+                                      value={it.url ?? ''}
+                                      onChange={(e) => {
+                                        const items = [...((data.about as any).allies.items || [])];
+                                        items[idx] = { ...items[idx], url: e.target.value };
+                                        updateData({
+                                          ...data,
+                                          about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                </div>
 
-            <input
-              className="flex-1 bg-white p-3 rounded-xl border-2 text-xs font-mono"
-              placeholder="/images/partners/xxx.png"
-              value={it.logo ?? ''}
-              onChange={(e) => {
-                const items = [ ...((data.about as any).allies.items || []) ];
-                items[idx] = { ...items[idx], logo: e.target.value };
-                updateData({
-                  ...data,
-                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
-                });
-              }}
-            />
-          </div>
+                                <div className="grid md:grid-cols-2 gap-4 items-center">
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-28 h-20 bg-white rounded-2xl border-2 flex items-center justify-center overflow-hidden">
+                                      <img
+                                        src={it.logo || '/images/default-hero.jpg'}
+                                        className="max-w-full max-h-full object-contain"
+                                        alt="Logo aliado"
+                                      />
+                                    </div>
 
-          <div className="space-y-2">
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              id={`ally-logo-upload-${idx}`}
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
+                                    <input
+                                      className="flex-1 bg-white p-3 rounded-xl border-2 text-xs font-mono"
+                                      placeholder="/images/partners/xxx.png"
+                                      value={it.logo ?? ''}
+                                      onChange={(e) => {
+                                        const items = [...((data.about as any).allies.items || [])];
+                                        items[idx] = { ...items[idx], logo: e.target.value };
+                                        updateData({
+                                          ...data,
+                                          about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                                        });
+                                      }}
+                                    />
+                                  </div>
 
-                const maxMB = 0.6;
-                if (file.size > maxMB * 1024 * 1024) {
-                  setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
-                  setTimeout(() => setUploadStatus(null), 3500);
-                  return;
-                }
+                                  <div className="space-y-2">
+                                    <input
+                                      type="file"
+                                      accept="image/png,image/jpeg,image/webp"
+                                      className="hidden"
+                                      id={`ally-logo-upload-${idx}`}
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
 
-                const ext = (() => {
-                  const name = file.name.toLowerCase();
-                  if (name.endsWith('.webp')) return 'webp';
-                  if (name.endsWith('.png')) return 'png';
-                  if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'jpg';
-                  return 'png';
-                })();
+                                        const maxMB = 0.6;
+                                        if (file.size > maxMB * 1024 * 1024) {
+                                          setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                                          setTimeout(() => setUploadStatus(null), 3500);
+                                          return;
+                                        }
 
-                const safe = (it.id || it.name || `ally-${idx}`)
-                  .toString()
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, '-')
-                  .replace(/^-|-$/g, '');
+                                        const ext = (() => {
+                                          const name = file.name.toLowerCase();
+                                          if (name.endsWith('.webp')) return 'webp';
+                                          if (name.endsWith('.png')) return 'png';
+                                          if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'jpg';
+                                          return 'png';
+                                        })();
 
-                const targetPath = `public/images/partners/${safe}-${Date.now()}.${ext}`;
-                const publicUrl = await uploadImageToCloud(file, targetPath);
-                if (!publicUrl) return;
+                                        const safe = (it.id || it.name || `ally-${idx}`)
+                                          .toString()
+                                          .toLowerCase()
+                                          .replace(/[^a-z0-9]+/g, '-')
+                                          .replace(/^-|-$/g, '');
 
-                const items = [ ...((data.about as any).allies.items || []) ];
-                items[idx] = { ...items[idx], logo: publicUrl };
-                updateData({
-                  ...data,
-                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
-                });
-              }}
-            />
+                                        const targetPath = `public/images/partners/${safe}-${Date.now()}.${ext}`;
+                                        const publicUrl = await uploadImageToCloud(file, targetPath);
+                                        if (!publicUrl) return;
 
-            <button
-              onClick={() => document.getElementById(`ally-logo-upload-${idx}`)?.click()}
-              className="w-full bg-black text-white py-3 rounded-xl font-black text-xs hover:bg-brand transition-all"
-            >
-              SUBIR LOGO (CLOUD)
-            </button>
+                                        const items = [...((data.about as any).allies.items || [])];
+                                        items[idx] = { ...items[idx], logo: publicUrl };
+                                        updateData({
+                                          ...data,
+                                          about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                                        });
+                                      }}
+                                    />
 
-            {uploadStatus && <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>}
-          </div>
-        </div>
-      </div>
-    ))}
+                                    <button
+                                      onClick={() => document.getElementById(`ally-logo-upload-${idx}`)?.click()}
+                                      className="w-full bg-black text-white py-3 rounded-xl font-black text-xs hover:bg-brand transition-all"
+                                    >
+                                      SUBIR LOGO (CLOUD)
+                                    </button>
 
-    <button
-      onClick={() => {
-        const items = [ ...(((data.about as any)?.allies?.items ?? []) as any[]) ];
-        items.push({
-          id: `ally-${Date.now()}`,
-          name: 'Nuevo Aliado',
-          logo: '',
-          url: 'https://',
-        });
-        updateData({
-          ...data,
-          about: { ...data.about, allies: { ...(data.about as any).allies, items } },
-        });
-      }}
-      className="w-full py-8 border-4 border-dashed rounded-[3rem] text-gray-400 font-black hover:text-brand hover:border-brand transition-all"
-    >
-      <Plus size={24} className="mx-auto mb-2" /> AÑADIR ALIADO
-    </button>
-  </div>
-</div>
+                                    {uploadStatus && (
+                                      <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
 
-      {/* Imagen ABOUT - cloud real (GitHub) */}
-      <div className="space-y-4 pt-6 border-t border-gray-200">
-        <label className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-          <ImageIcon size={16} /> Imagen (About) — permanente (GitHub)
-        </label>
+                            <button
+                              onClick={() => {
+                                const items = [...(((data.about as any)?.allies?.items ?? []) as any[])];
+                                items.push({
+                                  id: `ally-${Date.now()}`,
+                                  name: 'Nuevo Aliado',
+                                  logo: '',
+                                  url: 'https://',
+                                });
+                                updateData({
+                                  ...data,
+                                  about: { ...data.about, allies: { ...(data.about as any).allies, items } },
+                                });
+                              }}
+                              className="w-full py-8 border-4 border-dashed rounded-[3rem] text-gray-400 font-black hover:text-brand hover:border-brand transition-all"
+                            >
+                              <Plus size={24} className="mx-auto mb-2" /> AÑADIR ALIADO
+                            </button>
+                          </div>
+                        </div>
 
-        <div className="grid md:grid-cols-2 gap-6 items-start">
-          <div className="space-y-3">
-            <div className="w-full h-40 bg-gray-100 rounded-2xl overflow-hidden border-2 border-dashed border-gray-300">
-              <img
-                src={data.about.aboutImage || '/images/default-hero.jpg'}
-                className="w-full h-full object-cover"
-                alt="About preview"
-              />
-            </div>
+                        {/* Imagen ABOUT - cloud real (GitHub) */}
+                        <div className="space-y-4 pt-6 border-t border-gray-200">
+                          <label className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                            <ImageIcon size={16} /> Imagen (About) — permanente (GitHub)
+                          </label>
 
-            {uploadStatus && <div className="text-xs font-black text-gray-600">{uploadStatus}</div>}
+                          <div className="grid md:grid-cols-2 gap-6 items-start">
+                            <div className="space-y-3">
+                              <div className="w-full h-40 bg-gray-100 rounded-2xl overflow-hidden border-2 border-dashed border-gray-300">
+                                <img
+                                  src={data.about.aboutImage || '/images/default-hero.jpg'}
+                                  className="w-full h-full object-cover"
+                                  alt="About preview"
+                                />
+                              </div>
 
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              id="about-image-upload"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
+                              {uploadStatus && (
+                                <div className="text-xs font-black text-gray-600">{uploadStatus}</div>
+                              )}
 
-                const maxMB = 0.6;
-                if (file.size > maxMB * 1024 * 1024) {
-                  setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
-                  setTimeout(() => setUploadStatus(null), 3500);
-                  return;
-                }
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                className="hidden"
+                                id="about-image-upload"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
 
-                const ext = (() => {
-                  const name = file.name.toLowerCase();
-                  if (name.endsWith('.webp')) return 'webp';
-                  if (name.endsWith('.png')) return 'png';
-                  if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'jpg';
-                  return 'jpg';
-                })();
+                                  const maxMB = 0.6;
+                                  if (file.size > maxMB * 1024 * 1024) {
+                                    setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                                    setTimeout(() => setUploadStatus(null), 3500);
+                                    return;
+                                  }
 
-                const targetPath = `public/images/about/about-${Date.now()}.${ext}`;
-                const publicUrl = await uploadImageToCloud(file, targetPath);
-                if (!publicUrl) return;
+                                  const ext = (() => {
+                                    const name = file.name.toLowerCase();
+                                    if (name.endsWith('.webp')) return 'webp';
+                                    if (name.endsWith('.png')) return 'png';
+                                    if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'jpg';
+                                    return 'jpg';
+                                  })();
 
-                updateData({
-                  ...data,
-                  about: { ...data.about, aboutImage: publicUrl },
-                });
-              }}
-            />
+                                  const targetPath = `public/images/about/about-${Date.now()}.${ext}`;
+                                  const publicUrl = await uploadImageToCloud(file, targetPath);
+                                  if (!publicUrl) return;
 
-            <button
-              onClick={() => document.getElementById('about-image-upload')?.click()}
-              className="w-full bg-black text-white py-3 rounded-xl font-black text-xs hover:bg-brand transition-all"
-            >
-              SUBIR IMAGEN ABOUT (CLOUD)
-            </button>
+                                  updateData({
+                                    ...data,
+                                    about: { ...data.about, aboutImage: publicUrl },
+                                  });
+                                }}
+                              />
 
-            <p className="text-[10px] text-gray-400 font-bold">
-              Recomendado: 1920×900 aprox, ideal &lt; 350KB (máx 600KB).
-            </p>
-          </div>
+                              <button
+                                onClick={() => document.getElementById('about-image-upload')?.click()}
+                                className="w-full bg-black text-white py-3 rounded-xl font-black text-xs hover:bg-brand transition-all"
+                              >
+                                SUBIR IMAGEN ABOUT (CLOUD)
+                              </button>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                URL actual (debe ser /images/...)
-              </label>
-              <input
-                className="w-full bg-gray-50 border-2 border-gray-100 p-3 rounded-xl text-xs outline-none"
-                value={data.about.aboutImage || ''}
-                onChange={(e) =>
-                  updateData({ ...data, about: { ...data.about, aboutImage: e.target.value } })
-                }
-                placeholder="/images/about/about.jpg"
-              />
-            </div>
+                              <p className="text-[10px] text-gray-400 font-bold">
+                                Recomendado: 1920×900 aprox, ideal &lt; 350KB (máx 600KB).
+                              </p>
+                            </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-gray-400">Color Fondo</label>
-                <input
-                  type="color"
-                  className="w-full h-12 rounded-lg cursor-pointer"
-                  value={data.about.bgColor}
-                  onChange={(e) =>
-                    updateData({ ...data, about: { ...data.about, bgColor: e.target.value } })
-                  }
-                />
-                <div className="text-[10px] font-mono text-gray-500">{data.about.bgColor}</div>
-              </div>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                  URL actual (debe ser /images/...)
+                                </label>
+                                <input
+                                  className="w-full bg-gray-50 border-2 border-gray-100 p-3 rounded-xl text-xs outline-none"
+                                  value={data.about.aboutImage || ''}
+                                  onChange={(e) =>
+                                    updateData({
+                                      ...data,
+                                      about: { ...data.about, aboutImage: e.target.value },
+                                    })
+                                  }
+                                  placeholder="/images/about/about.jpg"
+                                />
+                              </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-gray-400">Color Texto</label>
-                <input
-                  type="color"
-                  className="w-full h-12 rounded-lg cursor-pointer"
-                  value={data.about.textColor}
-                  onChange={(e) =>
-                    updateData({ ...data, about: { ...data.about, textColor: e.target.value } })
-                  }
-                />
-                <div className="text-[10px] font-mono text-gray-500">{data.about.textColor}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+                              <div className="grid grid-cols-2 gap-4 pt-2">
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black uppercase text-gray-400">Color Fondo</label>
+                                  <input
+                                    type="color"
+                                    className="w-full h-12 rounded-lg cursor-pointer"
+                                    value={data.about.bgColor}
+                                    onChange={(e) =>
+                                      updateData({
+                                        ...data,
+                                        about: { ...data.about, bgColor: e.target.value },
+                                      })
+                                    }
+                                  />
+                                  <div className="text-[10px] font-mono text-gray-500">{data.about.bgColor}</div>
+                                </div>
 
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black uppercase text-gray-400">Color Texto</label>
+                                  <input
+                                    type="color"
+                                    className="w-full h-12 rounded-lg cursor-pointer"
+                                    value={data.about.textColor}
+                                    onChange={(e) =>
+                                      updateData({
+                                        ...data,
+                                        about: { ...data.about, textColor: e.target.value },
+                                      })
+                                    }
+                                  />
+                                  <div className="text-[10px] font-mono text-gray-500">{data.about.textColor}</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-                  {/* EQUIPMENT (del primer código, intacto) */}
+                  {/* ✅ EQUIPMENT (LIMPIO: sin duplicidad) */}
                   {activePageEditor === 'equipment' && (
                     <div className="space-y-12">
                       <div className="p-8 bg-black text-white rounded-3xl space-y-6">
@@ -1075,26 +1157,36 @@ const AdminDashboard = () => {
                         </h4>
 
                         <div className="space-y-4">
-                          <label className="text-[10px] uppercase font-black text-gray-500">Texto sobre Instalación</label>
+                          <label className="text-[10px] uppercase font-black text-gray-500">
+                            Texto sobre Instalación
+                          </label>
                           <textarea
                             className="w-full bg-white/10 p-4 rounded-xl text-sm"
                             value={data.equipmentHeader.installationInfo}
                             onChange={(e) =>
                               updateData({
                                 ...data,
-                                equipmentHeader: { ...data.equipmentHeader, installationInfo: e.target.value },
+                                equipmentHeader: {
+                                  ...data.equipmentHeader,
+                                  installationInfo: e.target.value,
+                                },
                               })
                             }
                           />
 
-                          <label className="text-[10px] uppercase font-black text-gray-500">Texto sobre Visitas Técnicas</label>
+                          <label className="text-[10px] uppercase font-black text-gray-500">
+                            Texto sobre Visitas Técnicas
+                          </label>
                           <textarea
                             className="w-full bg-white/10 p-4 rounded-xl text-sm"
                             value={data.equipmentHeader.evaluationInfo}
                             onChange={(e) =>
                               updateData({
                                 ...data,
-                                equipmentHeader: { ...data.equipmentHeader, evaluationInfo: e.target.value },
+                                equipmentHeader: {
+                                  ...data.equipmentHeader,
+                                  evaluationInfo: e.target.value,
+                                },
                               })
                             }
                           />
@@ -1108,149 +1200,19 @@ const AdminDashboard = () => {
 
                         <div className="grid gap-8">
                           {data.equipment.map((eq: any, idx: number) => (
-  <div key={eq.id} className="p-10 bg-gray-50 rounded-[3rem] border-2 space-y-6 relative group">
-    <button
-      onClick={() => updateData({ ...data, equipment: data.equipment.filter((e: any) => e.id !== eq.id) })}
-      className="absolute top-6 right-6 text-red-400 hover:scale-110 transition-all"
-    >
-      <Trash2 />
-    </button>
-
-    <div className="grid md:grid-cols-2 gap-6">
-      <div className="space-y-4">
-        <label className="text-[10px] font-black uppercase">Nombre / Modelo</label>
-        <input
-          className="w-full bg-white p-3 rounded-xl font-black"
-          value={eq.title}
-          onChange={(e) => {
-            const nE = [...data.equipment];
-            nE[idx].title = e.target.value;
-            updateData({ ...data, equipment: nE });
-          }}
-        />
-
-        <label className="text-[10px] font-black uppercase">Familia (Categoría)</label>
-        <input
-          className="w-full bg-white p-3 rounded-xl font-bold"
-          value={eq.category}
-          onChange={(e) => {
-            const nE = [...data.equipment];
-            nE[idx].category = e.target.value;
-            updateData({ ...data, equipment: nE });
-          }}
-        />
-      </div>
-
-      <div className="space-y-4">
-        <label className="text-[10px] font-black uppercase text-brand">Precio de Venta ($)</label>
-        <input
-          type="number"
-          className="w-full bg-white p-3 rounded-xl font-black text-xl border-2 border-brand"
-          value={eq.price}
-          onChange={(e) => {
-            const nE = [...data.equipment];
-            nE[idx].price = Number(e.target.value);
-            updateData({ ...data, equipment: nE });
-          }}
-        />
-
-        {/* ✅ FOTO PRODUCTO */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase text-gray-500">
-            Foto (URL /images/...)
-          </label>
-
-          <div className="flex items-center gap-4">
-            <div className="w-28 h-20 bg-white rounded-xl border-2 overflow-hidden flex items-center justify-center">
-              <img
-                src={eq.imageUrl || '/images/default-hero.jpg'}
-                className="max-w-full max-h-full object-contain"
-              />
-            </div>
-
-            <input
-              className="flex-1 bg-white p-2 rounded-lg text-[11px] font-mono border-2"
-              placeholder="/images/products/camara.jpg"
-              value={eq.imageUrl || ''}
-              onChange={(e) => {
-                const nE = [...data.equipment];
-                nE[idx].imageUrl = e.target.value;
-                updateData({ ...data, equipment: nE });
-              }}
-            />
-          </div>
-
-          {/* upload cloud */}
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="hidden"
-            id={`eq-image-upload-${idx}`}
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-
-              const ext = file.name.toLowerCase().endsWith('.png')
-                ? 'png'
-                : file.name.toLowerCase().endsWith('.webp')
-                ? 'webp'
-                : 'jpg';
-
-              const safe = (eq.title || 'equipo')
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-');
-
-              const targetPath = `public/images/products/${safe}-${Date.now()}.${ext}`;
-              const publicUrl = await uploadImageToCloud(file, targetPath);
-              if (!publicUrl) return;
-
-              const nE = [...data.equipment];
-              nE[idx].imageUrl = publicUrl;
-              updateData({ ...data, equipment: nE });
-            }}
-          />
-
-          <button
-            onClick={() => document.getElementById(`eq-image-upload-${idx}`)?.click()}
-            className="w-full bg-black text-white py-2 rounded-xl font-black text-[10px] hover:bg-brand transition-all"
-          >
-            SUBIR FOTO (CLOUD)
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-2">
-            <label className="text-[9px] font-black uppercase">Link Ficha (URL)</label>
-            <input
-              className="w-full bg-white p-2 rounded-lg text-[10px]"
-              value={eq.fileUrl || ''}
-              onChange={(e) => {
-                const nE = [...data.equipment];
-                nE[idx].fileUrl = e.target.value;
-                updateData({ ...data, equipment: nE });
-              }}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[9px] font-black uppercase">Link Demo (URL)</label>
-            <input
-              className="w-full bg-white p-2 rounded-lg text-[10px]"
-              value={eq.videoUrl || ''}
-              onChange={(e) => {
-                const nE = [...data.equipment];
-                nE[idx].videoUrl = e.target.value;
-                updateData({ ...data, equipment: nE });
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
+                            <div
+                              key={eq.id}
+                              className="p-10 bg-gray-50 rounded-[3rem] border-2 space-y-6 relative group"
+                            >
                               <button
-                                onClick={() => updateData({ ...data, equipment: data.equipment.filter((e: any) => e.id !== eq.id) })}
+                                onClick={() =>
+                                  updateData({
+                                    ...data,
+                                    equipment: data.equipment.filter((e: any) => e.id !== eq.id),
+                                  })
+                                }
                                 className="absolute top-6 right-6 text-red-400 hover:scale-110 transition-all"
+                                title="Eliminar equipo"
                               >
                                 <Trash2 />
                               </button>
@@ -1268,7 +1230,9 @@ const AdminDashboard = () => {
                                     }}
                                   />
 
-                                  <label className="text-[10px] font-black uppercase">Familia (Categoría)</label>
+                                  <label className="text-[10px] font-black uppercase">
+                                    Familia (Categoría)
+                                  </label>
                                   <input
                                     className="w-full bg-white p-3 rounded-xl font-bold"
                                     value={eq.category}
@@ -1281,7 +1245,9 @@ const AdminDashboard = () => {
                                 </div>
 
                                 <div className="space-y-4">
-                                  <label className="text-[10px] font-black uppercase text-brand">Precio de Venta ($)</label>
+                                  <label className="text-[10px] font-black uppercase text-brand">
+                                    Precio de Venta ($)
+                                  </label>
                                   <input
                                     type="number"
                                     className="w-full bg-white p-3 rounded-xl font-black text-xl border-2 border-brand"
@@ -1292,6 +1258,87 @@ const AdminDashboard = () => {
                                       updateData({ ...data, equipment: nE });
                                     }}
                                   />
+
+                                  {/* ✅ FOTO PRODUCTO */}
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase text-gray-500">
+                                      Foto (URL /images/...)
+                                    </label>
+
+                                    <div className="flex items-center gap-4">
+                                      <div className="w-28 h-20 bg-white rounded-xl border-2 overflow-hidden flex items-center justify-center">
+                                        <img
+                                          src={eq.imageUrl || '/images/default-hero.jpg'}
+                                          className="max-w-full max-h-full object-contain"
+                                          alt="Producto"
+                                        />
+                                      </div>
+
+                                      <input
+                                        className="flex-1 bg-white p-2 rounded-lg text-[11px] font-mono border-2"
+                                        placeholder="/images/products/camara.jpg"
+                                        value={eq.imageUrl || ''}
+                                        onChange={(e) => {
+                                          const nE = [...data.equipment];
+                                          nE[idx].imageUrl = e.target.value;
+                                          updateData({ ...data, equipment: nE });
+                                        }}
+                                      />
+                                    </div>
+
+                                    <input
+                                      type="file"
+                                      accept="image/png,image/jpeg,image/webp"
+                                      className="hidden"
+                                      id={`eq-image-upload-${idx}`}
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+
+                                        const maxMB = 0.6;
+                                        if (file.size > maxMB * 1024 * 1024) {
+                                          setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                                          setTimeout(() => setUploadStatus(null), 3500);
+                                          return;
+                                        }
+
+                                        const ext = (() => {
+                                          const name = file.name.toLowerCase();
+                                          if (name.endsWith('.webp')) return 'webp';
+                                          if (name.endsWith('.png')) return 'png';
+                                          if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'jpg';
+                                          return 'jpg';
+                                        })();
+
+                                        const safe = (eq.title || 'equipo')
+                                          .toString()
+                                          .toLowerCase()
+                                          .replace(/[^a-z0-9]+/g, '-')
+                                          .replace(/^-|-$/g, '');
+
+                                        const targetPath = `public/images/products/${safe}-${Date.now()}.${ext}`;
+                                        const publicUrl = await uploadImageToCloud(file, targetPath);
+                                        if (!publicUrl) return;
+
+                                        const nE = [...data.equipment];
+                                        nE[idx].imageUrl = publicUrl;
+                                        updateData({ ...data, equipment: nE });
+                                      }}
+                                    />
+
+                                    <button
+                                      onClick={() =>
+                                        document.getElementById(`eq-image-upload-${idx}`)?.click()
+                                      }
+                                      className="w-full bg-black text-white py-2 rounded-xl font-black text-[10px] hover:bg-brand transition-all"
+                                    >
+                                      SUBIR FOTO (CLOUD)
+                                    </button>
+
+                                    {uploadStatus && (
+                                      <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>
+                                    )}
+                                  </div>
 
                                   <div className="grid grid-cols-2 gap-2">
                                     <div className="space-y-2">
@@ -1350,6 +1397,7 @@ const AdminDashboard = () => {
                                     price: 0,
                                     fileUrl: '',
                                     videoUrl: '',
+                                    imageUrl: '',
                                   },
                                 ],
                               })
@@ -1376,7 +1424,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* TAB: WHATSAPP (del segundo, simple) */}
+          {/* TAB: WHATSAPP */}
           {activeTab === 'whatsapp' && (
             <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
               <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-green-500">
@@ -1399,7 +1447,9 @@ const AdminDashboard = () => {
                       })
                     }
                   />
-                  <p className="text-[10px] font-bold text-gray-400">Incluye el código de país (ej: +569...)</p>
+                  <p className="text-[10px] font-bold text-gray-400">
+                    Incluye el código de país (ej: +569...)
+                  </p>
                 </div>
 
                 <div className="space-y-4">
@@ -1421,7 +1471,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* TAB: AI (del primero) */}
+          {/* TAB: AI */}
           {activeTab === 'ai' && (
             <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-10 animate-in fade-in duration-500">
               <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-blue-600">
@@ -1443,11 +1493,12 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* TAB: MAINTENANCE (del segundo) */}
+          {/* TAB: MAINTENANCE */}
           {activeTab === 'maintenance' && (
             <div className="bg-white p-12 rounded-[4rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
               <h2 className="text-4xl font-black tracking-tighter uppercase flex items-center gap-4">
-                <Database className="text-brand" size={36} /> Soporte <span className="text-brand">Técnico</span>
+                <Database className="text-brand" size={36} /> Soporte{' '}
+                <span className="text-brand">Técnico</span>
               </h2>
 
               <div className="grid md:grid-cols-3 gap-6">
@@ -1456,7 +1507,9 @@ const AdminDashboard = () => {
                   <h3 className="font-black tracking-tight uppercase text-sm">Descargar Copia</h3>
                   <button
                     onClick={() => {
-                      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                      const blob = new Blob([JSON.stringify(data, null, 2)], {
+                        type: 'application/json',
+                      });
                       const link = document.createElement('a');
                       link.href = URL.createObjectURL(blob);
                       link.download = `mipymesegura_backup_${Date.now()}.json`;
@@ -1505,7 +1558,11 @@ const AdminDashboard = () => {
                   <h3 className="font-black tracking-tight uppercase text-sm">Limpiar Caché</h3>
                   <button
                     onClick={() => {
-                      if (confirm('¿Resetear caché local? Se perderán cambios no guardados en nube/archivo.')) {
+                      if (
+                        confirm(
+                          '¿Resetear caché local? Se perderán cambios no guardados en nube/archivo.'
+                        )
+                      ) {
                         localStorage.removeItem('site_data');
                         window.location.reload();
                       }
@@ -1519,7 +1576,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* TAB: GITHUB (del segundo) */}
+          {/* TAB: GITHUB */}
           {activeTab === 'github' && (
             <div className="bg-black text-white p-12 rounded-[4rem] border-4 border-yellow-400 shadow-xl space-y-8">
               <h2 className="text-3xl font-black tracking-tighter uppercase flex items-center gap-4">
@@ -1567,4 +1624,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
