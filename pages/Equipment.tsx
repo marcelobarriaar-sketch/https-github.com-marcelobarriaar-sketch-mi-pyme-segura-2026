@@ -384,8 +384,8 @@ const Equipment = () => {
                     </span>
                   )}
 
-                  {canInlineEdit && p.active === false && (
-                    <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-700">
+                 {false && p.active === false && ( ... )}
+                  <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-700">
                       Inactivo
                     </span>
                   )}
