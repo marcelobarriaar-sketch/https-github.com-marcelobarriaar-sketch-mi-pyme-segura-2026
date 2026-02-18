@@ -39,7 +39,14 @@ const Equipment = () => {
   const { data, updateData } = useSiteData();
   const { isAdmin } = useAdmin();
 
+  // 🔒 SINGLE SOURCE OF TRUTH:
+  // Equipment público SIEMPRE solo lectura.
+  // Edición solo en Panel Admin → modal EDITANDO: EQUIPMENT
+  const PUBLIC_EQUIPMENT_READONLY = true;
+  const canInlineEdit = isAdmin && !PUBLIC_EQUIPMENT_READONLY;
+
   const header = data.equipmentHeader;
+
 
   // ✅ Blindaje: si catalog no existe todavía, no revienta
   const catalog = (data as any).catalog ?? { categories: [], products: [] };
@@ -222,22 +229,36 @@ const Equipment = () => {
   // ---------- UI ----------
   return (
     <div className="max-w-7xl mx-auto px-4 py-20">
-      {/* HEADER */}
-      <div className="mb-14 space-y-4 max-w-3xl">
-        {isAdmin ? (
-          <>
-            <input
-              className="text-5xl font-extrabold w-full border-2 p-3 rounded-xl"
-              value={header.title}
-              onChange={(e) => handleHeaderEdit('title', e.target.value)}
-            />
-            <input
-              className="text-xl w-full border-2 p-3 rounded-xl"
-              value={header.subtitle}
-              onChange={(e) => handleHeaderEdit('subtitle', e.target.value)}
-            />
-          </>
-        ) : (
+  {/* HEADER */}
+<div className="mb-14 space-y-4 max-w-3xl">
+  {canInlineEdit ? (
+    <>
+      <input
+        className="text-5xl font-extrabold w-full border-2 p-3 rounded-xl"
+        value={header.title}
+        onChange={(e) => handleHeaderEdit('title', e.target.value)}
+      />
+      <input
+        className="text-xl w-full border-2 p-3 rounded-xl"
+        value={header.subtitle}
+        onChange={(e) => handleHeaderEdit('subtitle', e.target.value)}
+      />
+    </>
+  ) : (
+    <>
+      <h1 className="text-5xl font-extrabold text-black">{header.title}</h1>
+      <p className="text-xl text-gray-600">{header.subtitle}</p>
+    </>
+  )}
+
+  {/* Debug solo admin */}
+  {isAdmin && (
+    <div className="text-[11px] text-gray-500 font-mono">
+      catalog.products: {(catalog.products ?? []).length} | legacy equipment:{' '}
+      {Array.isArray((data as any).equipment) ? (data as any).equipment.length : 0}
+    </div>
+  )}
+</div>
           <>
             <h1 className="text-5xl font-extrabold text-black">{header.title}</h1>
             <p className="text-xl text-gray-600">{header.subtitle}</p>
