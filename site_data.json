@@ -233,21 +233,11 @@
       "price": 89990
     },
     {
-      "id": "1771381101117",
-      "title": "Nuevo Equipo",
-      "category": "Cámaras",
+      "id": "1771381180598",
+      "title": "Cámaras IP ",
+      "category": "",
       "description": "...",
-      "price": 0,
-      "fileUrl": "",
-      "videoUrl": "",
-      "imageUrl": ""
-    },
-    {
-      "id": "1771381103982",
-      "title": "Nuevo Equipo",
-      "category": "Cámaras",
-      "description": "...",
-      "price": 0,
+      "price": 10,
       "fileUrl": "",
       "videoUrl": "",
       "imageUrl": ""
