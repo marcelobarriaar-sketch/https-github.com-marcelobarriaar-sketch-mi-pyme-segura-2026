@@ -22,7 +22,6 @@ type CatalogProduct = {
 
   priceNet: number;
   features: string[];
-
   imageUrl: string;
   datasheetUrl: string;
   videoUrl: string;
@@ -47,7 +46,6 @@ const Equipment = () => {
 
   const header = data.equipmentHeader;
 
-
   // ✅ Blindaje: si catalog no existe todavía, no revienta
   const catalog = (data as any).catalog ?? { categories: [], products: [] };
 
@@ -60,6 +58,7 @@ const Equipment = () => {
    * Pasa data.equipment (legacy) → catalog.products, y luego deja equipment=[]
    * para eliminar duplicados para siempre.
    */
+
   useEffect(() => {
     const legacy: any[] = Array.isArray((data as any).equipment) ? (data as any).equipment : [];
     if (!legacy.length) return;
@@ -229,7 +228,8 @@ const Equipment = () => {
   // ---------- UI ----------
   return (
     <div className="max-w-7xl mx-auto px-4 py-20">
-  {/* HEADER */}
+
+      {/* HEADER */}
 <div className="mb-14 space-y-4 max-w-3xl">
   {canInlineEdit ? (
     <>
@@ -255,24 +255,12 @@ const Equipment = () => {
   {isAdmin && (
     <div className="text-[11px] text-gray-500 font-mono">
       catalog.products: {(catalog.products ?? []).length} | legacy equipment:{' '}
-      {Array.isArray((data as any).equipment) ? (data as any).equipment.length : 0}
+      {Array.isArray((data as any).equipment)
+        ? (data as any).equipment.length
+        : 0}
     </div>
   )}
 </div>
-          <>
-            <h1 className="text-5xl font-extrabold text-black">{header.title}</h1>
-            <p className="text-xl text-gray-600">{header.subtitle}</p>
-          </>
-        )}
-
-        {/* Debug solo admin */}
-        {isAdmin && (
-          <div className="text-[11px] text-gray-500 font-mono">
-            catalog.products: {(catalog.products ?? []).length} | legacy equipment:{' '}
-            {Array.isArray((data as any).equipment) ? (data as any).equipment.length : 0}
-          </div>
-        )}
-      </div>
 
       {/* CATEGORY FILTER */}
       <div className="flex flex-wrap gap-3 mb-8">
