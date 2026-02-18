@@ -100,31 +100,48 @@
     "bgColor": "#FFFFFF",
     "textColor": "#1F2937"
   },
-
   "catalog": {
     "categories": [
       {
         "id": "camaras",
         "name": "Cámaras",
         "subcategories": [
-          { "id": "analogas", "name": "Análogas (HD-TVI)" },
-          { "id": "ip", "name": "IP" }
+          {
+            "id": "analogas",
+            "name": "Análogas (HD-TVI)"
+          },
+          {
+            "id": "ip",
+            "name": "IP"
+          }
         ]
       },
       {
         "id": "grabadores",
         "name": "Grabadores",
         "subcategories": [
-          { "id": "dvr", "name": "DVR" },
-          { "id": "nvr", "name": "NVR" }
+          {
+            "id": "dvr",
+            "name": "DVR"
+          },
+          {
+            "id": "nvr",
+            "name": "NVR"
+          }
         ]
       },
       {
         "id": "alarmas",
         "name": "Alarmas",
         "subcategories": [
-          { "id": "kits", "name": "Kit de alarmas" },
-          { "id": "accesorios", "name": "Accesorios" }
+          {
+            "id": "kits",
+            "name": "Kit de alarmas"
+          },
+          {
+            "id": "accesorios",
+            "name": "Accesorios"
+          }
         ]
       },
       {
@@ -136,16 +153,28 @@
         "id": "autonomia",
         "name": "Autonomía para equipos",
         "subcategories": [
-          { "id": "ups", "name": "UPS" },
-          { "id": "renovables", "name": "Energías renovables" }
+          {
+            "id": "ups",
+            "name": "UPS"
+          },
+          {
+            "id": "renovables",
+            "name": "Energías renovables"
+          }
         ]
       },
       {
         "id": "conectividad",
         "name": "Conectividad",
         "subcategories": [
-          { "id": "inalambrica", "name": "Inalámbrica" },
-          { "id": "alambrica", "name": "Alámbrica" }
+          {
+            "id": "inalambrica",
+            "name": "Inalámbrica"
+          },
+          {
+            "id": "alambrica",
+            "name": "Alámbrica"
+          }
         ]
       },
       {
@@ -176,7 +205,6 @@
       }
     ]
   },
-
   "projectsHeader": {
     "title": "Proyectos Instalados",
     "subtitle": "Historias reales de seguridad y crecimiento.",
@@ -195,17 +223,16 @@
     "isBetaEnabled": false,
     "betaPrompt": "Asistente Beta."
   },
-
   "equipment": [
     {
       "id": "eq1",
       "title": "Cámara Bullet Solar 4K",
       "description": "Autonomía total con panel solar integrado y conectividad 4G. Ideal para perímetros rurales.",
       "imageUrl": "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&q=80&w=800",
-      "category": "Cámaras"
+      "category": "Cámaras",
+      "price": 89990
     }
   ],
-
   "projects": [
     {
       "id": "1769460618466",
@@ -220,7 +247,6 @@
       "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200"
     }
   ],
-
   "brands": [
     {
       "id": "b1",
@@ -259,7 +285,6 @@
       "url": "https://www.ezviz.com/la"
     }
   ],
-
   "customPages": [],
   "githubSettings": {
     "token": "",
@@ -268,4 +293,3 @@
     "branch": "main"
   }
 }
-
