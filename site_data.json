@@ -8,6 +8,9 @@
     "siteNameColor": "#000000",
     "fontFamily": "'Roboto', sans-serif",
     "globalBackground": "#F9FAFB"
+    "logoUrl": "https://TU-URL-DEL-LOGO.png",
+"footerTagline": "Líderes en seguridad inteligente para PYMES."
+
   },
   "whatsappConfig": {
     "phoneNumber": "+56986141302",
