@@ -216,6 +216,16 @@ const AdminDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 text-black">
+<div className="flex justify-end mb-6">
+  <button
+    onClick={() => handleManualSave()}
+    disabled={isSyncing}
+    className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest shadow-xl transition-all"
+  >
+    {isSyncing ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+  </button>
+</div>
+
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
         <div className="flex items-center gap-6">
