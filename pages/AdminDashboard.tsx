@@ -1108,7 +1108,146 @@ const AdminDashboard = () => {
 
                         <div className="grid gap-8">
                           {data.equipment.map((eq: any, idx: number) => (
-                            <div key={eq.id} className="p-10 bg-gray-50 rounded-[3rem] border-2 space-y-6 relative group">
+  <div key={eq.id} className="p-10 bg-gray-50 rounded-[3rem] border-2 space-y-6 relative group">
+    <button
+      onClick={() => updateData({ ...data, equipment: data.equipment.filter((e: any) => e.id !== eq.id) })}
+      className="absolute top-6 right-6 text-red-400 hover:scale-110 transition-all"
+    >
+      <Trash2 />
+    </button>
+
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="space-y-4">
+        <label className="text-[10px] font-black uppercase">Nombre / Modelo</label>
+        <input
+          className="w-full bg-white p-3 rounded-xl font-black"
+          value={eq.title}
+          onChange={(e) => {
+            const nE = [...data.equipment];
+            nE[idx].title = e.target.value;
+            updateData({ ...data, equipment: nE });
+          }}
+        />
+
+        <label className="text-[10px] font-black uppercase">Familia (Categoría)</label>
+        <input
+          className="w-full bg-white p-3 rounded-xl font-bold"
+          value={eq.category}
+          onChange={(e) => {
+            const nE = [...data.equipment];
+            nE[idx].category = e.target.value;
+            updateData({ ...data, equipment: nE });
+          }}
+        />
+      </div>
+
+      <div className="space-y-4">
+        <label className="text-[10px] font-black uppercase text-brand">Precio de Venta ($)</label>
+        <input
+          type="number"
+          className="w-full bg-white p-3 rounded-xl font-black text-xl border-2 border-brand"
+          value={eq.price}
+          onChange={(e) => {
+            const nE = [...data.equipment];
+            nE[idx].price = Number(e.target.value);
+            updateData({ ...data, equipment: nE });
+          }}
+        />
+
+        {/* ✅ FOTO PRODUCTO */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase text-gray-500">
+            Foto (URL /images/...)
+          </label>
+
+          <div className="flex items-center gap-4">
+            <div className="w-28 h-20 bg-white rounded-xl border-2 overflow-hidden flex items-center justify-center">
+              <img
+                src={eq.imageUrl || '/images/default-hero.jpg'}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+
+            <input
+              className="flex-1 bg-white p-2 rounded-lg text-[11px] font-mono border-2"
+              placeholder="/images/products/camara.jpg"
+              value={eq.imageUrl || ''}
+              onChange={(e) => {
+                const nE = [...data.equipment];
+                nE[idx].imageUrl = e.target.value;
+                updateData({ ...data, equipment: nE });
+              }}
+            />
+          </div>
+
+          {/* upload cloud */}
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            id={`eq-image-upload-${idx}`}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+
+              const ext = file.name.toLowerCase().endsWith('.png')
+                ? 'png'
+                : file.name.toLowerCase().endsWith('.webp')
+                ? 'webp'
+                : 'jpg';
+
+              const safe = (eq.title || 'equipo')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-');
+
+              const targetPath = `public/images/products/${safe}-${Date.now()}.${ext}`;
+              const publicUrl = await uploadImageToCloud(file, targetPath);
+              if (!publicUrl) return;
+
+              const nE = [...data.equipment];
+              nE[idx].imageUrl = publicUrl;
+              updateData({ ...data, equipment: nE });
+            }}
+          />
+
+          <button
+            onClick={() => document.getElementById(`eq-image-upload-${idx}`)?.click()}
+            className="w-full bg-black text-white py-2 rounded-xl font-black text-[10px] hover:bg-brand transition-all"
+          >
+            SUBIR FOTO (CLOUD)
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <label className="text-[9px] font-black uppercase">Link Ficha (URL)</label>
+            <input
+              className="w-full bg-white p-2 rounded-lg text-[10px]"
+              value={eq.fileUrl || ''}
+              onChange={(e) => {
+                const nE = [...data.equipment];
+                nE[idx].fileUrl = e.target.value;
+                updateData({ ...data, equipment: nE });
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[9px] font-black uppercase">Link Demo (URL)</label>
+            <input
+              className="w-full bg-white p-2 rounded-lg text-[10px]"
+              value={eq.videoUrl || ''}
+              onChange={(e) => {
+                const nE = [...data.equipment];
+                nE[idx].videoUrl = e.target.value;
+                updateData({ ...data, equipment: nE });
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
                               <button
                                 onClick={() => updateData({ ...data, equipment: data.equipment.filter((e: any) => e.id !== eq.id) })}
                                 className="absolute top-6 right-6 text-red-400 hover:scale-110 transition-all"
