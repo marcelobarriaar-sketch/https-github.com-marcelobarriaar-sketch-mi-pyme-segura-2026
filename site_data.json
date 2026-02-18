@@ -207,6 +207,30 @@
         "datasheetUrl": "",
         "videoUrl": "",
         "active": true
+      },
+      {
+        "id": "prod-1771406360732",
+        "name": "CAMARA BULLET FULL HD 2MP LENTE 2.8MM COLORVU LITE C/LUZ 20METROS IP67 ",
+        "brand": "Hikvision",
+        "model": "DS-2CE10DF0T-PF",
+        "sku": "023",
+        "categoryId": "camaras",
+        "subcategoryId": "analogas",
+        "priceNet": 39990,
+        "features": [
+          "Imágenes de alta calidad con 2 MP, resolución 1920 × 1080. Imágenes en color 24 horas al día, 7 días a la semana con apertura F1.0",
+          "La tecnología 3D DNR ofrece imágenes claras y nítidas 2.8 mm, horizontal FOV: 98°, vertical FOV: 51°, diagonal FOV: 115°",
+          "Distancia de luz blanca de hasta 20 m para imágenes nocturnas brillantes",
+          "Un puerto para Cuatro señales Conmutables (TVI / AHD / CVI / CVBS)",
+          "Resistente al agua y al polvo (IP67)",
+          "WDR (amplio rango dinámico)",
+          "WDR digital Modo AE (exposición automática)",
+          "DWDR, BLC, HLC, global"
+        ],
+        "imageUrl": "https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/public/images/hikvision_camera.png",
+        "datasheetUrl": "",
+        "videoUrl": "",
+        "active": true
       }
     ]
   },
