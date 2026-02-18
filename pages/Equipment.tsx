@@ -1,148 +1,289 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useSiteData, useAdmin } from '../App';
-import { Plus, Trash2, Edit3, Save, FileText, Video, Upload, Info } from 'lucide-react';
+import { Plus, Trash2, Save } from 'lucide-react';
 
 const Equipment = () => {
   const { data, updateData } = useSiteData();
   const { isAdmin } = useAdmin();
+
+  const header = data.equipmentHeader;
+  const catalog = data.catalog;
+
   const [editingId, setEditingId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [activeSubcategory, setActiveSubcategory] = useState<string>('all');
 
+  // ---------- Header edit ----------
   const handleHeaderEdit = (field: 'title' | 'subtitle', val: string) => {
-    updateData({ ...data, equipmentHeader: { ...data.equipmentHeader, [field]: val } });
-  };
-
-  const addEquipment = () => {
-    const newItem = {
-      id: Date.now().toString(),
-      title: 'Nuevo Equipo',
-      description: 'Descripción del producto técnico...',
-      imageUrl: 'https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=500',
-      category: 'General'
-    };
-    updateData({ ...data, equipment: [newItem, ...data.equipment] });
-    setEditingId(newItem.id);
-  };
-
-  const removeEquipment = (id: string) => {
-    if (confirm('¿Eliminar este equipo?')) {
-      updateData({ ...data, equipment: data.equipment.filter(e => e.id !== id) });
-    }
-  };
-
-  const updateItem = (id: string, updates: any) => {
     updateData({
       ...data,
-      equipment: data.equipment.map(e => e.id === id ? { ...e, ...updates } : e)
+      equipmentHeader: { ...header, [field]: val }
     });
   };
 
-  const handleFileChange = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateItem(id, { imageUrl: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
+  // ---------- Products CRUD ----------
+  const addProduct = () => {
+    const newProd = {
+      id: `prod-${Date.now()}`,
+      name: 'Nuevo Producto',
+      brand: '',
+      model: '',
+      sku: '',
+      categoryId: catalog.categories[0]?.id || '',
+      subcategoryId: '',
+      priceNet: 0,
+      features: [],
+      imageUrl: '',
+      datasheetUrl: '',
+      videoUrl: '',
+      active: true
+    };
+
+    updateData({
+      ...data,
+      catalog: {
+        ...catalog,
+        products: [newProd, ...catalog.products]
+      }
+    });
+
+    setEditingId(newProd.id);
   };
 
+  const removeProduct = (id: string) => {
+    if (!confirm('¿Eliminar producto?')) return;
+
+    updateData({
+      ...data,
+      catalog: {
+        ...catalog,
+        products: catalog.products.filter((p: any) => p.id !== id)
+      }
+    });
+  };
+
+  const updateProduct = (id: string, updates: any) => {
+    updateData({
+      ...data,
+      catalog: {
+        ...catalog,
+        products: catalog.products.map((p: any) =>
+          p.id === id ? { ...p, ...updates } : p
+        )
+      }
+    });
+  };
+
+  // ---------- Filters ----------
+  const filteredProducts = catalog.products.filter((p: any) => {
+    if (!p.active && !isAdmin) return false;
+
+    if (activeCategory !== 'all' && p.categoryId !== activeCategory) return false;
+    if (activeSubcategory !== 'all' && p.subcategoryId !== activeSubcategory) return false;
+
+    return true;
+  });
+
+  const currentCategory = catalog.categories.find(
+    (c: any) => c.id === activeCategory
+  );
+
+  // ---------- UI ----------
   return (
     <div className="max-w-7xl mx-auto px-4 py-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
-        <div className="max-w-2xl w-full space-y-4">
-          {isAdmin ? (
-            <div className="space-y-4 w-full">
-              <input 
-                className="text-5xl font-extrabold tracking-tight w-full bg-white text-black border-2 border-gray-200 p-2 rounded-xl outline-none focus:border-red-600"
-                value={data.equipmentHeader.title}
-                onChange={(e) => handleHeaderEdit('title', e.target.value)}
-              />
-              <input 
-                className="text-xl text-black w-full bg-white border-2 border-gray-200 p-2 rounded-xl outline-none focus:border-red-600"
-                value={data.equipmentHeader.subtitle}
-                onChange={(e) => handleHeaderEdit('subtitle', e.target.value)}
-              />
-            </div>
-          ) : (
-            <>
-              <h1 className="text-5xl font-extrabold tracking-tight mb-4 text-black">{data.equipmentHeader.title}</h1>
-              <p className="text-xl text-gray-600">{data.equipmentHeader.subtitle}</p>
-            </>
-          )}
-        </div>
-        {isAdmin && (
-          <button 
-            onClick={addEquipment}
-            className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-red-700 transition-colors shadow-lg"
-          >
-            <Plus size={20} /> Añadir Equipo
-          </button>
+
+      {/* HEADER */}
+      <div className="mb-14 space-y-4 max-w-3xl">
+        {isAdmin ? (
+          <>
+            <input
+              className="text-5xl font-extrabold w-full border-2 p-3 rounded-xl"
+              value={header.title}
+              onChange={(e) => handleHeaderEdit('title', e.target.value)}
+            />
+            <input
+              className="text-xl w-full border-2 p-3 rounded-xl"
+              value={header.subtitle}
+              onChange={(e) => handleHeaderEdit('subtitle', e.target.value)}
+            />
+          </>
+        ) : (
+          <>
+            <h1 className="text-5xl font-extrabold">{header.title}</h1>
+            <p className="text-xl text-gray-600">{header.subtitle}</p>
+          </>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {data.equipment.map((item) => (
-          <div key={item.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-300">
-            <div className="relative h-64 overflow-hidden">
-              <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-red-600 uppercase tracking-wider">
-                {item.category}
-              </div>
-              {isAdmin && (
-                <div className="absolute bottom-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-lg font-black text-[8px] uppercase tracking-widest flex items-center gap-1 shadow-lg border border-black opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Info size={10} /> Sugerido: 800 x 600 px
-                </div>
-              )}
-            </div>
-            
-            <div className="p-8 space-y-4">
-              {editingId === item.id ? (
-                <div className="space-y-3">
-                  <input className="w-full border-2 p-2 rounded-lg bg-white text-black font-bold" value={item.title} onChange={(e) => updateItem(item.id, { title: e.target.value })} />
-                  <input className="w-full border-2 p-2 rounded-lg bg-white text-black text-sm" value={item.category} onChange={(e) => updateItem(item.id, { category: e.target.value })} placeholder="Categoría" />
-                  <textarea className="w-full border-2 p-2 rounded-lg bg-white text-black" value={item.description} onChange={(e) => updateItem(item.id, { description: e.target.value })} />
-                  
-                  <div className="pt-2 space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Actualizar Imagen</label>
-                    <input 
-                      type="file" 
-                      className="hidden" 
-                      id={`file-${item.id}`}
-                      onChange={(e) => handleFileChange(item.id, e)}
-                      accept="image/*"
-                    />
-                    <button 
-                      onClick={() => document.getElementById(`file-${item.id}`)?.click()}
-                      className="w-full flex items-center justify-center gap-2 bg-black text-white py-2 rounded-xl font-black text-xs hover:bg-red-600 transition-all"
-                    >
-                      <Upload size={14} /> SUBIR DE MAC
-                    </button>
-                    <input className="w-full border-2 p-2 rounded-lg bg-white text-black text-[10px] outline-none" value={item.imageUrl.startsWith('data:') ? 'Local' : item.imageUrl} onChange={(e) => updateItem(item.id, { imageUrl: e.target.value })} placeholder="URL alternativa" />
-                  </div>
+      {/* CATEGORY FILTER */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        <button
+          onClick={() => {
+            setActiveCategory('all');
+            setActiveSubcategory('all');
+          }}
+          className={`px-4 py-2 rounded-full border ${
+            activeCategory === 'all' ? 'bg-black text-white' : 'bg-white'
+          }`}
+        >
+          Todas
+        </button>
 
-                  <button onClick={() => setEditingId(null)} className="w-full bg-green-600 text-white py-2 rounded-lg font-bold flex items-center justify-center gap-2"><Save size={16} /> Guardar</button>
-                </div>
-              ) : (
-                <>
-                  <h3 className="text-2xl font-bold text-gray-900">{item.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{item.description}</p>
-                  {isAdmin && (
-                    <div className="flex gap-2 mt-6 pt-6 border-t border-gray-100">
-                      <button onClick={() => setEditingId(item.id)} className="flex-1 bg-gray-900 text-white py-2 rounded-lg font-bold">Editar</button>
-                      <button onClick={() => removeEquipment(item.id)} className="p-2 text-red-600 bg-red-50 rounded-lg"><Trash2 size={20} /></button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+        {catalog.categories.map((cat: any) => (
+          <button
+            key={cat.id}
+            onClick={() => {
+              setActiveCategory(cat.id);
+              setActiveSubcategory('all');
+            }}
+            className={`px-4 py-2 rounded-full border ${
+              activeCategory === cat.id ? 'bg-black text-white' : 'bg-white'
+            }`}
+          >
+            {cat.name}
+          </button>
         ))}
       </div>
-    </div>
-  );
-};
 
-export default Equipment;
+      {/* SUBCATEGORY FILTER */}
+      {currentCategory && currentCategory.subcategories?.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-10">
+          <button
+            onClick={() => setActiveSubcategory('all')}
+            className={`px-3 py-1 rounded border text-sm ${
+              activeSubcategory === 'all' ? 'bg-gray-900 text-white' : ''
+            }`}
+          >
+            Todas
+          </button>
+
+          {currentCategory.subcategories.map((sub: any) => (
+            <button
+              key={sub.id}
+              onClick={() => setActiveSubcategory(sub.id)}
+              className={`px-3 py-1 rounded border text-sm ${
+                activeSubcategory === sub.id ? 'bg-gray-900 text-white' : ''
+              }`}
+            >
+              {sub.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ADMIN ADD */}
+      {isAdmin && (
+        <button
+          onClick={addProduct}
+          className="mb-10 bg-red-600 text-white px-6 py-3 rounded-xl font-bold flex gap-2 items-center"
+        >
+          <Plus size={18} /> Añadir producto
+        </button>
+      )}
+
+      {/* GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filteredProducts.map((p: any) => {
+          const editing = editingId === p.id;
+
+          return (
+            <div key={p.id} className="border rounded-2xl overflow-hidden bg-white shadow-sm">
+
+              {/* IMAGE */}
+              <div className="h-56 bg-gray-100">
+                {p.imageUrl && (
+                  <img
+                    src={p.imageUrl}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+
+              <div className="p-6 space-y-3">
+
+                {editing ? (
+                  <>
+                    <input className="w-full border p-2 rounded"
+                      value={p.name}
+                      onChange={e => updateProduct(p.id, { name: e.target.value })}
+                    />
+
+                    <input className="w-full border p-2 rounded"
+                      placeholder="Marca"
+                      value={p.brand}
+                      onChange={e => updateProduct(p.id, { brand: e.target.value })}
+                    />
+
+                    <input className="w-full border p-2 rounded"
+                      placeholder="Modelo"
+                      value={p.model}
+                      onChange={e => updateProduct(p.id, { model: e.target.value })}
+                    />
+
+                    <input className="w-full border p-2 rounded"
+                      placeholder="SKU"
+                      value={p.sku}
+                      onChange={e => updateProduct(p.id, { sku: e.target.value })}
+                    />
+
+                    <input type="number" className="w-full border p-2 rounded"
+                      placeholder="Valor sin IVA"
+                      value={p.priceNet}
+                      onChange={e => updateProduct(p.id, { priceNet: Number(e.target.value) })}
+                    />
+
+                    {/* category select */}
+                    <select
+                      className="w-full border p-2 rounded"
+                      value={p.categoryId}
+                      onChange={e =>
+                        updateProduct(p.id, {
+                          categoryId: e.target.value,
+                          subcategoryId: ''
+                        })
+                      }
+                    >
+                      {catalog.categories.map((c: any) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+
+                    {/* subcategory select */}
+                    <select
+                      className="w-full border p-2 rounded"
+                      value={p.subcategoryId}
+                      onChange={e =>
+                        updateProduct(p.id, { subcategoryId: e.target.value })
+                      }
+                    >
+                      <option value="">Sin subcategoría</option>
+                      {catalog.categories
+                        .find((c: any) => c.id === p.categoryId)
+                        ?.subcategories?.map((s: any) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                    </select>
+
+                    <input className="w-full border p-2 rounded"
+                      placeholder="URL imagen"
+                      value={p.imageUrl}
+                      onChange={e => updateProduct(p.id, { imageUrl: e.target.value })}
+                    />
+
+                    <input className="w-full border p-2 rounded"
+                      placeholder="URL ficha técnica (PDF)"
+                      value={p.datasheetUrl}
+                      onChange={e => updateProduct(p.id, { datasheetUrl: e.target.value })}
+                    />
+
+                    <input className="w-full border p-2 rounded"
+                      placeholder="URL video"
+                      value={p.videoUrl}
+                      onChange={e => updateProduct(p.id, { videoUrl: e.target.value })}
+                    />
+
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="w-full bg-green-600 text-white py-2 rounded flex gap-2 justify-center"
+                    >
+                      <Save size={16}/
