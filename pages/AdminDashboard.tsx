@@ -1148,116 +1148,89 @@ const AdminDashboard = () => {
                     </div>
                   )}
 
-                  {/* ✅ EQUIPMENT (LIMPIO: sin duplicidad) */}
-                  {activePageEditor === 'equipment' && (
-                    <div className="space-y-12">
-                      <div className="p-8 bg-black text-white rounded-3xl space-y-6">
-                        <h4 className="text-xl font-black uppercase text-yellow-400 flex items-center gap-2">
-                          <DollarSign /> Política de Precios e Instalación
-                        </h4>
+                 {/* ✅ EQUIPMENT (ADMIN REAL: usa catalog.products + catalog.categories) */}
+{activePageEditor === 'equipment' && (
+  <div className="space-y-12">
+    {/* Política / textos (se mantienen) */}
+    <div className="p-8 bg-black text-white rounded-3xl space-y-6">
+      <h4 className="text-xl font-black uppercase text-yellow-400 flex items-center gap-2">
+        <DollarSign /> Política de Precios e Instalación
+      </h4>
 
-                        <div className="space-y-4">
-                          <label className="text-[10px] uppercase font-black text-gray-500">
-                            Texto sobre Instalación
-                          </label>
-                          <textarea
-                            className="w-full bg-white/10 p-4 rounded-xl text-sm"
-                            value={data.equipmentHeader.installationInfo}
-                            onChange={(e) =>
-                              updateData({
-                                ...data,
-                                equipmentHeader: {
-                                  ...data.equipmentHeader,
-                                  installationInfo: e.target.value,
-                                },
-                              })
-                            }
-                          />
+      <div className="space-y-4">
+        <label className="text-[10px] uppercase font-black text-gray-500">
+          Texto sobre Instalación
+        </label>
+        <textarea
+          className="w-full bg-white/10 p-4 rounded-xl text-sm"
+          value={data.equipmentHeader?.installationInfo || ''}
+          onChange={(e) =>
+            updateData({
+              ...data,
+              equipmentHeader: {
+                ...(data.equipmentHeader || {}),
+                installationInfo: e.target.value,
+              },
+            })
+          }
+        />
 
-                          <label className="text-[10px] uppercase font-black text-gray-500">
-                            Texto sobre Visitas Técnicas
-                          </label>
-                          <textarea
-                            className="w-full bg-white/10 p-4 rounded-xl text-sm"
-                            value={data.equipmentHeader.evaluationInfo}
-                            onChange={(e) =>
-                              updateData({
-                                ...data,
-                                equipmentHeader: {
-                                  ...data.equipmentHeader,
-                                  evaluationInfo: e.target.value,
-                                },
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
+        <label className="text-[10px] uppercase font-black text-gray-500">
+          Texto sobre Visitas Técnicas
+        </label>
+        <textarea
+          className="w-full bg-white/10 p-4 rounded-xl text-sm"
+          value={data.equipmentHeader?.evaluationInfo || ''}
+          onChange={(e) =>
+            updateData({
+              ...data,
+              equipmentHeader: {
+                ...(data.equipmentHeader || {}),
+                evaluationInfo: e.target.value,
+              },
+            })
+          }
+        />
+      </div>
+    </div>
 
-                      <div className="space-y-8">
-                        <h4 className="text-2xl font-black uppercase flex items-center gap-2 text-brand">
-                          <PlusCircle /> Catálogo de Equipos
-                        </h4>
+    {/* Catálogo real (catalog.products) */}
+    <div className="space-y-8">
+      <h4 className="text-2xl font-black uppercase flex items-center gap-2 text-brand">
+        <PlusCircle /> Catálogo de Equipos
+      </h4>
 
-                        <div className="grid gap-8">
-                          {data.equipment.map((eq: any, idx: number) => (
-                            <div
-                              key={eq.id}
-                              className="p-10 bg-gray-50 rounded-[3rem] border-2 space-y-6 relative group"
-                            >
-                              <button
-                                onClick={() =>
-                                  updateData({
-                                    ...data,
-                                    equipment: data.equipment.filter((e: any) => e.id !== eq.id),
-                                  })
-                                }
-                                className="absolute top-6 right-6 text-red-400 hover:scale-110 transition-all"
-                                title="Eliminar equipo"
-                              >
-                                <Trash2 />
-                              </button>
+      <EquipmentAdminEditorCatalog
+        categories={data.catalog?.categories ?? []}
+        products={data.catalog?.products ?? []}
+        setProducts={(nextProducts) => {
+          updateData({
+            ...data,
+            catalog: {
+              ...(data.catalog ?? { categories: [], products: [] }),
+              products: nextProducts,
+            },
+          });
+        }}
+        onSave={async (nextProducts) => {
+          const nextData = {
+            ...data,
+            catalog: {
+              ...(data.catalog ?? { categories: [], products: [] }),
+              products: nextProducts,
+            },
+          };
 
-                              <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                  <label className="text-[10px] font-black uppercase">Nombre / Modelo</label>
-                                  <input
-                                    className="w-full bg-white p-3 rounded-xl font-black"
-                                    value={eq.title}
-                                    onChange={(e) => {
-                                      const nE = [...data.equipment];
-                                      nE[idx].title = e.target.value;
-                                      updateData({ ...data, equipment: nE });
-                                    }}
-                                  />
+          // 1) actualiza state
+          updateData(nextData);
 
-                                  <label className="text-[10px] font-black uppercase">
-                                    Familia (Categoría)
-                                  </label>
-                                  <input
-                                    className="w-full bg-white p-3 rounded-xl font-bold"
-                                    value={eq.category}
-                                    onChange={(e) => {
-                                      const nE = [...data.equipment];
-                                      nE[idx].category = e.target.value;
-                                      updateData({ ...data, equipment: nE });
-                                    }}
-                                  />
-                                </div>
-
-                                <div className="space-y-4">
-                                  <label className="text-[10px] font-black uppercase text-brand">
-                                    Precio de Venta ($)
-                                  </label>
-                                  <input
-                                    type="number"
-                                    className="w-full bg-white p-3 rounded-xl font-black text-xl border-2 border-brand"
-                                    value={eq.price}
-                                    onChange={(e) => {
-                                      const nE = [...data.equipment];
-                                      nE[idx].price = Number(e.target.value);
-                                      updateData({ ...data, equipment: nE });
-                                    }}
-                                  />
+          // 2) guarda con payload exacto (evita desfase)
+          await handleManualSave(nextData);
+        }}
+      />
+    </div>
+  </div>
+)}
 
                                   {/* ✅ FOTO PRODUCTO */}
                                   <div className="space-y-2">
