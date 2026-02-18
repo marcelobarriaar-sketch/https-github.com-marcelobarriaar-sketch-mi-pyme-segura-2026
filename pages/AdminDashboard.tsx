@@ -50,21 +50,65 @@ const AdminDashboard = () => {
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
 
   // -----------------------------
+    // -----------------------------
   // GUARDADO: local + GitHub
   // -----------------------------
-  const handleManualSave = async () => {
-    // 1) Guardar local
-    localStorage.setItem('site_data', JSON.stringify(data));
+  const handleManualSave = async (payload?: any) => {
+    const toSave = payload ?? data;
+
+    // Helper: corrige URLs de GitHub tipo /blob/ a raw (para que <img> funcione)
+    const fixGithubBlobToRaw = (url?: string) => {
+      if (!url || typeof url !== 'string') return url;
+      if (url.includes('github.com') && url.includes('/blob/')) {
+        return url
+          .replace('https://github.com/', 'https://raw.githubusercontent.com/')
+          .replace('/blob/', '/');
+      }
+      // También corrige si te llega con "refs/heads/main" en raw
+      if (url.includes('raw.githubusercontent.com') && url.includes('/refs/heads/')) {
+        return url.replace('/refs/heads/', '/');
+      }
+      return url;
+    };
+
+    // 1) Guardar local (payload exacto)
+    localStorage.setItem('site_data', JSON.stringify(toSave));
 
     // 2) Guardar nube/GitHub
     try {
       setIsSyncing(true);
       setSaveStatus('Sincronizando con la nube...');
 
+      // Normalización defensiva (solo si existen estas rutas)
+      const normalized = (() => {
+        const next = { ...toSave };
+
+        // 🔧 Arregla imágenes en catálogo (si existe)
+        if (next?.catalog?.products && Array.isArray(next.catalog.products)) {
+          next.catalog = { ...next.catalog };
+          next.catalog.products = next.catalog.products.map((p: any) => ({
+            ...p,
+            imageUrl: fixGithubBlobToRaw(p?.imageUrl),
+          }));
+        }
+
+        // 🔧 Arregla heroBgImageUrl (si existe)
+        if (next?.home?.heroBgImageUrl) {
+          next.home = { ...next.home, heroBgImageUrl: fixGithubBlobToRaw(next.home.heroBgImageUrl) };
+        }
+
+        // 🔧 Arregla aboutImage (si existe)
+        if (next?.about?.aboutImage) {
+          next.about = { ...next.about, aboutImage: fixGithubBlobToRaw(next.about.aboutImage) };
+        }
+
+        return next;
+      })();
+
       const res = await fetch('/api/save-site-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(normalized),
       });
 
       const result = await res.json().catch(() => ({}));
