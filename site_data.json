@@ -1,16 +1,14 @@
 {
   "branding": {
     "siteName": "Mi Pyme Segura",
-    "logoUrl": "/images/logo.png",
+    "logoUrl": "https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/refs/heads/main/public/images/LOGO%20MPS%20SECURITY.png",
     "primaryColor": "#b51a00",
     "secondaryColor": "#111827",
     "textColor": "#1F2937",
     "siteNameColor": "#000000",
     "fontFamily": "'Roboto', sans-serif",
-    "globalBackground": "#F9FAFB"
-    "logoUrl": "https://TU-URL-DEL-LOGO.png",
-"footerTagline": "Líderes en seguridad inteligente para PYMES."
-
+    "globalBackground": "#F9FAFB",
+    "footerTagline": "Líderes en seguridad Inteligente para PYMES - Una Empresa perteneciente a Inversiones Doña Elsa SPA"
   },
   "whatsappConfig": {
     "phoneNumber": "+56986141302",
