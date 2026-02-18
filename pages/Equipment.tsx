@@ -323,8 +323,8 @@ const Equipment = () => {
       )}
 
       {/* ADMIN ADD */}
-      {isAdmin && (
-        <button
+      {canInlineEdit && (
+         <button
           type="button"
           onClick={addProduct}
           className="mb-10 bg-red-600 text-white px-6 py-3 rounded-xl font-bold flex gap-2 items-center"
