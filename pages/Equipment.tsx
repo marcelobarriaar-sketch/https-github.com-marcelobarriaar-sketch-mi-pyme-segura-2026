@@ -58,7 +58,6 @@ const Equipment = () => {
    * Pasa data.equipment (legacy) → catalog.products, y luego deja equipment=[]
    * para eliminar duplicados para siempre.
    */
-
   useEffect(() => {
     const legacy: any[] = Array.isArray((data as any).equipment) ? (data as any).equipment : [];
     if (!legacy.length) return;
@@ -90,8 +89,7 @@ const Equipment = () => {
         const subcategoryId = String(x.subcategoryId ?? '');
 
         const desc = String(x.description ?? '').trim();
-        const features =
-          Array.isArray(x.features) ? x.features : desc ? [desc] : [];
+        const features = Array.isArray(x.features) ? x.features : desc ? [desc] : [];
 
         const prod: CatalogProduct = {
           id: String(x.id ?? `prod-${Date.now()}-${Math.random().toString(16).slice(2)}`),
@@ -112,9 +110,7 @@ const Equipment = () => {
               ? x.price
               : Number(x.priceNet ?? x.price ?? 0) || 0,
 
-          features: features
-            .map((f: any) => String(f ?? '').trim())
-            .filter(Boolean),
+          features: features.map((f: any) => String(f ?? '').trim()).filter(Boolean),
 
           imageUrl: String(x.imageUrl ?? ''),
           datasheetUrl: String(x.datasheetUrl ?? x.fileUrl ?? ''),
@@ -127,13 +123,14 @@ const Equipment = () => {
       })
       .filter((p) => !existsKey(p));
 
-    // Si no hay nada que agregar, igual marcamos migrado y vaciamos legacy
     updateData({
       ...(data as any),
       __equipmentMigrated: true,
       catalog: {
         ...catalog,
-        products: migrated.length ? [...migrated, ...(catalog.products ?? [])] : (catalog.products ?? [])
+        products: migrated.length
+          ? [...migrated, ...(catalog.products ?? [])]
+          : (catalog.products ?? [])
       },
       equipment: [] // 👈 mata la fuente vieja
     });
@@ -148,7 +145,7 @@ const Equipment = () => {
     });
   };
 
-  // ---------- Products CRUD ----------
+  // ---------- Products CRUD (quedan, pero no se usan en público porque canInlineEdit=false) ----------
   const addProduct = () => {
     const firstCatId = String((catalog.categories?.[0] as any)?.id ?? '');
 
@@ -156,7 +153,6 @@ const Equipment = () => {
       id: `prod-${Date.now()}`,
       name: 'Nuevo Producto',
 
-      // ✅ obligatorios
       brand: '',
       model: '',
       sku: '',
@@ -200,9 +196,7 @@ const Equipment = () => {
       ...(data as any),
       catalog: {
         ...catalog,
-        products: (catalog.products ?? []).map((p: any) =>
-          p.id === id ? { ...p, ...updates } : p
-        )
+        products: (catalog.products ?? []).map((p: any) => (p.id === id ? { ...p, ...updates } : p))
       }
     });
   };
@@ -216,51 +210,51 @@ const Equipment = () => {
   const filteredProducts = useMemo(() => {
     return (catalog.products ?? []).filter((p: any) => {
       if (!p) return false;
-      if (!isAdmin && p.active === false) return false;
+
+      // ✅ Página pública: ocultar siempre inactivos
+      if (p.active === false) return false;
 
       if (activeCategory !== 'all' && p.categoryId !== activeCategory) return false;
-      if (activeSubcategory !== 'all' && (p.subcategoryId || '') !== activeSubcategory) return false;
+      if (activeSubcategory !== 'all' && (p.subcategoryId || '') !== activeSubcategory)
+        return false;
 
       return true;
     });
-  }, [catalog.products, activeCategory, activeSubcategory, isAdmin]);
+  }, [catalog.products, activeCategory, activeSubcategory]);
 
   // ---------- UI ----------
   return (
     <div className="max-w-7xl mx-auto px-4 py-20">
-
       {/* HEADER */}
-<div className="mb-14 space-y-4 max-w-3xl">
-  {canInlineEdit ? (
-    <>
-      <input
-        className="text-5xl font-extrabold w-full border-2 p-3 rounded-xl"
-        value={header.title}
-        onChange={(e) => handleHeaderEdit('title', e.target.value)}
-      />
-      <input
-        className="text-xl w-full border-2 p-3 rounded-xl"
-        value={header.subtitle}
-        onChange={(e) => handleHeaderEdit('subtitle', e.target.value)}
-      />
-    </>
-  ) : (
-    <>
-      <h1 className="text-5xl font-extrabold text-black">{header.title}</h1>
-      <p className="text-xl text-gray-600">{header.subtitle}</p>
-    </>
-  )}
+      <div className="mb-14 space-y-4 max-w-3xl">
+        {canInlineEdit ? (
+          <>
+            <input
+              className="text-5xl font-extrabold w-full border-2 p-3 rounded-xl"
+              value={header.title}
+              onChange={(e) => handleHeaderEdit('title', e.target.value)}
+            />
+            <input
+              className="text-xl w-full border-2 p-3 rounded-xl"
+              value={header.subtitle}
+              onChange={(e) => handleHeaderEdit('subtitle', e.target.value)}
+            />
+          </>
+        ) : (
+          <>
+            <h1 className="text-5xl font-extrabold text-black">{header.title}</h1>
+            <p className="text-xl text-gray-600">{header.subtitle}</p>
+          </>
+        )}
 
-  {/* Debug solo admin */}
-  {isAdmin && (
-    <div className="text-[11px] text-gray-500 font-mono">
-      catalog.products: {(catalog.products ?? []).length} | legacy equipment:{' '}
-      {Array.isArray((data as any).equipment)
-        ? (data as any).equipment.length
-        : 0}
-    </div>
-  )}
-</div>
+        {/* Debug solo admin */}
+        {isAdmin && (
+          <div className="text-[11px] text-gray-500 font-mono">
+            catalog.products: {(catalog.products ?? []).length} | legacy equipment:{' '}
+            {Array.isArray((data as any).equipment) ? (data as any).equipment.length : 0}
+          </div>
+        )}
+      </div>
 
       {/* CATEGORY FILTER */}
       <div className="flex flex-wrap gap-3 mb-8">
@@ -322,9 +316,9 @@ const Equipment = () => {
         </div>
       )}
 
-      {/* ADMIN ADD */}
+      {/* ADMIN ADD (desactivado en público) */}
       {canInlineEdit && (
-         <button
+        <button
           type="button"
           onClick={addProduct}
           className="mb-10 bg-red-600 text-white px-6 py-3 rounded-xl font-bold flex gap-2 items-center"
@@ -369,24 +363,16 @@ const Equipment = () => {
               </div>
 
               <div className="p-6 space-y-3">
-              
-                               {/* BADGES */}
+                {/* BADGES */}
                 <div className="flex flex-wrap gap-2">
                   {categoryName && (
                     <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-gray-100">
                       {categoryName}
                     </span>
                   )}
-
                   {subcategoryName && (
                     <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-gray-100">
                       {subcategoryName}
-                    </span>
-                  )}
-
-                 {false && p.active === false && ( ... )}
-                  <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-700">
-                      Inactivo
                     </span>
                   )}
                 </div>
