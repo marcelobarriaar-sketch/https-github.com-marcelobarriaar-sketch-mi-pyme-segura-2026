@@ -343,7 +343,7 @@ const Equipment = () => {
       {/* GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredProducts.map((p: CatalogProduct) => {
-          const editing = editingId === p.id;
+          const editing = canInlineEdit && editingId === p.id;
 
           const categoryName =
             (catalog.categories ?? []).find((c: any) => c.id === p.categoryId)?.name ?? '';
@@ -381,7 +381,11 @@ const Equipment = () => {
                       {subcategoryName}
                     </span>
                   )}
-                  {isAdmin && p.active === false && (
+                  {canInlineEdit && p.active === false && (
+              <span ...>Inactivo</span>
+              )}
+
+              
                     <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-700">
                       Inactivo
                     </span>
@@ -531,7 +535,7 @@ const Equipment = () => {
                       </ul>
                     )}
 
-                    {isAdmin && (
+                    {canInlineEdit && (
                       <div className="flex gap-2 pt-4">
                         <button
                           type="button"
