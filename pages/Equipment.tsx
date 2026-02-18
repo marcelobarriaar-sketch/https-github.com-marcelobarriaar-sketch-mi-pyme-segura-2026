@@ -1,12 +1,36 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSiteData, useAdmin } from '../App';
 import { Plus, Trash2, Save } from 'lucide-react';
 
+type CatalogCategory = {
+  id: string;
+  name: string;
+  subcategories?: { id: string; name: string }[];
+};
+
+type CatalogProduct = {
+  id: string;
+  name: string;
+  brand?: string;
+  model?: string;
+  sku?: string;
+  categoryId?: string;
+  subcategoryId?: string;
+  priceNet?: number;
+  features?: string[];
+  imageUrl?: string;
+  datasheetUrl?: string;
+  videoUrl?: string;
+  active?: boolean;
+
+  // opcional (por si quieres mostrar un párrafo corto)
+  description?: string;
+};
+
 const normalize = (s: any) =>
   String(s ?? '')
-    .trim()
     .toLowerCase()
-    .replace(/\s+/g, ' ');
+    .trim();
 
 const Equipment = () => {
   const { data, updateData } = useSiteData();
@@ -21,99 +45,99 @@ const Equipment = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeSubcategory, setActiveSubcategory] = useState<string>('all');
 
+  /**
+   * ✅ MIGRACIÓN AUTOMÁTICA (1 sola vez)
+   * Si existe data.equipment (lista vieja) y trae cosas, las pasa a catalog.products
+   * y después deja data.equipment = [] para que no se duplique nunca más.
+   */
+  useEffect(() => {
+    const legacy: any[] = Array.isArray((data as any).equipment) ? (data as any).equipment : [];
+
+    // Si no hay legacy, nada que hacer
+    if (!legacy.length) return;
+
+    // Si ya migramos antes (marca), no repetir
+    const alreadyMigrated = (data as any).__equipmentMigrated === true;
+    if (alreadyMigrated) return;
+
+    const categories: CatalogCategory[] = (catalog.categories ?? []) as any[];
+
+    const findCategoryIdByName = (catName: string) => {
+      const target = normalize(catName);
+      const match = categories.find((c) => normalize(c.name) === target);
+      return match?.id ?? (categories[0]?.id ?? '');
+    };
+
+    const existing: CatalogProduct[] = (catalog.products ?? []) as any[];
+
+    // para evitar duplicados por nombre/modelo/sku
+    const existsKey = (p: Partial<CatalogProduct>) => {
+      const key = `${normalize(p.name)}|${normalize(p.model)}|${normalize(p.sku)}`;
+      return existing.some((e) => `${normalize(e.name)}|${normalize(e.model)}|${normalize(e.sku)}` === key);
+    };
+
+    const migrated: CatalogProduct[] = legacy
+      .filter((x) => x && (x.title || x.name))
+      .map((x) => {
+        const name = x.name ?? x.title ?? 'Producto';
+        const categoryId = x.categoryId ?? findCategoryIdByName(x.category ?? 'Cámaras');
+
+        // description del legacy: si venía como párrafo, lo guardamos en description
+        // y también lo convertimos en 1 feature si no hay features.
+        const desc = String(x.description ?? '').trim();
+
+        const prod: CatalogProduct = {
+          id: x.id ?? `prod-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name,
+          brand: x.brand ?? '',
+          model: x.model ?? '',
+          sku: x.sku ?? '',
+          categoryId,
+          subcategoryId: x.subcategoryId ?? '',
+          priceNet: typeof x.price === 'number' ? x.price : Number(x.priceNet ?? 0),
+          features: Array.isArray(x.features) ? x.features : desc ? [desc] : [],
+          imageUrl: x.imageUrl ?? '',
+          datasheetUrl: x.datasheetUrl ?? x.fileUrl ?? '',
+          videoUrl: x.videoUrl ?? '',
+          active: x.active !== false,
+          description: desc || undefined
+        };
+
+        return prod;
+      })
+      .filter((p) => !existsKey(p)); // evita duplicar con lo que ya esté en catalog
+
+    if (!migrated.length) {
+      // Marcamos igual para no intentarlo siempre
+      updateData({ ...(data as any), __equipmentMigrated: true, equipment: [] });
+      return;
+    }
+
+    updateData({
+      ...(data as any),
+      __equipmentMigrated: true,
+      catalog: {
+        ...catalog,
+        products: [...migrated, ...(catalog.products ?? [])]
+      },
+      equipment: [] // 👈 mata la fuente vieja (adiós duplicados)
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ---------- Header edit ----------
   const handleHeaderEdit = (field: 'title' | 'subtitle', val: string) => {
     updateData({
       ...data,
-      equipmentHeader: { ...header, [field]: val },
+      equipmentHeader: { ...header, [field]: val }
     });
   };
 
-  // ---------- Legacy (data.equipment) -> Product shape ----------
-  const legacyEquipmentProducts = useMemo(() => {
-    const legacy = Array.isArray((data as any)?.equipment) ? (data as any).equipment : [];
-
-    const catByName = (categoryName: string) => {
-      const n = normalize(categoryName);
-      const found = (catalog.categories || []).find((c: any) => normalize(c?.name) === n);
-      return found?.id ?? '';
-    };
-
-    return legacy.map((e: any) => {
-      const categoryId = catByName(e?.category) || (catalog.categories?.[0]?.id ?? '');
-      const priceNet = Number(e?.price ?? 0);
-
-      return {
-        id: String(e?.id ?? `legacy-${Date.now()}-${Math.random()}`),
-        name: String(e?.title ?? 'Equipo'),
-        brand: '',
-        model: '',
-        sku: '',
-        categoryId,
-        subcategoryId: '',
-        priceNet,
-        features: e?.description ? [String(e.description)] : [],
-        imageUrl: String(e?.imageUrl ?? ''),
-        datasheetUrl: String(e?.fileUrl ?? ''),
-        videoUrl: String(e?.videoUrl ?? ''),
-        active: true,
-
-        // meta interna
-        __source: 'legacy',
-      };
-    });
-  }, [data, catalog.categories]);
-
-  // ---------- Unified products (catalog.products + legacyEquipmentProducts) ----------
-  const unifiedProducts = useMemo(() => {
-    const catProds = Array.isArray(catalog.products) ? catalog.products : [];
-    const legacyProds = legacyEquipmentProducts;
-
-    // Dedup por nombre + modelo (igual al problema que teníai: el "Bullet Solar 4K" aparece en ambos)
-    const keyOf = (p: any) => `${normalize(p?.name)}__${normalize(p?.model)}`;
-
-    // Elegir “mejor” producto si está duplicado:
-    // - prioriza el que tenga precioNet > 0
-    // - si empate, prioriza el que tenga imageUrl
-    // - si empate, prioriza catalog (porque es el formato nuevo)
-    const pickBetter = (a: any, b: any) => {
-      const aPrice = Number(a?.priceNet ?? 0);
-      const bPrice = Number(b?.priceNet ?? 0);
-      if (aPrice !== bPrice) return aPrice > bPrice ? a : b;
-
-      const aImg = normalize(a?.imageUrl).length > 0;
-      const bImg = normalize(b?.imageUrl).length > 0;
-      if (aImg !== bImg) return aImg ? a : b;
-
-      const aIsCatalog = a?.__source !== 'legacy';
-      const bIsCatalog = b?.__source !== 'legacy';
-      if (aIsCatalog !== bIsCatalog) return aIsCatalog ? a : b;
-
-      return a;
-    };
-
-    const map = new Map<string, any>();
-
-    // Primero catalog, después legacy (pero dedupe elige mejor)
-    for (const p of catProds) {
-      const prod = { ...p, __source: 'catalog' };
-      map.set(keyOf(prod), prod);
-    }
-
-    for (const p of legacyProds) {
-      const k = keyOf(p);
-      if (!map.has(k)) map.set(k, p);
-      else map.set(k, pickBetter(map.get(k), p));
-    }
-
-    return Array.from(map.values());
-  }, [catalog.products, legacyEquipmentProducts]);
-
-  // ---------- Products CRUD (catalog + legacy) ----------
+  // ---------- Products CRUD ----------
   const addProduct = () => {
-    const firstCatId = catalog.categories[0]?.id ?? '';
+    const firstCatId = (catalog.categories?.[0] as any)?.id ?? '';
 
-    const newProd = {
+    const newProd: CatalogProduct = {
       id: `prod-${Date.now()}`,
       name: 'Nuevo Producto',
       brand: '',
@@ -126,15 +150,15 @@ const Equipment = () => {
       imageUrl: '',
       datasheetUrl: '',
       videoUrl: '',
-      active: true,
+      active: true
     };
 
     updateData({
       ...data,
       catalog: {
         ...catalog,
-        products: [newProd, ...(catalog.products || [])],
-      },
+        products: [newProd, ...(catalog.products ?? [])]
+      }
     });
 
     setEditingId(newProd.id);
@@ -143,103 +167,42 @@ const Equipment = () => {
   const removeProduct = (id: string) => {
     if (!confirm('¿Eliminar producto?')) return;
 
-    // Si existe en catalog, bórralo de catalog
-    const isInCatalog = (catalog.products || []).some((p: any) => p?.id === id);
-
-    if (isInCatalog) {
-      updateData({
-        ...data,
-        catalog: {
-          ...catalog,
-          products: (catalog.products || []).filter((p: any) => p.id !== id),
-        },
-      });
-      return;
-    }
-
-    // Si no está en catalog, lo buscamos en legacy (data.equipment)
-    const legacy = Array.isArray((data as any)?.equipment) ? (data as any).equipment : [];
-    const existsLegacy = legacy.some((e: any) => String(e?.id) === String(id));
-    if (existsLegacy) {
-      updateData({
-        ...data,
-        equipment: legacy.filter((e: any) => String(e?.id) !== String(id)),
-      } as any);
-    }
-  };
-
-  const updateProduct = (id: string, updates: any) => {
-    // Si está en catalog, actualizar en catalog
-    const isInCatalog = (catalog.products || []).some((p: any) => p?.id === id);
-
-    if (isInCatalog) {
-      updateData({
-        ...data,
-        catalog: {
-          ...catalog,
-          products: (catalog.products || []).map((p: any) => (p.id === id ? { ...p, ...updates } : p)),
-        },
-      });
-      return;
-    }
-
-    // Si no está en catalog, actualizar en legacy (data.equipment) con mapeo inverso básico
-    const legacy = Array.isArray((data as any)?.equipment) ? (data as any).equipment : [];
-    const idx = legacy.findIndex((e: any) => String(e?.id) === String(id));
-    if (idx === -1) return;
-
-    const current = legacy[idx];
-
-    // Convertimos updates del formato catalog al formato legacy
-    const patched = { ...current };
-
-    if (updates.name !== undefined) patched.title = updates.name;
-    if (updates.priceNet !== undefined) patched.price = updates.priceNet;
-    if (updates.imageUrl !== undefined) patched.imageUrl = updates.imageUrl;
-    if (updates.datasheetUrl !== undefined) patched.fileUrl = updates.datasheetUrl;
-    if (updates.videoUrl !== undefined) patched.videoUrl = updates.videoUrl;
-
-    // features: guardamos como un texto simple (legacy usa description)
-    if (updates.features !== undefined) {
-      patched.description = Array.isArray(updates.features)
-        ? updates.features.filter(Boolean).join(' • ')
-        : String(updates.features ?? '');
-    }
-
-    // categoryId: intentamos traducir a nombre de categoría
-    if (updates.categoryId !== undefined) {
-      const cat = (catalog.categories || []).find((c: any) => c.id === updates.categoryId);
-      patched.category = cat?.name ?? patched.category ?? '';
-    }
-
-    const nextLegacy = [...legacy];
-    nextLegacy[idx] = patched;
-
     updateData({
       ...data,
-      equipment: nextLegacy,
-    } as any);
+      catalog: {
+        ...catalog,
+        products: (catalog.products ?? []).filter((p: any) => p.id !== id)
+      }
+    });
+  };
+
+  const updateProduct = (id: string, updates: Partial<CatalogProduct>) => {
+    updateData({
+      ...data,
+      catalog: {
+        ...catalog,
+        products: (catalog.products ?? []).map((p: any) => (p.id === id ? { ...p, ...updates } : p))
+      }
+    });
   };
 
   // ---------- Derived ----------
   const currentCategory = useMemo(() => {
     if (activeCategory === 'all') return null;
-    return (catalog.categories || []).find((c: any) => c.id === activeCategory) ?? null;
+    return (catalog.categories ?? []).find((c: any) => c.id === activeCategory) ?? null;
   }, [activeCategory, catalog.categories]);
 
   const filteredProducts = useMemo(() => {
-    return unifiedProducts.filter((p: any) => {
+    return (catalog.products ?? []).filter((p: any) => {
       if (!p) return false;
-
-      // Si no es admin, oculta inactivos
       if (!isAdmin && p.active === false) return false;
 
-      if (activeCategory !== 'all' && (p.categoryId || '') !== activeCategory) return false;
+      if (activeCategory !== 'all' && p.categoryId !== activeCategory) return false;
       if (activeSubcategory !== 'all' && (p.subcategoryId || '') !== activeSubcategory) return false;
 
       return true;
     });
-  }, [unifiedProducts, activeCategory, activeSubcategory, isAdmin]);
+  }, [catalog.products, activeCategory, activeSubcategory, isAdmin]);
 
   // ---------- UI ----------
   return (
@@ -265,6 +228,13 @@ const Equipment = () => {
             <p className="text-xl text-gray-600">{header.subtitle}</p>
           </>
         )}
+
+        {/* DEBUG SOLO ADMIN (para que veas conteos y cachar al tiro si hay duplicación) */}
+        {isAdmin && (
+          <div className="text-[11px] text-gray-500 font-mono">
+            catalog.products: {(catalog.products ?? []).length} | legacy equipment: {Array.isArray((data as any).equipment) ? (data as any).equipment.length : 0}
+          </div>
+        )}
       </div>
 
       {/* CATEGORY FILTER */}
@@ -282,7 +252,7 @@ const Equipment = () => {
           Todas
         </button>
 
-        {(catalog.categories || []).map((cat: any) => (
+        {(catalog.categories ?? []).map((cat: any) => (
           <button
             key={cat.id}
             type="button"
@@ -347,16 +317,18 @@ const Equipment = () => {
 
       {/* GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredProducts.map((p: any) => {
+        {filteredProducts.map((p: CatalogProduct) => {
           const editing = editingId === p.id;
 
           const categoryName =
-            (catalog.categories || []).find((c: any) => c.id === p.categoryId)?.name ?? '';
+            (catalog.categories ?? []).find((c: any) => c.id === p.categoryId)?.name ?? '';
 
           const subcategoryName =
-            (catalog.categories || [])
+            (catalog.categories ?? [])
               .find((c: any) => c.id === p.categoryId)
               ?.subcategories?.find((s: any) => s.id === p.subcategoryId)?.name ?? '';
+
+          const price = Number(p.priceNet || 0);
 
           return (
             <div key={p.id} className="border rounded-2xl overflow-hidden bg-white shadow-sm">
@@ -389,11 +361,6 @@ const Equipment = () => {
                       Inactivo
                     </span>
                   )}
-                  {isAdmin && p.__source === 'legacy' && (
-                    <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
-                      Legacy (data.equipment)
-                    </span>
-                  )}
                 </div>
 
                 {editing ? (
@@ -410,7 +377,6 @@ const Equipment = () => {
                       value={p.brand || ''}
                       onChange={(e) => updateProduct(p.id, { brand: e.target.value })}
                       placeholder="Marca"
-                      disabled={p.__source === 'legacy'}
                     />
 
                     <input
@@ -418,7 +384,6 @@ const Equipment = () => {
                       value={p.model || ''}
                       onChange={(e) => updateProduct(p.id, { model: e.target.value })}
                       placeholder="Modelo"
-                      disabled={p.__source === 'legacy'}
                     />
 
                     <input
@@ -426,44 +391,40 @@ const Equipment = () => {
                       value={p.sku || ''}
                       onChange={(e) => updateProduct(p.id, { sku: e.target.value })}
                       placeholder="SKU"
-                      disabled={p.__source === 'legacy'}
                     />
 
                     <input
                       type="number"
                       className="w-full border p-2 rounded"
-                      value={Number(p.priceNet) || 0}
+                      value={price}
                       onChange={(e) => updateProduct(p.id, { priceNet: Number(e.target.value) })}
                       placeholder="Valor sin IVA"
                     />
 
-                    {/* CATEGORY SELECT */}
                     <select
                       className="w-full border p-2 rounded"
                       value={p.categoryId || ''}
                       onChange={(e) =>
                         updateProduct(p.id, {
                           categoryId: e.target.value,
-                          subcategoryId: '',
+                          subcategoryId: ''
                         })
                       }
                     >
-                      {(catalog.categories || []).map((c: any) => (
+                      {(catalog.categories ?? []).map((c: any) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
                         </option>
                       ))}
                     </select>
 
-                    {/* SUBCATEGORY SELECT (solo para catalog, legacy queda sin subcat) */}
                     <select
                       className="w-full border p-2 rounded"
                       value={p.subcategoryId || ''}
                       onChange={(e) => updateProduct(p.id, { subcategoryId: e.target.value })}
-                      disabled={p.__source === 'legacy'}
                     >
                       <option value="">Sin subcategoría</option>
-                      {(catalog.categories || [])
+                      {(catalog.categories ?? [])
                         .find((c: any) => c.id === p.categoryId)
                         ?.subcategories?.map((s: any) => (
                           <option key={s.id} value={s.id}>
@@ -480,7 +441,7 @@ const Equipment = () => {
                           features: e.target.value
                             .split('\n')
                             .map((x) => x.trim())
-                            .filter(Boolean),
+                            .filter(Boolean)
                         })
                       }
                       placeholder="Características (una por línea)"
@@ -513,12 +474,8 @@ const Equipment = () => {
                         type="checkbox"
                         checked={p.active !== false}
                         onChange={(e) => updateProduct(p.id, { active: e.target.checked })}
-                        disabled={p.__source === 'legacy'}
                       />
                       Producto activo
-                      {p.__source === 'legacy' && (
-                        <span className="text-xs text-gray-400">(legacy siempre se muestra)</span>
-                      )}
                     </label>
 
                     <button
@@ -532,15 +489,18 @@ const Equipment = () => {
                 ) : (
                   <>
                     <h3 className="font-bold text-xl text-gray-900">{p.name}</h3>
-                    <p className="text-sm text-gray-600">{[p.brand, p.model].filter(Boolean).join(' ')}</p>
+
+                    <p className="text-sm text-gray-600">
+                      {[p.brand, p.model].filter(Boolean).join(' ')}
+                    </p>
+
                     <p className="font-semibold">
-                      ${Number(p.priceNet || 0).toLocaleString()}{' '}
-                      <span className="text-xs text-gray-500">+ IVA</span>
+                      ${price.toLocaleString()} <span className="text-xs text-gray-500">+ IVA</span>
                     </p>
 
                     {!!(p.features?.length ?? 0) && (
                       <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                        {p.features.slice(0, 4).map((f: string, idx: number) => (
+                        {(p.features ?? []).slice(0, 4).map((f: string, idx: number) => (
                           <li key={idx}>{f}</li>
                         ))}
                       </ul>
