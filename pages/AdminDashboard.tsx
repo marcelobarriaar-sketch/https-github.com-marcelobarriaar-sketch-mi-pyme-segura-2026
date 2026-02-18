@@ -29,6 +29,7 @@ import {
   Shield,
   Globe,
   PlusCircle,
+  RefreshCw, // ✅ FALTABA
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -283,193 +284,195 @@ const AdminDashboard = () => {
         </aside>
 
         {/* MAIN */}
-<main className="md:col-span-3 space-y-10">
-  {/* TAB: BRANDING (solo lo esencial para compilar) */}
-  {activeTab === 'branding' && (
-    <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
-      <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-brand">
-        <Palette /> MARCA Y ESTILO
-      </h2>
+        <main className="md:col-span-3 space-y-10">
+          {/* TAB: BRANDING */}
+          {activeTab === 'branding' && (
+            <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
+              <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-brand">
+                <Palette /> MARCA Y ESTILO
+              </h2>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-2">
-          <label className="text-xs font-black uppercase text-gray-400">
-            Nombre de la Pyme
-          </label>
-          <input
-            className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-xl outline-none focus:border-brand"
-            value={(data.branding?.siteName ?? '')}
-            onChange={(e) =>
-              updateData({
-                ...data,
-                branding: { ...(data.branding ?? {}), siteName: e.target.value },
-              })
-            }
-          />
-        </div>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-gray-400">
+                    Nombre de la Pyme
+                  </label>
+                  <input
+                    className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-xl outline-none focus:border-brand"
+                    value={(data.branding?.siteName ?? '')}
+                    onChange={(e) =>
+                      updateData({
+                        ...data,
+                        branding: { ...(data.branding ?? {}), siteName: e.target.value },
+                      })
+                    }
+                  />
+                </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-black uppercase text-gray-400">
-            Color Primario
-          </label>
-          <div className="flex gap-4 items-center">
-            <input
-              type="color"
-              className="w-12 h-12 rounded-lg cursor-pointer"
-              value={(data.branding?.primaryColor ?? '#b51a00')}
-              onChange={(e) =>
-                updateData({
-                  ...data,
-                  branding: { ...(data.branding ?? {}), primaryColor: e.target.value },
-                })
-              }
-            />
-            <span className="font-mono text-xs">{data.branding?.primaryColor}</span>
-          </div>
-        </div>
-      </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-gray-400">
+                    Color Primario
+                  </label>
+                  <div className="flex gap-4 items-center">
+                    <input
+                      type="color"
+                      className="w-12 h-12 rounded-lg cursor-pointer"
+                      value={(data.branding?.primaryColor ?? '#b51a00')}
+                      onChange={(e) =>
+                        updateData({
+                          ...data,
+                          branding: { ...(data.branding ?? {}), primaryColor: e.target.value },
+                        })
+                      }
+                    />
+                    <span className="font-mono text-xs">{data.branding?.primaryColor}</span>
+                  </div>
+                </div>
+              </div>
 
-      {/* Logo (local + URL) */}
-      <div className="space-y-3 pt-6 border-t border-gray-100">
-        <h3 className="text-xl font-black uppercase text-gray-400 flex items-center gap-2">
-          <IconImage /> LOGO
-        </h3>
+              {/* Logo (local + URL) */}
+              <div className="space-y-3 pt-6 border-t border-gray-100">
+                <h3 className="text-xl font-black uppercase text-gray-400 flex items-center gap-2">
+                  <IconImage /> LOGO
+                </h3>
 
-        <div className="grid md:grid-cols-2 gap-6 items-start">
-          {/* Preview */}
-          <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 p-4">
-            <div className="text-xs font-black uppercase text-gray-400 mb-3">Vista previa</div>
+                <div className="grid md:grid-cols-2 gap-6 items-start">
+                  {/* Preview */}
+                  <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 p-4">
+                    <div className="text-xs font-black uppercase text-gray-400 mb-3">
+                      Vista previa
+                    </div>
 
-            <div className="h-28 bg-white rounded-2xl border border-gray-200 flex items-center justify-center overflow-hidden p-3">
-              <img
-                src={data.branding?.logoUrl || '/images/logo.png'}
-                className="max-w-full max-h-full object-contain"
-                alt="Logo"
-                onError={(e) => {
-                  // si la URL falla, vuelve al logo por defecto
-                  (e.currentTarget as HTMLImageElement).src = '/images/logo.png';
-                }}
-              />
-            </div>
+                    <div className="h-28 bg-white rounded-2xl border border-gray-200 flex items-center justify-center overflow-hidden p-3">
+                      <img
+                        src={data.branding?.logoUrl || '/images/logo.png'}
+                        className="max-w-full max-h-full object-contain"
+                        alt="Logo"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/images/logo.png';
+                        }}
+                      />
+                    </div>
 
-            <div className="mt-3 text-xs text-gray-500">
-              Tip: usa una URL pública (GitHub raw, Cloudinary, etc.). Formatos: PNG/JPG/WebP.
-            </div>
-          </div>
+                    <div className="mt-3 text-xs text-gray-500">
+                      Tip: usa una URL pública (GitHub raw, Cloudinary, etc.). Formatos:
+                      PNG/JPG/WebP.
+                    </div>
+                  </div>
 
-          {/* Controles */}
-          <div className="space-y-4">
-            {/* Subida local */}
-            <div>
-              <input
-                type="file"
-                className="hidden"
-                id="logo-upload"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(e) =>
-                  handleFileUpload(e, (url) =>
-                    updateData({
-                      ...data,
-                      branding: { ...(data.branding ?? {}), logoUrl: url },
-                    })
-                  )
-                }
-              />
+                  {/* Controles */}
+                  <div className="space-y-4">
+                    {/* Subida local */}
+                    <div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        id="logo-upload"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={(e) =>
+                          handleFileUpload(e, (url) =>
+                            updateData({
+                              ...data,
+                              branding: { ...(data.branding ?? {}), logoUrl: url },
+                            })
+                          )
+                        }
+                      />
 
-              <button
-                onClick={() => document.getElementById('logo-upload')?.click()}
-                className="bg-black text-white px-8 py-3 rounded-xl font-black text-xs hover:bg-brand transition-all flex items-center gap-2"
-                type="button"
-              >
-                <Upload size={16} /> SUBIR LOGO (LOCAL)
-              </button>
-            </div>
+                      <button
+                        onClick={() => document.getElementById('logo-upload')?.click()}
+                        className="bg-black text-white px-8 py-3 rounded-xl font-black text-xs hover:bg-brand transition-all flex items-center gap-2"
+                        type="button"
+                      >
+                        <Upload size={16} /> SUBIR LOGO (LOCAL)
+                      </button>
+                    </div>
 
-            {/* URL del logo */}
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase text-gray-400">
-                Logo (URL)
-              </label>
+                    {/* URL del logo */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase text-gray-400">
+                        Logo (URL)
+                      </label>
 
-              <input
-                className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-sm outline-none focus:border-brand"
-                value={(data.branding?.logoUrl ?? '')}
-                onChange={(e) =>
-                  updateData({
-                    ...data,
-                    branding: { ...(data.branding ?? {}), logoUrl: e.target.value },
-                  })
-                }
-                placeholder="https://.../logo.png"
-              />
+                      <input
+                        className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-sm outline-none focus:border-brand"
+                        value={(data.branding?.logoUrl ?? '')}
+                        onChange={(e) =>
+                          updateData({
+                            ...data,
+                            branding: { ...(data.branding ?? {}), logoUrl: e.target.value },
+                          })
+                        }
+                        placeholder="https://.../logo.png"
+                      />
 
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  className="px-5 py-2 rounded-xl font-black text-xs bg-white border-2 border-black hover:bg-gray-50 transition"
-                  onClick={() =>
-                    updateData({
-                      ...data,
-                      branding: { ...(data.branding ?? {}), logoUrl: '' },
-                    })
-                  }
-                  title="Vaciar URL del logo"
-                >
-                  LIMPIAR URL
-                </button>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          className="px-5 py-2 rounded-xl font-black text-xs bg-white border-2 border-black hover:bg-gray-50 transition"
+                          onClick={() =>
+                            updateData({
+                              ...data,
+                              branding: { ...(data.branding ?? {}), logoUrl: '' },
+                            })
+                          }
+                          title="Vaciar URL del logo"
+                        >
+                          LIMPIAR URL
+                        </button>
 
-                <button
-                  type="button"
-                  className="px-5 py-2 rounded-xl font-black text-xs bg-black text-white hover:bg-brand transition flex items-center gap-2"
-                  onClick={() => {
-                    // fuerza re-render por si pegaste URL y quieres “probarla”
-                    updateData({
-                      ...data,
-                      branding: { ...(data.branding ?? {}), logoUrl: (data.branding?.logoUrl ?? '').trim() },
-                    });
-                  }}
-                  title="Aplicar URL"
-                >
-                  <RefreshCw size={14} /> USAR URL
-                </button>
+                        <button
+                          type="button"
+                          className="px-5 py-2 rounded-xl font-black text-xs bg-black text-white hover:bg-brand transition flex items-center gap-2"
+                          onClick={() => {
+                            updateData({
+                              ...data,
+                              branding: {
+                                ...(data.branding ?? {}),
+                                logoUrl: (data.branding?.logoUrl ?? '').trim(),
+                              },
+                            });
+                          }}
+                          title="Aplicar URL"
+                        >
+                          <RefreshCw size={14} /> USAR URL
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Texto inferior (Footer) */}
+              <div className="space-y-3 pt-6 border-t border-gray-100">
+                <h3 className="text-xl font-black uppercase text-gray-400 flex items-center gap-2">
+                  <Type /> TEXTO INFERIOR (FOOTER)
+                </h3>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-gray-400">
+                    Frase del pie de página
+                  </label>
+
+                  <input
+                    className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-sm outline-none focus:border-brand"
+                    value={(data.branding?.footerTagline ?? '')}
+                    onChange={(e) =>
+                      updateData({
+                        ...data,
+                        branding: { ...(data.branding ?? {}), footerTagline: e.target.value },
+                      })
+                    }
+                    placeholder="Líderes en seguridad inteligente para PYMES."
+                  />
+
+                  <div className="text-xs text-gray-500">
+                    Si lo dejas vacío, puedes mantener un texto por defecto en el Footer.
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Texto inferior (Footer) */}
-      <div className="space-y-3 pt-6 border-t border-gray-100">
-        <h3 className="text-xl font-black uppercase text-gray-400 flex items-center gap-2">
-          <Type /> TEXTO INFERIOR (FOOTER)
-        </h3>
-
-        <div className="space-y-2">
-          <label className="text-xs font-black uppercase text-gray-400">
-            Frase del pie de página
-          </label>
-
-          <input
-            className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-sm outline-none focus:border-brand"
-            value={(data.branding?.footerTagline ?? '')}
-            onChange={(e) =>
-              updateData({
-                ...data,
-                branding: { ...(data.branding ?? {}), footerTagline: e.target.value },
-              })
-            }
-            placeholder="Líderes en seguridad inteligente para PYMES."
-          />
-
-          <div className="text-xs text-gray-500">
-            Si lo dejas vacío, puedes mantener un texto por defecto en el Footer.
-          </div>
-        </div>
-      </div>
-    </div>
-  )}
-</main>
-
+          )}
 
           {/* TAB: PAGES */}
           {activeTab === 'pages' && (
@@ -510,7 +513,7 @@ const AdminDashboard = () => {
                     </button>
                   </div>
 
-                  {/* HOME (solo hero bg + featured para compilar, mantiene tu lógica) */}
+                  {/* HOME */}
                   {activePageEditor === 'home' && (
                     <div className="space-y-12">
                       <div className="p-8 bg-gray-50 rounded-3xl space-y-6">
@@ -579,7 +582,9 @@ const AdminDashboard = () => {
                                 }
                               />
                               <button
-                                onClick={() => document.getElementById('home-featured-upload')?.click()}
+                                onClick={() =>
+                                  document.getElementById('home-featured-upload')?.click()
+                                }
                                 className="bg-black text-white px-8 py-3 rounded-xl font-black text-xs hover:bg-brand transition-all flex items-center gap-2"
                               >
                                 <Upload size={16} /> CAMBIAR FOTO (LOCAL)
@@ -605,7 +610,9 @@ const AdminDashboard = () => {
                               </div>
 
                               {uploadStatus && (
-                                <div className="text-xs font-black text-gray-600">{uploadStatus}</div>
+                                <div className="text-xs font-black text-gray-600">
+                                  {uploadStatus}
+                                </div>
                               )}
 
                               <input
@@ -677,7 +684,7 @@ const AdminDashboard = () => {
                     </div>
                   )}
 
-                  {/* ABOUT (mínimo para compilar) */}
+                  {/* ABOUT */}
                   {activePageEditor === 'about' && (
                     <div className="p-8 bg-gray-50 rounded-3xl space-y-6">
                       <h4 className="text-xl font-black uppercase text-brand flex items-center gap-2">
@@ -685,22 +692,32 @@ const AdminDashboard = () => {
                       </h4>
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <label className="text-xs font-black uppercase text-gray-400">Título</label>
+                          <label className="text-xs font-black uppercase text-gray-400">
+                            Título
+                          </label>
                           <input
                             className="w-full bg-white border-2 p-4 rounded-xl font-black outline-none"
                             value={data.about?.title ?? ''}
                             onChange={(e) =>
-                              updateData({ ...data, about: { ...(data.about ?? {}), title: e.target.value } })
+                              updateData({
+                                ...data,
+                                about: { ...(data.about ?? {}), title: e.target.value },
+                              })
                             }
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-xs font-black uppercase text-gray-400">Contenido</label>
+                          <label className="text-xs font-black uppercase text-gray-400">
+                            Contenido
+                          </label>
                           <textarea
                             className="w-full bg-white border-2 p-4 rounded-xl font-bold outline-none h-28"
                             value={data.about?.content ?? ''}
                             onChange={(e) =>
-                              updateData({ ...data, about: { ...(data.about ?? {}), content: e.target.value } })
+                              updateData({
+                                ...data,
+                                about: { ...(data.about ?? {}), content: e.target.value },
+                              })
                             }
                           />
                         </div>
@@ -708,10 +725,9 @@ const AdminDashboard = () => {
                     </div>
                   )}
 
-                  {/* ✅ EQUIPMENT (ADMIN REAL: usa catalog.products + catalog.categories) */}
+                  {/* ✅ EQUIPMENT */}
                   {activePageEditor === 'equipment' && (
                     <div className="space-y-12">
-                      {/* Política / textos */}
                       <div className="p-8 bg-black text-white rounded-3xl space-y-6">
                         <h4 className="text-xl font-black uppercase text-yellow-400 flex items-center gap-2">
                           <DollarSign /> Política de Precios e Instalación
@@ -754,7 +770,6 @@ const AdminDashboard = () => {
                         </div>
                       </div>
 
-                      {/* Catálogo real */}
                       <div className="space-y-8">
                         <h4 className="text-2xl font-black uppercase flex items-center gap-2 text-brand">
                           <PlusCircle /> Catálogo de Equipos
@@ -1011,9 +1026,6 @@ export default AdminDashboard;
 
 /* =======================================================================================
    EQUIPMENT ADMIN EDITOR (catalog.products)
-   - Preview arriba + formulario abajo
-   - Edita: name, brand, model, sku, priceNet, categoryId, subcategoryId, features, imageUrl,
-            datasheetUrl, videoUrl, active
    ======================================================================================= */
 
 type CatalogCategory = { id: string; name: string; subcategories?: { id: string; name: string }[] };
@@ -1128,7 +1140,11 @@ function EquipmentAdminEditorCatalog(props: {
                   {p.categoryId} {p.subcategoryId ? `• ${p.subcategoryId}` : ''}
                 </div>
                 <div className="text-[10px] font-black">
-                  {p.active ? <span className="text-green-600">Activo</span> : <span className="text-gray-400">Inactivo</span>}
+                  {p.active ? (
+                    <span className="text-green-600">Activo</span>
+                  ) : (
+                    <span className="text-gray-400">Inactivo</span>
+                  )}
                 </div>
               </button>
             ))}
@@ -1295,7 +1311,14 @@ function EquipmentAdminEditorCatalog(props: {
                   <textarea
                     className="w-full bg-white p-3 rounded-xl border-2 font-medium text-sm min-h-[120px]"
                     value={(selected.features || []).join('\n')}
-                    onChange={(e) => updateProduct({ features: e.target.value.split('\n').map((s) => s.trim()).filter(Boolean) })}
+                    onChange={(e) =>
+                      updateProduct({
+                        features: e.target.value
+                          .split('\n')
+                          .map((s) => s.trim())
+                          .filter(Boolean),
+                      })
+                    }
                   />
                 </div>
 
