@@ -185,6 +185,23 @@
     ],
     "products": [
       {
+        "id": "1771387040915",
+        "name": "PRUEBA EQUIPO 1",
+        "brand": "",
+        "model": "",
+        "sku": "",
+        "categoryId": "camaras",
+        "subcategoryId": "",
+        "priceNet": 30000,
+        "features": [
+          "..."
+        ],
+        "imageUrl": "https://github.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/blob/main/public/images/camara-ip-4mp-wifi-dual-light-30m-ds-2cv1043g2-lidwf-28mm-b-hikvision.jpg?raw=true",
+        "datasheetUrl": "",
+        "videoUrl": "",
+        "active": true
+      },
+      {
         "id": "prod-1",
         "name": "Cámara Bullet Solar 4K",
         "brand": "Genérica",
@@ -225,14 +242,14 @@
   },
   "equipment": [
     {
-      "id": "1771387040915",
-      "title": "PRUEBA EQUIPO 1",
+      "id": "1771389750092",
+      "title": "EJEMPLO CAMARA 2",
       "category": "Cámaras",
       "description": "...",
-      "price": 30000,
+      "price": 100,
       "fileUrl": "",
       "videoUrl": "",
-      "imageUrl": "https://github.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/blob/main/public/images/camara-ip-4mp-wifi-dual-light-30m-ds-2cv1043g2-lidwf-28mm-b-hikvision.jpg?raw=true"
+      "imageUrl": ""
     }
   ],
   "projects": [
@@ -293,5 +310,6 @@
     "owner": "marcelobarriaar-sketch",
     "repo": "https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026",
     "branch": "main"
-  }
+  },
+  "__equipmentMigrated": true
 }
