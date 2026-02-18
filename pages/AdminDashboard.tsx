@@ -283,90 +283,193 @@ const AdminDashboard = () => {
         </aside>
 
         {/* MAIN */}
-        <main className="md:col-span-3 space-y-10">
-          {/* TAB: BRANDING (solo lo esencial para compilar) */}
-          {activeTab === 'branding' && (
-            <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
-              <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-brand">
-                <Palette /> MARCA Y ESTILO
-              </h2>
+<main className="md:col-span-3 space-y-10">
+  {/* TAB: BRANDING (solo lo esencial para compilar) */}
+  {activeTab === 'branding' && (
+    <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-12 animate-in fade-in duration-500">
+      <h2 className="text-3xl font-black uppercase flex items-center gap-4 text-brand">
+        <Palette /> MARCA Y ESTILO
+      </h2>
 
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase text-gray-400">
-                    Nombre de la Pyme
-                  </label>
-                  <input
-                    className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-xl outline-none focus:border-brand"
-                    value={(data.branding?.siteName ?? '')}
-                    onChange={(e) =>
-                      updateData({
-                        ...data,
-                        branding: { ...(data.branding ?? {}), siteName: e.target.value },
-                      })
-                    }
-                  />
-                </div>
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400">
+            Nombre de la Pyme
+          </label>
+          <input
+            className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-xl outline-none focus:border-brand"
+            value={(data.branding?.siteName ?? '')}
+            onChange={(e) =>
+              updateData({
+                ...data,
+                branding: { ...(data.branding ?? {}), siteName: e.target.value },
+              })
+            }
+          />
+        </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase text-gray-400">
-                    Color Primario
-                  </label>
-                  <div className="flex gap-4 items-center">
-                    <input
-                      type="color"
-                      className="w-12 h-12 rounded-lg cursor-pointer"
-                      value={(data.branding?.primaryColor ?? '#b51a00')}
-                      onChange={(e) =>
-                        updateData({
-                          ...data,
-                          branding: { ...(data.branding ?? {}), primaryColor: e.target.value },
-                        })
-                      }
-                    />
-                    <span className="font-mono text-xs">{data.branding?.primaryColor}</span>
-                  </div>
-                </div>
-              </div>
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400">
+            Color Primario
+          </label>
+          <div className="flex gap-4 items-center">
+            <input
+              type="color"
+              className="w-12 h-12 rounded-lg cursor-pointer"
+              value={(data.branding?.primaryColor ?? '#b51a00')}
+              onChange={(e) =>
+                updateData({
+                  ...data,
+                  branding: { ...(data.branding ?? {}), primaryColor: e.target.value },
+                })
+              }
+            />
+            <span className="font-mono text-xs">{data.branding?.primaryColor}</span>
+          </div>
+        </div>
+      </div>
 
-              {/* Logo (base64 compat) */}
-              <div className="space-y-3 pt-6 border-t border-gray-100">
-                <h3 className="text-xl font-black uppercase text-gray-400 flex items-center gap-2">
-                  <IconImage /> LOGO
-                </h3>
+      {/* Logo (local + URL) */}
+      <div className="space-y-3 pt-6 border-t border-gray-100">
+        <h3 className="text-xl font-black uppercase text-gray-400 flex items-center gap-2">
+          <IconImage /> LOGO
+        </h3>
 
-                <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center p-2 border-2 border-dashed border-gray-300 overflow-hidden">
-                    <img
-                      src={data.branding?.logoUrl || '/images/logo.png'}
-                      className="max-w-full max-h-full object-contain"
-                      alt="Logo"
-                    />
-                  </div>
+        <div className="grid md:grid-cols-2 gap-6 items-start">
+          {/* Preview */}
+          <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 p-4">
+            <div className="text-xs font-black uppercase text-gray-400 mb-3">Vista previa</div>
 
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      className="hidden"
-                      id="logo-upload"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={(e) =>
-                        handleFileUpload(e, (url) =>
-                          updateData({ ...data, branding: { ...(data.branding ?? {}), logoUrl: url } })
-                        )
-                      }
-                    />
-                    <button
-                      onClick={() => document.getElementById('logo-upload')?.click()}
-                      className="bg-black text-white px-8 py-3 rounded-xl font-black text-xs hover:bg-brand transition-all flex items-center gap-2"
-                    >
-                      <Upload size={16} /> SUBIR LOGO (LOCAL)
-                    </button>
-                  </div>
-                </div>
+            <div className="h-28 bg-white rounded-2xl border border-gray-200 flex items-center justify-center overflow-hidden p-3">
+              <img
+                src={data.branding?.logoUrl || '/images/logo.png'}
+                className="max-w-full max-h-full object-contain"
+                alt="Logo"
+                onError={(e) => {
+                  // si la URL falla, vuelve al logo por defecto
+                  (e.currentTarget as HTMLImageElement).src = '/images/logo.png';
+                }}
+              />
+            </div>
+
+            <div className="mt-3 text-xs text-gray-500">
+              Tip: usa una URL pública (GitHub raw, Cloudinary, etc.). Formatos: PNG/JPG/WebP.
+            </div>
+          </div>
+
+          {/* Controles */}
+          <div className="space-y-4">
+            {/* Subida local */}
+            <div>
+              <input
+                type="file"
+                className="hidden"
+                id="logo-upload"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) =>
+                  handleFileUpload(e, (url) =>
+                    updateData({
+                      ...data,
+                      branding: { ...(data.branding ?? {}), logoUrl: url },
+                    })
+                  )
+                }
+              />
+
+              <button
+                onClick={() => document.getElementById('logo-upload')?.click()}
+                className="bg-black text-white px-8 py-3 rounded-xl font-black text-xs hover:bg-brand transition-all flex items-center gap-2"
+                type="button"
+              >
+                <Upload size={16} /> SUBIR LOGO (LOCAL)
+              </button>
+            </div>
+
+            {/* URL del logo */}
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase text-gray-400">
+                Logo (URL)
+              </label>
+
+              <input
+                className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-sm outline-none focus:border-brand"
+                value={(data.branding?.logoUrl ?? '')}
+                onChange={(e) =>
+                  updateData({
+                    ...data,
+                    branding: { ...(data.branding ?? {}), logoUrl: e.target.value },
+                  })
+                }
+                placeholder="https://.../logo.png"
+              />
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  className="px-5 py-2 rounded-xl font-black text-xs bg-white border-2 border-black hover:bg-gray-50 transition"
+                  onClick={() =>
+                    updateData({
+                      ...data,
+                      branding: { ...(data.branding ?? {}), logoUrl: '' },
+                    })
+                  }
+                  title="Vaciar URL del logo"
+                >
+                  LIMPIAR URL
+                </button>
+
+                <button
+                  type="button"
+                  className="px-5 py-2 rounded-xl font-black text-xs bg-black text-white hover:bg-brand transition flex items-center gap-2"
+                  onClick={() => {
+                    // fuerza re-render por si pegaste URL y quieres “probarla”
+                    updateData({
+                      ...data,
+                      branding: { ...(data.branding ?? {}), logoUrl: (data.branding?.logoUrl ?? '').trim() },
+                    });
+                  }}
+                  title="Aplicar URL"
+                >
+                  <RefreshCw size={14} /> USAR URL
+                </button>
               </div>
             </div>
-          )}
+          </div>
+        </div>
+      </div>
+
+      {/* Texto inferior (Footer) */}
+      <div className="space-y-3 pt-6 border-t border-gray-100">
+        <h3 className="text-xl font-black uppercase text-gray-400 flex items-center gap-2">
+          <Type /> TEXTO INFERIOR (FOOTER)
+        </h3>
+
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase text-gray-400">
+            Frase del pie de página
+          </label>
+
+          <input
+            className="w-full bg-gray-50 border-2 p-4 rounded-xl font-black text-sm outline-none focus:border-brand"
+            value={(data.branding?.footerTagline ?? '')}
+            onChange={(e) =>
+              updateData({
+                ...data,
+                branding: { ...(data.branding ?? {}), footerTagline: e.target.value },
+              })
+            }
+            placeholder="Líderes en seguridad inteligente para PYMES."
+          />
+
+          <div className="text-xs text-gray-500">
+            Si lo dejas vacío, puedes mantener un texto por defecto en el Footer.
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+</main>
+
 
           {/* TAB: PAGES */}
           {activeTab === 'pages' && (
