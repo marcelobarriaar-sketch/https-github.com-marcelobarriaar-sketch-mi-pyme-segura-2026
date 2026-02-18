@@ -232,16 +232,22 @@
       "category": "Cámaras",
       "price": 89990
     },
-    {
-      "id": "1771381180598",
-      "title": "Cámaras IP ",
-      "category": "",
-      "description": "...",
-      "price": 10,
-      "fileUrl": "",
-      "videoUrl": "",
-      "imageUrl": ""
-    }
+   {
+  "id": "prod-2",
+  "name": "Cámaras IP",
+  "brand": "Genérica",
+  "model": "-",
+  "sku": "",
+  "categoryId": "camaras",
+  "subcategoryId": "ip",
+  "priceNet": 10,
+  "features": ["..."],
+  "imageUrl": "",
+  "datasheetUrl": "",
+  "videoUrl": "",
+  "active": true
+}
+
   ],
   "projects": [
     {
