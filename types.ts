@@ -23,10 +23,11 @@ export type Branding = {
   fontFamily: string;
   globalBackground: string;
 
-  // ✅ NUEVOS (opcionales) — usados por AdminDashboard
-  footerText?: string;
-  footerSubText?: string;
+  // ✅ NUEVOS
+  footerTagline?: string; // "Líderes en seguridad inteligente para PYMES."
+  logoUrlAlt?: string;    // opcional, si quieres guardar “logo url alternativo”
 };
+
 
 // =========================
 // WHATSAPP
