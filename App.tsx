@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation, useParams } from 'react-router-dom';
-import { 
-  ShieldCheck, 
-  Menu, 
-  X, 
-  Settings, 
-  Lock, 
+import {
+  ShieldCheck,
+  Menu,
+  X,
+  Settings,
+  Lock,
   Key,
   LogOut,
   Phone,
@@ -28,18 +27,22 @@ import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard';
 import { SiteData, AdminState } from './types';
 
-const RED_LOCK_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB8klEQVR4nO2YvUoDQRSFv7NBEAsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsL/8A3vH8K6R0fXNoAAAAASUVORK5CYII=";
+const RED_LOCK_LOGO =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB8klEQVR4nO2YvUoDQRSFv7NBEAsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsL/8A3vH8K6R0fXNoAAAAASUVORK5CYII=";
 
 const INITIAL_DATA: SiteData = {
   branding: {
     siteName: "Mi Pyme Segura",
-    logoUrl: RED_LOCK_LOGO, 
+    logoUrl: RED_LOCK_LOGO,
     primaryColor: "#E02424",
     secondaryColor: "#111827",
     textColor: "#1F2937",
     siteNameColor: "#000000",
     fontFamily: "'Inter', sans-serif",
-    globalBackground: "#F9FAFB"
+    globalBackground: "#F9FAFB",
+
+    // ✅ NUEVO: editable desde el panel (Branding)
+    footerTagline: "Líderes en seguridad inteligente para PYMES."
   },
   whatsappConfig: {
     phoneNumber: "+56912345678",
@@ -47,23 +50,30 @@ const INITIAL_DATA: SiteData = {
   },
   home: {
     heroTitle: "SEGURIDAD INTELIGENTE PARA TU NEGOCIO",
-    heroSubtitle: "Protegemos tu inversión con tecnología de vanguardia y sistemas autónomos diseñados para la realidad de hoy.",
-    featuredImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1600",
+    heroSubtitle:
+      "Protegemos tu inversión con tecnología de vanguardia y sistemas autónomos diseñados para la realidad de hoy.",
+    featuredImage:
+      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1600",
     heroBgColor: "#111827",
     heroTextColor: "#FFFFFF"
   },
   about: {
     title: "Sobre Mi Pyme Segura",
-    content: "En Mi Pyme Segura llevamos más de una década dedicados a un propósito claro: proteger lo que más importa. Nacimos desde la realidad que nos rodea y desde el sur de Chile levantamos una propuesta seria, moderna y al alcance de todos.",
-    mission: "Proteger a personas, hogares y organizaciones mediante soluciones de seguridad inteligentes.",
-    vision: "Ser referentes en el sur de Chile en soluciones de seguridad inteligentes.",
-    aboutImage: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80&w=800",
+    content:
+      "En Mi Pyme Segura llevamos más de una década dedicados a un propósito claro: proteger lo que más importa. Nacimos desde la realidad que nos rodea y desde el sur de Chile levantamos una propuesta seria, moderna y al alcance de todos.",
+    mission:
+      "Proteger a personas, hogares y organizaciones mediante soluciones de seguridad inteligentes.",
+    vision:
+      "Ser referentes en el sur de Chile en soluciones de seguridad inteligentes.",
+    aboutImage:
+      "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80&w=800",
     bgColor: "#FFFFFF",
     textColor: "#1F2937"
   },
   contact: {
     title: "Hablemos de tu Seguridad",
-    description: "Estamos listos para blindar tu negocio. Completa el formulario o utiliza cualquiera de nuestros canales directos.",
+    description:
+      "Estamos listos para blindar tu negocio. Completa el formulario o utiliza cualquiera de nuestros canales directos.",
     phone: "+56912345678",
     email: "hola@mipymesegura.cl",
     address: "Av. Providencia 1234, Santiago",
@@ -73,9 +83,24 @@ const INITIAL_DATA: SiteData = {
     bgColor: "#F9FAFB",
     textColor: "#1F2937"
   },
-  equipmentHeader: { title: "Nuestro Equipamiento", subtitle: "Tecnología de última generación seleccionada por expertos.", bgColor: "#FFFFFF", textColor: "#1F2937" },
-  projectsHeader: { title: "Proyectos Instalados", subtitle: "Historias reales de seguridad y crecimiento.", bgColor: "#FFFFFF", textColor: "#1F2937" },
-  createProjectHeader: { title: "Crea tu propio Proyecto", subtitle: "Personaliza tu seguridad paso a paso.", bgColor: "#FFFFFF", textColor: "#1F2937" },
+  equipmentHeader: {
+    title: "Nuestro Equipamiento",
+    subtitle: "Tecnología de última generación seleccionada por expertos.",
+    bgColor: "#FFFFFF",
+    textColor: "#1F2937"
+  },
+  projectsHeader: {
+    title: "Proyectos Instalados",
+    subtitle: "Historias reales de seguridad y crecimiento.",
+    bgColor: "#FFFFFF",
+    textColor: "#1F2937"
+  },
+  createProjectHeader: {
+    title: "Crea tu propio Proyecto",
+    subtitle: "Personaliza tu seguridad paso a paso.",
+    bgColor: "#FFFFFF",
+    textColor: "#1F2937"
+  },
   aiSettings: {
     selectedModel: 'gemini-3-flash-preview',
     systemPrompt: 'Eres un asesor experto en seguridad para "Mi Pyme Segura".',
@@ -95,16 +120,38 @@ const INITIAL_DATA: SiteData = {
     {
       id: 'pr1',
       title: 'Instalación en Bodega Industrial',
-      description: 'Implementación de circuito cerrado con IA para detección de intrusos en tiempo real en la zona sur.',
-      imageUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200'
+      description:
+        'Implementación de circuito cerrado con IA para detección de intrusos en tiempo real en la zona sur.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200'
     }
   ],
   brands: [
-    { id: 'b1', name: 'Hikvision', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Hikvision_logo.svg/1200px-Hikvision_logo.svg.png' },
-    { id: 'b2', name: 'Dahua', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Dahua_Technology_logo.svg/1200px-Dahua_Technology_logo.svg.png' },
-    { id: 'b3', name: 'Ubiquiti', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Ubiquiti_Networks_logo.svg/1200px-Ubiquiti_Networks_logo.svg.png' },
-    { id: 'b4', name: 'Ruijie', logo: 'https://www.ruijienetworks.com/resources/kindeditor/attached/image/20211124/20211124112933_349.png' },
-    { id: 'b5', name: 'Bosch', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Bosch-logo.svg/1200px-Bosch-logo.svg.png' }
+    {
+      id: 'b1',
+      name: 'Hikvision',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Hikvision_logo.svg/1200px-Hikvision_logo.svg.png'
+    },
+    {
+      id: 'b2',
+      name: 'Dahua',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Dahua_Technology_logo.svg/1200px-Dahua_Technology_logo.svg.png'
+    },
+    {
+      id: 'b3',
+      name: 'Ubiquiti',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Ubiquiti_Networks_logo.svg/1200px-Ubiquiti_Networks_logo.svg.png'
+    },
+    {
+      id: 'b4',
+      name: 'Ruijie',
+      logo: 'https://www.ruijienetworks.com/resources/kindeditor/attached/image/20211124/20211124112933_349.png'
+    },
+    {
+      id: 'b5',
+      name: 'Bosch',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Bosch-logo.svg/1200px-Bosch-logo.svg.png'
+    }
   ],
   customPages: [],
   githubSettings: {
@@ -138,9 +185,12 @@ const CustomPage = () => {
   if (!page) return <div className="py-40 text-center font-black text-4xl uppercase">Página no encontrada</div>;
 
   return (
-    <div 
+    <div
       className="min-h-screen animate-in fade-in duration-500"
-      style={{ backgroundColor: page.bgColor || data.branding.globalBackground, color: page.textColor || data.branding.textColor }}
+      style={{
+        backgroundColor: page.bgColor || data.branding.globalBackground,
+        color: page.textColor || data.branding.textColor
+      }}
     >
       <div className="max-w-4xl mx-auto px-4 py-20">
         <h1 className="text-6xl font-black tracking-tighter mb-12 uppercase border-b-8 border-brand inline-block">
@@ -176,7 +226,7 @@ const FloatingSaveButton = () => {
           <CheckCircle size={18} /> ¡Sincronizado!
         </div>
       )}
-      <button 
+      <button
         onClick={handleSave}
         className="pointer-events-auto bg-brand text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all border-4 border-white group"
       >
@@ -190,11 +240,11 @@ const WhatsAppButton = () => {
   const { data } = useSiteData();
   const phone = data.whatsappConfig.phoneNumber.replace(/\D/g, '');
   const msg = encodeURIComponent(data.whatsappConfig.welcomeMessage);
-  
+
   return (
-    <a 
-      href={`https://wa.me/${phone}?text=${msg}`} 
-      target="_blank" 
+    <a
+      href={`https://wa.me/${phone}?text=${msg}`}
+      target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-8 left-8 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all border-4 border-white group flex items-center justify-center animate-bounce-slow"
     >
@@ -242,10 +292,17 @@ const Navbar = () => {
             <div className="flex items-center gap-2">
               <Link to="/" className="flex items-center group">
                 <div className="bg-brand p-1 rounded-lg transition-all duration-300 w-10 h-10 flex items-center justify-center overflow-hidden border border-white/20">
-                   <img src={data.branding.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
+                  <img
+                    src={data?.branding?.logoUrl || "/images/logo.png"}
+                    alt="Logo"
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/images/logo.png";
+                    }}
+                  />
                 </div>
                 <span className="ml-3 text-2xl font-black tracking-tighter uppercase text-site-name">
-                   {data.branding.siteName}
+                  {data?.branding?.siteName || "Mi Pyme Segura"}
                 </span>
               </Link>
             </div>
@@ -265,7 +322,7 @@ const Navbar = () => {
                   )}
                 </Link>
               ))}
-              
+
               {!isAdmin ? (
                 <button onClick={() => setShowLogin(true)} className="p-2 rounded-xl bg-gray-900 text-white hover:bg-brand transition-all">
                   <Lock size={16} />
@@ -302,15 +359,15 @@ const Navbar = () => {
               ))}
               <div className="pt-4 mt-4 border-t-2 border-gray-100 flex flex-col gap-3">
                 {!isAdmin ? (
-                  <button 
+                  <button
                     onClick={() => { setShowLogin(true); setIsOpen(false); }}
                     className="w-full flex items-center justify-center gap-3 bg-gray-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest"
                   >
                     <Lock size={18} /> Acceso Administrador
                   </button>
                 ) : (
-                  <Link 
-                    to="/admin" 
+                  <Link
+                    to="/admin"
                     onClick={() => setIsOpen(false)}
                     className="w-full flex items-center justify-center gap-3 bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest"
                   >
@@ -328,30 +385,34 @@ const Navbar = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-[3rem] p-10 max-w-sm w-full shadow-2xl border-4 border-black relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16" />
-            
-            <h2 className="text-4xl font-black text-black tracking-tight mb-2 uppercase">Acceso <span className="text-brand">Admin</span></h2>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Usa tus credenciales de seguridad</p>
-            
+
+            <h2 className="text-4xl font-black text-black tracking-tight mb-2 uppercase">
+              Acceso <span className="text-brand">Admin</span>
+            </h2>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">
+              Usa tus credenciales de seguridad
+            </p>
+
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Usuario</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-brand font-bold text-black" 
+                <input
+                  type="text"
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-brand font-bold text-black"
                   placeholder="Usuario"
                   value={credentials.user}
-                  onChange={e => setCredentials({...credentials, user: e.target.value})}
+                  onChange={e => setCredentials({ ...credentials, user: e.target.value })}
                   required
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Contraseña</label>
-                <input 
-                  type="password" 
-                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-brand font-bold text-black" 
+                <input
+                  type="password"
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-brand font-bold text-black"
                   placeholder="••••••••"
                   value={credentials.pass}
-                  onChange={e => setCredentials({...credentials, pass: e.target.value})}
+                  onChange={e => setCredentials({ ...credentials, pass: e.target.value })}
                   required
                 />
               </div>
@@ -359,9 +420,9 @@ const Navbar = () => {
               <button type="submit" className="w-full bg-black text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-brand transition-all shadow-xl">
                 ENTRAR AL SISTEMA
               </button>
-              <button 
+              <button
                 type="button"
-                onClick={() => setShowLogin(false)} 
+                onClick={() => setShowLogin(false)}
                 className="w-full text-gray-400 font-black text-[10px] uppercase pt-2 hover:text-black transition-colors"
               >
                 Cerrar Ventana
@@ -399,8 +460,7 @@ const Footer = () => {
           </div>
 
           <p className="text-gray-400 text-sm font-medium">
-            {data?.branding?.footerTagline?.trim() ||
-              "Líderes en seguridad inteligente para PYMES."}
+            {data?.branding?.footerTagline?.trim() || "Líderes en seguridad inteligente para PYMES."}
           </p>
         </div>
 
@@ -409,7 +469,6 @@ const Footer = () => {
     </footer>
   );
 };
-
 
 const App = () => {
   const [data, setData] = useState<SiteData | null>(null);
@@ -500,60 +559,9 @@ const App = () => {
               --site-name-color: ${data.branding.siteNameColor};
               --global-font: ${data.branding.fontFamily};
             }
-            
+
             body {
               font-family: var(--global-font);
               background-color: ${data.branding.globalBackground};
               color: var(--site-text);
             }
-
-            @keyframes bounce-slow {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-10px); }
-            }
-            .animate-bounce-slow { animation: bounce-slow 3s infinite ease-in-out; }
-            
-            .text-brand { color: var(--brand-primary) !important; }
-            .bg-brand { background-color: var(--brand-primary) !important; }
-            .border-brand { border-color: var(--brand-primary) !important; }
-            .text-site-name { color: var(--site-name-color) !important; }
-            .hover\\:text-brand:hover { color: var(--brand-primary) !important; }
-            .hover\\:bg-brand:hover { background-color: var(--brand-primary) !important; }
-            .hover\\:border-brand:hover { border-color: var(--brand-primary) !important; }
-            .focus\\:border-brand:focus { border-color: var(--brand-primary) !important; }
-            .selection\\:bg-brand::selection { background-color: var(--brand-primary); color: white; }
-          `}
-        </style>
-        
-        {isCloudSyncing && (
-          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-black text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest flex items-center gap-2 border border-white/20 shadow-2xl animate-in fade-in slide-in-from-top-4">
-            <Loader2 size={12} className="animate-spin text-brand" /> Sincronizando Cloud...
-          </div>
-        )}
-
-        <HashRouter>
-          <div className="min-h-screen flex flex-col relative selection:bg-brand selection:text-white">
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/equipment" element={<Equipment />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/create-project" element={<CreateProject />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/p/:slug" element={<CustomPage />} />
-              </Routes>
-            </main>
-            <Footer />
-            <FloatingSaveButton />
-            <WhatsAppButton />
-          </div>
-        </HashRouter>
-      </AdminContext.Provider>
-    </SiteDataContext.Provider>
-  );
-};
-
-export default App;
