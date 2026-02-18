@@ -183,44 +183,7 @@
         "subcategories": []
       }
     ],
-    "products": [
-      {
-        "id": "1771387040915",
-        "name": "PRUEBA EQUIPO 1",
-        "brand": "",
-        "model": "",
-        "sku": "",
-        "categoryId": "camaras",
-        "subcategoryId": "",
-        "priceNet": 30000,
-        "features": [
-          "..."
-        ],
-        "imageUrl": "https://github.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/blob/main/public/images/camara-ip-4mp-wifi-dual-light-30m-ds-2cv1043g2-lidwf-28mm-b-hikvision.jpg?raw=true",
-        "datasheetUrl": "",
-        "videoUrl": "",
-        "active": true
-      },
-      {
-        "id": "prod-1",
-        "name": "Cámara Bullet Solar 4K",
-        "brand": "Genérica",
-        "model": "4K-SOLAR-01",
-        "sku": "SOLAR-4K-01",
-        "categoryId": "camaras",
-        "subcategoryId": "ip",
-        "priceNet": 0,
-        "features": [
-          "Panel solar integrado",
-          "Conectividad 4G",
-          "Ideal para perímetros rurales"
-        ],
-        "imageUrl": "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&q=80&w=800",
-        "datasheetUrl": "",
-        "videoUrl": "",
-        "active": true
-      }
-    ]
+    "products": []
   },
   "projectsHeader": {
     "title": "Proyectos Instalados",
@@ -240,18 +203,7 @@
     "isBetaEnabled": false,
     "betaPrompt": "Asistente Beta."
   },
-  "equipment": [
-    {
-      "id": "1771389750092",
-      "title": "EJEMPLO CAMARA 2",
-      "category": "Cámaras",
-      "description": "...",
-      "price": 100,
-      "fileUrl": "",
-      "videoUrl": "",
-      "imageUrl": ""
-    }
-  ],
+  "equipment": [],
   "projects": [
     {
       "id": "1769460618466",
