@@ -183,7 +183,23 @@
         "subcategories": []
       }
     ],
-    "products": []
+    "products": [
+      {
+        "id": "prod-1771390651907",
+        "name": "Nuevo Producto",
+        "brand": "",
+        "model": "",
+        "sku": "",
+        "categoryId": "camaras",
+        "subcategoryId": "",
+        "priceNet": 0,
+        "features": [],
+        "imageUrl": "https://github.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/blob/main/public/images/camara_colorvu.png",
+        "datasheetUrl": "",
+        "videoUrl": "",
+        "active": true
+      }
+    ]
   },
   "projectsHeader": {
     "title": "Proyectos Instalados",
