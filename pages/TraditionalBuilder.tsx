@@ -1,6 +1,20 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Minus, Plus, CheckCircle2, MessageCircle, Sparkles, Info } from 'lucide-react';
+import {
+  ArrowLeft,
+  Minus,
+  Plus,
+  CheckCircle2,
+  MessageCircle,
+  Sparkles,
+  Info,
+  Shield,
+  Cable,
+  Wifi,
+  Cpu,
+  Zap,
+  BadgeCheck,
+} from 'lucide-react';
 import { useSiteData } from '../App';
 
 type BizType =
@@ -38,31 +52,34 @@ const containsAny = (text: string, words: string[]) => {
   return words.some((w) => t.includes(normalize(w)));
 };
 
-const bizOptions: Array<{ id: BizType; title: string; desc: string }> = [
-  { id: 'retail', title: 'Comercio / Retail', desc: 'Tienda, minimarket, local, ferretería, etc.' },
-  { id: 'office', title: 'Oficina / Corporativo', desc: 'Oficinas, recepción, cowork, empresa.' },
-  { id: 'warehouse', title: 'Bodega / Industria', desc: 'Galpones, bodegas, fábricas, patio.' },
-  { id: 'food', title: 'Restaurant / Café', desc: 'Salón, caja, cocina, terrazas.' },
-  { id: 'workshop', title: 'Taller / Servicio técnico', desc: 'Taller mecánico, vulca, herramientas.' },
-  { id: 'health', title: 'Centro de salud', desc: 'Clínica, consulta, dental, laboratorio.' },
-  { id: 'education', title: 'Educación', desc: 'Colegio, instituto, academia, salas.' },
-  { id: 'condo', title: 'Condominio / Comunidad', desc: 'Accesos, portería, espacios comunes.' },
-  { id: 'farm', title: 'Parcela / Campo / Obra', desc: 'Perímetro, portón, bodegas, solar.' },
-  { id: 'other', title: 'Otro', desc: 'No calza en ninguna o prefieres explicarlo.' },
+const toggleInArray = <T,>(arr: T[], value: T) =>
+  arr.includes(value) ? arr.filter((x) => x !== value) : [...arr, value];
+
+const bizOptions: Array<{ id: BizType; title: string; desc: string; icon: any }> = [
+  { id: 'retail', title: 'Comercio / Retail', desc: 'Tienda, minimarket, local, ferretería, etc.', icon: Shield },
+  { id: 'office', title: 'Oficina / Corporativo', desc: 'Oficinas, recepción, cowork, empresa.', icon: Cpu },
+  { id: 'warehouse', title: 'Bodega / Industria', desc: 'Galpones, bodegas, fábricas, patio.', icon: Cable },
+  { id: 'food', title: 'Restaurant / Café', desc: 'Salón, caja, cocina, terrazas.', icon: Zap },
+  { id: 'workshop', title: 'Taller / Servicio técnico', desc: 'Taller mecánico, vulca, herramientas.', icon: Cable },
+  { id: 'health', title: 'Centro de salud', desc: 'Clínica, consulta, dental, laboratorio.', icon: Shield },
+  { id: 'education', title: 'Educación', desc: 'Colegio, instituto, academia, salas.', icon: Cpu },
+  { id: 'condo', title: 'Condominio / Comunidad', desc: 'Accesos, portería, espacios comunes.', icon: Wifi },
+  { id: 'farm', title: 'Parcela / Campo / Obra', desc: 'Perímetro, portón, bodegas, solar.', icon: Wifi },
+  { id: 'other', title: 'Otro', desc: 'No calza en ninguna o prefieres explicarlo.', icon: Info },
 ];
 
-const priorityOptions: Array<{ id: Priority; title: string; desc: string }> = [
-  { id: 'price', title: 'Precio', desc: 'Lo más importante es cuidar el presupuesto.' },
-  { id: 'quality', title: 'Mejor imagen', desc: 'Prioridad: nitidez, detalle, mejor calidad.' },
-  { id: 'remote', title: 'Ver desde el celular', desc: 'Acceso remoto simple y estable.' },
-  { id: 'scalable', title: 'Ampliable a futuro', desc: 'Que pueda crecer sin rehacer todo.' },
-  { id: 'rugged', title: 'Resistente a clima', desc: 'Lluvia/viento/polvo: más robusto.' },
+const priorityOptions: Array<{ id: Priority; title: string; desc: string; icon: any }> = [
+  { id: 'price', title: 'Precio', desc: 'Cuidar el presupuesto.', icon: Zap },
+  { id: 'quality', title: 'Mejor imagen', desc: 'Nitidez y detalle.', icon: BadgeCheck },
+  { id: 'remote', title: 'Ver desde el celular', desc: 'Acceso remoto estable.', icon: Wifi },
+  { id: 'scalable', title: 'Ampliable a futuro', desc: 'Crecer sin rehacer.', icon: Cpu },
+  { id: 'rugged', title: 'Resistente a clima', desc: 'Más robusto.', icon: Shield },
 ];
 
-const internetOptions: Array<{ id: InternetType; title: string; desc: string }> = [
-  { id: 'fiber', title: 'Internet fijo (Fibra/Router)', desc: 'Tengo router con internet estable.' },
-  { id: '4g', title: 'Solo 4G', desc: 'Uso chip / router 4G.' },
-  { id: 'none', title: 'Sin internet (solo grabación local)', desc: 'No necesito ver remoto por ahora.' },
+const internetOptions: Array<{ id: InternetType; title: string; desc: string; icon: any }> = [
+  { id: 'fiber', title: 'Internet fijo (Fibra/Router)', desc: 'Router con internet estable.', icon: Wifi },
+  { id: '4g', title: 'Solo 4G', desc: 'Chip / router 4G.', icon: Wifi },
+  { id: 'none', title: 'Sin internet (solo grabación local)', desc: 'No necesito ver remoto.', icon: Cable },
 ];
 
 const distanceOptions: Array<{ id: AvgDistance; title: string; desc: string }> = [
@@ -107,14 +124,11 @@ const productText = (p: any) =>
     .join(' ');
 
 const isCamera = (p: any, cameraCategoryIds: string[]) => {
-  // Prefer tags si existen
   if (anyTag(p, ['camera_ip', 'camera_analog'])) return true;
 
-  // Si hay categorías tipo cámaras
   const catOk = cameraCategoryIds.length > 0 ? cameraCategoryIds.includes(String(p?.categoryId ?? '')) : false;
   if (catOk) return true;
 
-  // Fallback por texto
   const text = productText(p);
   return containsAny(text, ['camara', 'camera', 'cctv', 'dome', 'bullet', 'ptz', 'turret']);
 };
@@ -129,22 +143,11 @@ const pickCheapest = (items: any[]) => {
 const findByTagsOrKeywords = (all: any[], opts: { tags?: string[]; anyTags?: string[]; keywords?: string[] }) => {
   const active = all.filter(isActive);
 
-  const byTags =
-    opts.tags && opts.tags.length
-      ? active.filter((p) => hasAllTags(p, opts.tags!))
-      : [];
-
-  const byAnyTags =
-    opts.anyTags && opts.anyTags.length
-      ? active.filter((p) => anyTag(p, opts.anyTags!))
-      : [];
-
+  const byTags = opts.tags && opts.tags.length ? active.filter((p) => hasAllTags(p, opts.tags!)) : [];
+  const byAnyTags = opts.anyTags && opts.anyTags.length ? active.filter((p) => anyTag(p, opts.anyTags!)) : [];
   const byKeywords =
-    opts.keywords && opts.keywords.length
-      ? active.filter((p) => containsAny(productText(p), opts.keywords!))
-      : [];
+    opts.keywords && opts.keywords.length ? active.filter((p) => containsAny(productText(p), opts.keywords!)) : [];
 
-  // Preferimos match por tags; si no, keywords
   const merged = (byTags.length ? byTags : byAnyTags.length ? byAnyTags : byKeywords).filter(Boolean);
   return pickCheapest(merged);
 };
@@ -154,24 +157,24 @@ const channelsTag = (n: number) => `channels_${n}`;
 // --- Recomendador ------------------------------------------------------------
 
 type BuilderAnswers = {
-  priority: Priority | null;
+  priority: Priority[];
   internetType: InternetType | null;
   recorderSameAsInternet: YesNoNA | null;
   avgDistance: AvgDistance | null;
   cableDifficulty: CableDifficulty | null;
   smartAlerts: boolean;
   wantUps: boolean;
-  nightMode: NightMode | null;
+  nightMode: NightMode[];
 };
 
 type SuggestItem = { id: string; qty: number; reason: string; bucket: 'required' | 'recommended' | 'optional' };
 
 const inferSystemType = (a: BuilderAnswers) => {
-  // Heurística pro: el cliente responde “problema”, tú resuelves “tecnología”
+  const pr = a.priority ?? [];
   if (a.smartAlerts) return 'ip' as const;
-  if (a.priority === 'quality' || a.priority === 'scalable' || a.cableDifficulty === 'hard') return 'ip' as const;
-  if (a.priority === 'price' && (a.avgDistance === '0-30' || a.avgDistance === '30-70')) return 'analog' as const;
-  if (a.internetType === 'none') return 'analog' as const; // por costo/operación típica
+  if (pr.includes('quality') || pr.includes('scalable') || a.cableDifficulty === 'hard') return 'ip' as const;
+  if (pr.includes('price') && (a.avgDistance === '0-30' || a.avgDistance === '30-70')) return 'analog' as const;
+  if (a.internetType === 'none') return 'analog' as const;
   return 'ip' as const;
 };
 
@@ -179,11 +182,8 @@ const pickRecorder = (all: any[], system: 'ip' | 'analog', cams: number) => {
   const channels = cams <= 4 ? 4 : cams <= 8 ? 8 : cams <= 16 ? 16 : 32;
 
   if (system === 'ip') {
-    // Prefer tags: recorder_nvr + channels_X
     const byTags = findByTagsOrKeywords(all, { tags: ['recorder_nvr', channelsTag(channels)] });
     if (byTags) return byTags;
-
-    // Fallback keywords
     return findByTagsOrKeywords(all, {
       keywords: ['nvr', 'grabador ip', 'grabador', 'network video recorder', `${channels}ch`, `${channels} canales`],
     });
@@ -203,11 +203,8 @@ const pickSwitch = (all: any[], cams: number, preferPoe: boolean) => {
   if (preferPoe) {
     const byTags = findByTagsOrKeywords(all, { tags: ['switch_poe', `switch_${ports}p`] });
     if (byTags) return byTags;
-
-    // Si no hay tag de tamaño, al menos PoE
     const anyPoe = findByTagsOrKeywords(all, { anyTags: ['switch_poe'] });
     if (anyPoe) return anyPoe;
-
     return findByTagsOrKeywords(all, { keywords: ['switch poe', 'poe switch'] });
   }
 
@@ -227,8 +224,9 @@ const pickPowerSupply12v5a = (all: any[]) => {
 };
 
 const pickWirelessLink = (all: any[]) => {
-  // Prefer kit/pair si existe; si no, 2 unidades
-  const kit = findByTagsOrKeywords(all, { anyTags: ['wireless_link_pair'] }) || findByTagsOrKeywords(all, { keywords: ['kit enlace', 'par enlace', 'punto a punto', 'ptp'] });
+  const kit =
+    findByTagsOrKeywords(all, { anyTags: ['wireless_link_pair'] }) ||
+    findByTagsOrKeywords(all, { keywords: ['kit enlace', 'par enlace', 'punto a punto', 'ptp'] });
   if (kit) return { product: kit, isKit: true };
 
   const unit =
@@ -251,7 +249,6 @@ const buildSuggestions = (products: any[], answers: BuilderAnswers, camerasCount
 
   const system = inferSystemType(answers);
 
-  // 1) Grabador (siempre requerido)
   const recorder = pickRecorder(products, system, camerasCount);
   if (recorder?.id) {
     suggestions.push({
@@ -262,9 +259,8 @@ const buildSuggestions = (products: any[], answers: BuilderAnswers, camerasCount
     });
   }
 
-  // 2) Switch / Fuentes según sistema
   if (system === 'ip') {
-    const preferPoe = answers.cableDifficulty !== 'easy' || answers.avgDistance !== '0-30' || answers.priority === 'scalable';
+    const preferPoe = answers.cableDifficulty !== 'easy' || answers.avgDistance !== '0-30' || answers.priority.includes('scalable');
     const sw = pickSwitch(products, camerasCount, preferPoe);
     if (sw?.id) {
       suggestions.push({
@@ -275,7 +271,6 @@ const buildSuggestions = (products: any[], answers: BuilderAnswers, camerasCount
       });
     }
   } else {
-    // Regla tuya: cada 3 cámaras -> 1 fuente 12V 5A (ajustable)
     const ps = pickPowerSupply12v5a(products);
     const qty = Math.max(1, Math.ceil(camerasCount / 3));
     if (ps?.id) {
@@ -288,7 +283,6 @@ const buildSuggestions = (products: any[], answers: BuilderAnswers, camerasCount
     }
   }
 
-  // 3) Enlaces si grabador e internet están en lugares distintos
   if (answers.recorderSameAsInternet === 'no') {
     const link = pickWirelessLink(products);
     if (link.product?.id) {
@@ -303,14 +297,6 @@ const buildSuggestions = (products: any[], answers: BuilderAnswers, camerasCount
     }
   }
 
-  // 4) Recomendados por noche
-  if (answers.nightMode === 'color') {
-    // Aquí no agregamos una cámara (porque el usuario ya eligió las cámaras),
-    // pero si tienes productos tipo “iluminación” o similares, podrías sugerir.
-    // Lo dejamos como guía sin forzar un producto.
-  }
-
-  // 5) UPS si quiere respaldo
   if (answers.wantUps) {
     const ups = pickUps(products);
     if (ups?.id) {
@@ -323,7 +309,6 @@ const buildSuggestions = (products: any[], answers: BuilderAnswers, camerasCount
     }
   }
 
-  // 6) Opcional: si distancia +100 o cable difícil, sugerir enlace aunque no lo haya marcado
   if ((answers.avgDistance === '100+' || answers.cableDifficulty === 'hard') && answers.recorderSameAsInternet !== 'no') {
     const link = pickWirelessLink(products);
     if (link.product?.id) {
@@ -339,23 +324,93 @@ const buildSuggestions = (products: any[], answers: BuilderAnswers, camerasCount
   return suggestions;
 };
 
+// --- UI helpers --------------------------------------------------------------
+
+const StepPill = ({ step, current }: { step: number; current: number }) => {
+  const done = step < current;
+  const active = step === current;
+
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className={[
+          'h-9 w-9 rounded-full grid place-items-center border font-black',
+          done ? 'bg-black text-white border-black' : active ? 'bg-yellow-400 text-black border-yellow-400' : 'bg-white text-gray-700 border-gray-200',
+        ].join(' ')}
+      >
+        {done ? <CheckCircle2 size={18} className="text-white" /> : step}
+      </div>
+      <div className="hidden sm:block">
+        <div className={['text-sm font-extrabold', active ? 'text-black' : done ? 'text-gray-900' : 'text-gray-500'].join(' ')}>
+          Paso {step}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CardButton = ({
+  selected,
+  onClick,
+  title,
+  desc,
+  icon: Icon,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  title: string;
+  desc: string;
+  icon?: any;
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className={[
+        'group text-left rounded-2xl border p-4 transition-all duration-200',
+        'bg-white shadow-[0_1px_0_rgba(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]',
+        selected ? 'border-black ring-2 ring-yellow-400/60' : 'border-gray-200 hover:border-gray-400',
+      ].join(' ')}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          {Icon ? (
+            <div
+              className={[
+                'h-10 w-10 rounded-xl grid place-items-center border',
+                selected ? 'bg-black border-black' : 'bg-gray-50 border-gray-200 group-hover:border-gray-300',
+              ].join(' ')}
+            >
+              <Icon size={18} className={selected ? 'text-yellow-400' : 'text-gray-700'} />
+            </div>
+          ) : null}
+
+          <div>
+            <div className="font-extrabold text-gray-900">{title}</div>
+            <div className="text-sm text-gray-600 mt-1">{desc}</div>
+          </div>
+        </div>
+
+        {selected ? <CheckCircle2 className="shrink-0 text-black" /> : null}
+      </div>
+    </button>
+  );
+};
+
 // --- Componente --------------------------------------------------------------
 
 export default function TraditionalBuilder() {
   const { data } = useSiteData() as any;
 
-  // ✅ Tu catálogo real (según Equipment.tsx)
   const catalog = (data as any).catalog ?? { categories: [], products: [] };
   const categories = (catalog.categories ?? []) as any[];
   const products = (catalog.products ?? []) as any[];
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
-  // Paso 1
   const [bizType, setBizType] = useState<BizType | null>(null);
 
-  // Paso 2 (nuevo)
-  const [priority, setPriority] = useState<Priority | null>(null);
+  // ✅ MULTISELECT
+  const [priority, setPriority] = useState<Priority[]>([]);
   const [internetType, setInternetType] = useState<InternetType | null>(null);
   const [recorderSameAsInternet, setRecorderSameAsInternet] = useState<YesNoNA | null>(null);
   const [avgDistance, setAvgDistance] = useState<AvgDistance | null>(null);
@@ -363,13 +418,11 @@ export default function TraditionalBuilder() {
   const [smartAlerts, setSmartAlerts] = useState(false);
   const [wantUps, setWantUps] = useState(false);
 
-  // Noche (se mantiene)
-  const [nightMode, setNightMode] = useState<NightMode | null>(null);
+  // ✅ MULTISELECT
+  const [nightMode, setNightMode] = useState<NightMode[]>([]);
 
-  // carrito: { [productId]: qty }  (ahora sirve para TODO: cámaras + equipos sugeridos)
   const [cart, setCart] = useState<Record<string, number>>({});
 
-  // Detectar categorías “cámaras” por nombre (si existen)
   const cameraCategoryIds = useMemo(() => {
     return categories
       .filter((c: any) => containsAny(c?.name, ['camara', 'camaras', 'cctv', 'camera']))
@@ -378,12 +431,15 @@ export default function TraditionalBuilder() {
 
   const activeProducts = useMemo(() => products.filter(isActive), [products]);
 
-  // Candidatos cámara (usa tags si existen; fallback por texto/categoría)
   const cameraCandidates = useMemo(() => {
     const base = activeProducts.filter((p: any) => isCamera(p, cameraCategoryIds));
 
-    // filtro por noche a color (si corresponde)
-    if (nightMode === 'color') {
+    const wantsColor = nightMode.includes('color');
+    const wantsBw = nightMode.includes('bw');
+
+    // Si marcó ambas (Color + BW), NO filtramos: mostramos todo.
+    // Si marcó solo color, filtramos por cámaras de noche a color.
+    if (wantsColor && !wantsBw) {
       return base.filter((p: any) => {
         if (anyTag(p, ['camera_color_night'])) return true;
         const text = productText(p);
@@ -391,12 +447,12 @@ export default function TraditionalBuilder() {
       });
     }
 
+    // Solo BW (o ambas, o nada): base.
     return base;
   }, [activeProducts, cameraCategoryIds, nightMode]);
 
   const cameraIdsSet = useMemo(() => new Set(cameraCandidates.map((p: any) => String(p?.id))), [cameraCandidates]);
 
-  // Items del carrito (todos)
   const cartItemsAll = useMemo(() => {
     const byId = new Map(activeProducts.map((p: any) => [String(p?.id), p]));
     return Object.entries(cart)
@@ -408,7 +464,6 @@ export default function TraditionalBuilder() {
       .filter(Boolean) as Array<{ p: any; qty: number }>;
   }, [cart, activeProducts]);
 
-  // Items cámara del carrito
   const cartItemsCameras = useMemo(() => {
     return cartItemsAll.filter((it) => cameraIdsSet.has(String(it.p?.id)));
   }, [cartItemsAll, cameraIdsSet]);
@@ -438,23 +493,35 @@ export default function TraditionalBuilder() {
   const canGoNext =
     (step === 1 && !!bizType) ||
     (step === 2 &&
-      !!nightMode &&
-      !!priority &&
+      nightMode.length > 0 &&
+      priority.length > 0 &&
       !!internetType &&
       !!avgDistance &&
       !!cableDifficulty &&
-      (!!recorderSameAsInternet || internetType === 'none')) ||
+      (internetType === 'none' ? true : !!recorderSameAsInternet)) ||
     (step === 3 && camerasCount > 0) ||
     step === 4;
 
-  // WhatsApp
   const phone = String(data?.whatsappConfig?.phoneNumber ?? '').replace(/\D/g, '');
   const waBase = phone ? `https://wa.me/${phone}` : 'https://wa.me/56900000000';
 
   const bizLabel = bizOptions.find((b) => b.id === bizType)?.title ?? '';
-  const nightLabel = nightMode === 'color' ? 'Color (noche a color)' : 'Blanco y negro (IR)';
 
-  const priorityLabel = priorityOptions.find((p) => p.id === priority)?.title ?? '';
+  const nightLabel =
+    nightMode.includes('color') && nightMode.includes('bw')
+      ? 'Color + Blanco y negro (IR)'
+      : nightMode.includes('color')
+      ? 'Color (noche a color)'
+      : 'Blanco y negro (IR)';
+
+  const priorityLabel =
+    priority.length > 0
+      ? priority
+          .map((id) => priorityOptions.find((p) => p.id === id)?.title)
+          .filter(Boolean)
+          .join(' + ')
+      : '';
+
   const internetLabel = internetOptions.find((i) => i.id === internetType)?.title ?? '';
   const distLabel = distanceOptions.find((d) => d.id === avgDistance)?.title ?? '';
   const diffLabel = difficultyOptions.find((d) => d.id === cableDifficulty)?.title ?? '';
@@ -478,7 +545,6 @@ export default function TraditionalBuilder() {
 
   const suggestions = useMemo(() => buildSuggestions(activeProducts, answers, camerasCount), [activeProducts, answers, camerasCount]);
 
-  // Para mostrar sugerencias con datos del producto
   const suggestionsWithProduct = useMemo(() => {
     const byId = new Map(activeProducts.map((p: any) => [String(p?.id), p]));
     return suggestions
@@ -503,14 +569,20 @@ export default function TraditionalBuilder() {
       'Hola! Quiero cotizar un proyecto TRADICIONAL en Mi Pyme Segura.',
       '',
       `Negocio: ${bizLabel || '—'}`,
-      `Prioridad: ${priorityLabel || '—'}`,
+      `Prioridad: ${priority.length ? priorityLabel : '—'}`,
       `Internet: ${internetLabel || '—'}`,
       `Grabador e internet mismo lugar: ${
-        internetType === 'none' ? 'No aplica (sin internet)' : recorderSameAsInternet === 'yes' ? 'Sí' : recorderSameAsInternet === 'no' ? 'No' : '—'
+        internetType === 'none'
+          ? 'No aplica (sin internet)'
+          : recorderSameAsInternet === 'yes'
+          ? 'Sí'
+          : recorderSameAsInternet === 'no'
+          ? 'No'
+          : '—'
       }`,
       `Distancia: ${distLabel || '—'}`,
       `Cableado: ${diffLabel || '—'}`,
-      `Noche: ${nightMode ? nightLabel : '—'}`,
+      `Noche: ${nightMode.length ? nightLabel : '—'}`,
       `Alertas inteligentes: ${smartAlerts ? 'Sí' : 'No'}`,
       `Respaldo energía (UPS): ${wantUps ? 'Sí' : 'No'}`,
       '',
@@ -531,6 +603,7 @@ export default function TraditionalBuilder() {
     return encodeURIComponent(lines.join('\n'));
   }, [
     bizLabel,
+    priority,
     priorityLabel,
     internetLabel,
     recorderSameAsInternet,
@@ -550,542 +623,667 @@ export default function TraditionalBuilder() {
   ]);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-b from-white via-white to-gray-50">
+      {/* background pattern */}
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.08]"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, #000 1px, transparent 0)',
+          backgroundSize: '26px 26px',
+        }}
+      />
+
+      <div className="relative max-w-6xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between gap-4">
           <Link to="/create-project" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-black">
             <ArrowLeft size={16} /> Volver
           </Link>
-          <div className="text-sm text-gray-500">
+
+          <div className="hidden sm:flex items-center gap-2">
+            <StepPill step={1} current={step} />
+            <div className="h-[2px] w-10 bg-gray-200 rounded-full" />
+            <StepPill step={2} current={step} />
+            <div className="h-[2px] w-10 bg-gray-200 rounded-full" />
+            <StepPill step={3} current={step} />
+            <div className="h-[2px] w-10 bg-gray-200 rounded-full" />
+            <StepPill step={4} current={step} />
+          </div>
+
+          <div className="text-sm text-gray-500 sm:hidden">
             Paso <span className="font-semibold text-black">{step}</span> de 4
           </div>
         </div>
 
-        <h1 className="mt-4 text-3xl md:text-4xl font-black text-gray-900">Crea tu Proyecto (Tradicional)</h1>
-        <p className="mt-2 text-gray-600">Arma tu cotización paso a paso. Total neto (sin IVA) + instalación.</p>
+        {/* Hero */}
+        <div className="mt-6 rounded-3xl border border-gray-200 bg-white/80 backdrop-blur shadow-[0_20px_60px_rgba(0,0,0,0.06)] overflow-hidden">
+          <div className="p-6 md:p-8">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <div className="inline-flex items-center gap-2 text-xs font-black px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                  <BadgeCheck size={14} /> Cotizador profesional
+                </div>
 
-        <div className="mt-8 rounded-2xl border border-gray-200 p-5 md:p-7 shadow-sm">
-          {step === 1 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">¿Qué negocio protegemos?</h2>
-              <p className="text-gray-600 mt-1">Elige la opción que más se parezca. Si no calza, pon “Otro”.</p>
+                <h1 className="mt-3 text-3xl md:text-4xl font-black text-red-600">Crea tu Proyecto (Tradicional)</h1>
+                <p className="mt-2 text-gray-600">
+                  Arma tu cotización paso a paso. Total neto (sin IVA) + instalación.
+                  <span className="ml-2 text-yellow-500 font-bold">Rápido</span>, claro y sin vueltas.
+                </p>
+              </div>
 
-              <div className="mt-5 grid md:grid-cols-2 gap-3">
-                {bizOptions.map((opt) => {
-                  const selected = bizType === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => setBizType(opt.id)}
-                      className={[
-                        'text-left rounded-2xl border p-4 transition',
-                        selected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                      ].join(' ')}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="font-extrabold text-gray-900">{opt.title}</div>
-                          <div className="text-sm text-gray-600 mt-1">{opt.desc}</div>
-                        </div>
-                        {selected && <CheckCircle2 className="shrink-0" />}
-                      </div>
-                    </button>
-                  );
-                })}
+              <div className="hidden md:block">
+                <div className="rounded-2xl border border-gray-200 bg-black text-white px-4 py-3">
+                  <div className="text-xs text-white/70">Instalación por cámara</div>
+                  <div className="text-xl font-black text-yellow-400">
+                    ${INSTALL_PER_CAMERA.toLocaleString('es-CL')}
+                  </div>
+                </div>
               </div>
             </div>
-          )}
 
-          {step === 2 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Cuéntanos del lugar</h2>
-              <p className="text-gray-600 mt-1">
-                Esto ayuda a recomendarte el sistema correcto (sin marearte con tecnicismos).
-              </p>
+            {/* progress bar */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>Inicio</span>
+                <span>Final</span>
+              </div>
+              <div className="mt-2 h-2 rounded-full bg-gray-100 overflow-hidden">
+                <div className="h-full rounded-full bg-black" style={{ width: `${(step / 4) * 100}%` }} />
+              </div>
+            </div>
+          </div>
 
-              {/* Prioridad */}
-              <div className="mt-6">
-                <div className="font-extrabold text-gray-900">¿Qué es lo más importante para ti?</div>
-                <div className="mt-3 grid md:grid-cols-2 gap-3">
-                  {priorityOptions.map((opt) => {
-                    const selected = priority === opt.id;
+          {/* content card */}
+          <div className="border-t border-gray-200 p-5 md:p-7 bg-white">
+            {step === 1 && (
+              <div>
+                <div className="text-xs font-black text-blue-700">PASO 1</div>
+                <h2 className="mt-1 text-xl font-black text-gray-900">¿Qué negocio protegemos?</h2>
+                <p className="text-gray-600 mt-1">Elige la opción que más se parezca. Si no calza, pon “Otro”.</p>
+
+                <div className="mt-5 grid md:grid-cols-2 gap-3">
+                  {bizOptions.map((opt) => {
+                    const selected = bizType === opt.id;
                     return (
-                      <button
+                      <CardButton
                         key={opt.id}
-                        onClick={() => setPriority(opt.id)}
-                        className={[
-                          'text-left rounded-2xl border p-4 transition',
-                          selected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                        ].join(' ')}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="font-extrabold text-gray-900">{opt.title}</div>
-                            <div className="text-sm text-gray-600 mt-1">{opt.desc}</div>
-                          </div>
-                          {selected && <CheckCircle2 className="shrink-0" />}
-                        </div>
-                      </button>
+                        selected={selected}
+                        onClick={() => setBizType(opt.id)}
+                        title={opt.title}
+                        desc={opt.desc}
+                        icon={opt.icon}
+                      />
                     );
                   })}
                 </div>
               </div>
+            )}
 
-              {/* Internet */}
-              <div className="mt-7">
-                <div className="font-extrabold text-gray-900">¿Qué internet tienes o tendrás?</div>
-                <div className="mt-3 grid md:grid-cols-3 gap-3">
-                  {internetOptions.map((opt) => {
-                    const selected = internetType === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        onClick={() => {
-                          setInternetType(opt.id);
-                          if (opt.id === 'none') setRecorderSameAsInternet('na');
-                        }}
-                        className={[
-                          'text-left rounded-2xl border p-4 transition',
-                          selected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                        ].join(' ')}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="font-extrabold text-gray-900">{opt.title}</div>
-                            <div className="text-sm text-gray-600 mt-1">{opt.desc}</div>
-                          </div>
-                          {selected && <CheckCircle2 className="shrink-0" />}
-                        </div>
-                      </button>
-                    );
-                  })}
+            {step === 2 && (
+              <div>
+                <div className="text-xs font-black text-blue-700">PASO 2</div>
+                <h2 className="mt-1 text-xl font-black text-gray-900">Cuéntanos del lugar</h2>
+                <p className="text-gray-600 mt-1">Esto ayuda a recomendarte el sistema correcto (sin marearte con tecnicismos).</p>
+
+                {/* Prioridad (MULTISELECT) */}
+                <div className="mt-6">
+                  <div className="text-xs font-black text-blue-700">ENFOQUE</div>
+                  <div className="mt-1 font-extrabold text-gray-900">¿Qué es lo más importante para ti? (puedes marcar más de una)</div>
+                  <div className="mt-3 grid md:grid-cols-2 gap-3">
+                    {priorityOptions.map((opt) => {
+                      const selected = priority.includes(opt.id);
+                      return (
+                        <CardButton
+                          key={opt.id}
+                          selected={selected}
+                          onClick={() => setPriority((prev) => toggleInArray(prev, opt.id))}
+                          title={opt.title}
+                          desc={opt.desc}
+                          icon={opt.icon}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {priority.length > 0 ? (
+                    <div className="mt-3 text-xs text-gray-500">
+                      Seleccionado: <b className="text-gray-900">{priorityLabel}</b>
+                    </div>
+                  ) : null}
                 </div>
 
-                {internetType && internetType !== 'none' ? (
-                  <div className="mt-4 rounded-2xl border border-gray-200 p-4">
-                    <div className="font-bold text-gray-900">¿El grabador quedará en el mismo lugar donde llega el internet?</div>
-                    <div className="mt-3 grid sm:grid-cols-2 gap-3">
-                      <button
-                        onClick={() => setRecorderSameAsInternet('yes')}
-                        className={[
-                          'rounded-2xl border p-4 text-left transition',
-                          recorderSameAsInternet === 'yes' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                        ].join(' ')}
-                      >
-                        <div className="font-extrabold text-gray-900">Sí</div>
-                        <div className="text-sm text-gray-600 mt-1">Perfecto, no deberías necesitar enlaces.</div>
-                      </button>
-                      <button
-                        onClick={() => setRecorderSameAsInternet('no')}
-                        className={[
-                          'rounded-2xl border p-4 text-left transition',
-                          recorderSameAsInternet === 'no' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                        ].join(' ')}
-                      >
-                        <div className="font-extrabold text-gray-900">No</div>
-                        <div className="text-sm text-gray-600 mt-1">Te sugeriremos enlaces (antenas) si hay en catálogo.</div>
-                      </button>
+                {/* Internet */}
+                <div className="mt-7">
+                  <div className="text-xs font-black text-blue-700">CONECTIVIDAD</div>
+                  <div className="mt-1 font-extrabold text-gray-900">¿Qué internet tienes o tendrás?</div>
+
+                  <div className="mt-3 grid md:grid-cols-3 gap-3">
+                    {internetOptions.map((opt) => {
+                      const selected = internetType === opt.id;
+                      return (
+                        <CardButton
+                          key={opt.id}
+                          selected={selected}
+                          onClick={() => {
+                            setInternetType(opt.id);
+                            if (opt.id === 'none') setRecorderSameAsInternet('na');
+                          }}
+                          title={opt.title}
+                          desc={opt.desc}
+                          icon={opt.icon}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {internetType && internetType !== 'none' ? (
+                    <div className="mt-4 rounded-2xl border border-gray-200 p-4 bg-gray-50">
+                      <div className="flex items-center gap-2 font-black text-gray-900">
+                        <Wifi size={18} className="text-yellow-500" />
+                        ¿El grabador quedará en el mismo lugar donde llega el internet?
+                      </div>
+
+                      <div className="mt-3 grid sm:grid-cols-2 gap-3">
+                        <CardButton
+                          selected={recorderSameAsInternet === 'yes'}
+                          onClick={() => setRecorderSameAsInternet('yes')}
+                          title="Sí"
+                          desc="Perfecto, no deberías necesitar enlaces."
+                          icon={BadgeCheck}
+                        />
+                        <CardButton
+                          selected={recorderSameAsInternet === 'no'}
+                          onClick={() => setRecorderSameAsInternet('no')}
+                          title="No"
+                          desc="Te sugeriremos enlaces (antenas) si hay en catálogo."
+                          icon={Wifi}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+
+                {/* Distancia / dificultad */}
+                <div className="mt-7 grid md:grid-cols-2 gap-4">
+                  <div className="rounded-2xl border border-gray-200 p-4 bg-white">
+                    <div className="flex items-center gap-2 font-black text-gray-900">
+                      <Cable size={18} className="text-yellow-500" />
+                      Distancia promedio grabador → cámaras
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {distanceOptions.map((opt) => {
+                        const selected = avgDistance === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => setAvgDistance(opt.id)}
+                            className={[
+                              'rounded-2xl border p-3 text-left transition-all duration-200',
+                              'hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]',
+                              selected ? 'border-black ring-2 ring-yellow-400/60 bg-gray-50' : 'border-gray-200 hover:border-gray-400',
+                            ].join(' ')}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="font-extrabold text-gray-900">{opt.title}</div>
+                                <div className="text-sm text-gray-600 mt-1">{opt.desc}</div>
+                              </div>
+                              {selected ? <CheckCircle2 className="shrink-0 text-black" /> : null}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-200 p-4 bg-white">
+                    <div className="flex items-center gap-2 font-black text-gray-900">
+                      <Cable size={18} className="text-yellow-500" />
+                      ¿Qué tan fácil es pasar cable?
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {difficultyOptions.map((opt) => {
+                        const selected = cableDifficulty === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => setCableDifficulty(opt.id)}
+                            className={[
+                              'rounded-2xl border p-3 text-left transition-all duration-200',
+                              'hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]',
+                              selected ? 'border-black ring-2 ring-yellow-400/60 bg-gray-50' : 'border-gray-200 hover:border-gray-400',
+                            ].join(' ')}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="font-extrabold text-gray-900">{opt.title}</div>
+                                <div className="text-sm text-gray-600 mt-1">{opt.desc}</div>
+                              </div>
+                              {selected ? <CheckCircle2 className="shrink-0 text-black" /> : null}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Noche (MULTISELECT) */}
+                <div className="mt-7">
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs font-black text-blue-700">VISIÓN NOCTURNA</div>
+                    <span className="text-xs px-2 py-1 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-100 inline-flex items-center gap-1">
+                      <Info size={14} /> puedes marcar más de una
+                    </span>
+                  </div>
+
+                  <div className="mt-2 font-extrabold text-gray-900">¿Cómo quieres ver la noche?</div>
+                  <p className="text-gray-600 mt-1">
+                    Si marcas <b>Color</b>, filtramos cámaras tipo <b>ColorVu / Full Color / Híbridas</b>. Si marcas ambas, te mostramos todo.
+                  </p>
+
+                  <div className="mt-4 grid md:grid-cols-2 gap-3">
+                    <CardButton
+                      selected={nightMode.includes('bw')}
+                      onClick={() => setNightMode((prev) => toggleInArray(prev, 'bw'))}
+                      title="Blanco y negro"
+                      desc="Visión infrarroja clásica (IR)."
+                      icon={Shield}
+                    />
+                    <CardButton
+                      selected={nightMode.includes('color')}
+                      onClick={() => setNightMode((prev) => toggleInArray(prev, 'color'))}
+                      title="Color"
+                      desc="Mejor detalle nocturno (ColorVu / Full Color / Híbridas)."
+                      icon={Sparkles}
+                    />
+                  </div>
+
+                  {nightMode.length > 0 ? (
+                    <div className="mt-3 text-xs text-gray-500">
+                      Seleccionado: <b className="text-gray-900">{nightLabel}</b>
+                    </div>
+                  ) : null}
+                </div>
+
+                {/* Extras */}
+                <div className="mt-7 grid md:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setSmartAlerts((v) => !v)}
+                    className={[
+                      'rounded-2xl border p-4 text-left transition-all duration-200',
+                      'bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]',
+                      smartAlerts ? 'border-black ring-2 ring-yellow-400/60' : 'border-gray-200 hover:border-gray-400',
+                    ].join(' ')}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className={['h-10 w-10 rounded-xl grid place-items-center border', smartAlerts ? 'bg-black border-black' : 'bg-gray-50 border-gray-200'].join(' ')}>
+                          <Cpu size={18} className={smartAlerts ? 'text-yellow-400' : 'text-gray-700'} />
+                        </div>
+                        <div>
+                          <div className="font-extrabold text-gray-900">Quiero alertas inteligentes</div>
+                          <div className="text-sm text-gray-600 mt-1">Persona/vehículo (si tu catálogo tiene equipos con IA).</div>
+                        </div>
+                      </div>
+                      {smartAlerts ? <CheckCircle2 className="shrink-0 text-black" /> : null}
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => setWantUps((v) => !v)}
+                    className={[
+                      'rounded-2xl border p-4 text-left transition-all duration-200',
+                      'bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-[1px]',
+                      wantUps ? 'border-black ring-2 ring-yellow-400/60' : 'border-gray-200 hover:border-gray-400',
+                    ].join(' ')}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className={['h-10 w-10 rounded-xl grid place-items-center border', wantUps ? 'bg-black border-black' : 'bg-gray-50 border-gray-200'].join(' ')}>
+                          <Zap size={18} className={wantUps ? 'text-yellow-400' : 'text-gray-700'} />
+                        </div>
+                        <div>
+                          <div className="font-extrabold text-gray-900">Quiero respaldo de energía</div>
+                          <div className="text-sm text-gray-600 mt-1">Agregar UPS (ideal en zonas con cortes).</div>
+                        </div>
+                      </div>
+                      {wantUps ? <CheckCircle2 className="shrink-0 text-black" /> : null}
+                    </div>
+                  </button>
+                </div>
+
+                {/* Recomendación */}
+                {priority.length > 0 && internetType && avgDistance && cableDifficulty && nightMode.length > 0 ? (
+                  <div className="mt-7 rounded-2xl border border-black p-4 bg-black text-white">
+                    <div className="flex items-center gap-2 font-black">
+                      <Sparkles size={18} className="text-yellow-400" /> Recomendación automática
+                    </div>
+                    <div className="mt-2 text-sm text-white/80">
+                      Según tus respuestas, el sistema recomendado es: <b className="text-yellow-400">{systemLabel}</b>
+                    </div>
+                    <div className="mt-2 text-xs text-white/60">
+                      *Esto es una sugerencia. La visita técnica puede ajustar por factibilidad.
                     </div>
                   </div>
                 ) : null}
               </div>
+            )}
 
-              {/* Distancia y dificultad */}
-              <div className="mt-7 grid md:grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-gray-200 p-4">
-                  <div className="font-extrabold text-gray-900">Distancia promedio grabador → cámaras</div>
-                  <div className="mt-3 grid gap-2">
-                    {distanceOptions.map((opt) => {
-                      const selected = avgDistance === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          onClick={() => setAvgDistance(opt.id)}
-                          className={[
-                            'rounded-2xl border p-3 text-left transition',
-                            selected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                          ].join(' ')}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <div className="font-extrabold text-gray-900">{opt.title}</div>
-                              <div className="text-sm text-gray-600 mt-1">{opt.desc}</div>
-                            </div>
-                            {selected && <CheckCircle2 className="shrink-0" />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-gray-200 p-4">
-                  <div className="font-extrabold text-gray-900">¿Qué tan fácil es pasar cable?</div>
-                  <div className="mt-3 grid gap-2">
-                    {difficultyOptions.map((opt) => {
-                      const selected = cableDifficulty === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          onClick={() => setCableDifficulty(opt.id)}
-                          className={[
-                            'rounded-2xl border p-3 text-left transition',
-                            selected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                          ].join(' ')}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <div className="font-extrabold text-gray-900">{opt.title}</div>
-                              <div className="text-sm text-gray-600 mt-1">{opt.desc}</div>
-                            </div>
-                            {selected && <CheckCircle2 className="shrink-0" />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Noche */}
-              <div className="mt-7">
-                <div className="flex items-center gap-2">
-                  <div className="font-extrabold text-gray-900">¿Cómo quieres ver la noche?</div>
-                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 inline-flex items-center gap-1">
-                    <Info size={14} /> filtra cámaras
-                  </span>
-                </div>
-
+            {step === 3 && (
+              <div>
+                <div className="text-xs font-black text-blue-700">PASO 3</div>
+                <h2 className="mt-1 text-xl font-black text-gray-900">Elige tus cámaras (catálogo)</h2>
                 <p className="text-gray-600 mt-1">
-                  Si eliges <b>Color</b>, te mostraremos cámaras tipo <b>ColorVu / Full Color / Híbridas</b> (según tags o features).
+                  Selecciona cantidades. Se sumará el total neto y la instalación (
+                  <b className="text-red-600">${INSTALL_PER_CAMERA.toLocaleString('es-CL')}</b> por cámara).
                 </p>
 
-                <div className="mt-4 grid md:grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setNightMode('bw')}
-                    className={[
-                      'rounded-2xl border p-4 text-left transition',
-                      nightMode === 'bw' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                    ].join(' ')}
-                  >
-                    <div className="font-extrabold text-gray-900">Blanco y negro</div>
-                    <div className="text-sm text-gray-600 mt-1">Visión infrarroja clásica (IR).</div>
-                  </button>
-
-                  <button
-                    onClick={() => setNightMode('color')}
-                    className={[
-                      'rounded-2xl border p-4 text-left transition',
-                      nightMode === 'color' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                    ].join(' ')}
-                  >
-                    <div className="font-extrabold text-gray-900">Color</div>
-                    <div className="text-sm text-gray-600 mt-1">Mejor detalle nocturno (ColorVu / Full Color / Híbridas).</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Extras */}
-              <div className="mt-7 grid md:grid-cols-2 gap-3">
-                <button
-                  onClick={() => setSmartAlerts((v) => !v)}
-                  className={[
-                    'rounded-2xl border p-4 text-left transition',
-                    smartAlerts ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                  ].join(' ')}
-                >
-                  <div className="font-extrabold text-gray-900">Quiero alertas inteligentes</div>
-                  <div className="text-sm text-gray-600 mt-1">Persona/vehículo (si tu catálogo tiene equipos con IA).</div>
-                </button>
-
-                <button
-                  onClick={() => setWantUps((v) => !v)}
-                  className={[
-                    'rounded-2xl border p-4 text-left transition',
-                    wantUps ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400',
-                  ].join(' ')}
-                >
-                  <div className="font-extrabold text-gray-900">Quiero respaldo de energía</div>
-                  <div className="text-sm text-gray-600 mt-1">Agregar UPS (ideal en zonas con cortes).</div>
-                </button>
-              </div>
-
-              {/* Recomendación “sistema” */}
-              {priority && internetType && avgDistance && cableDifficulty ? (
-                <div className="mt-7 rounded-2xl border border-gray-200 p-4 bg-gray-50">
-                  <div className="flex items-center gap-2 font-bold text-gray-900">
-                    <Sparkles size={18} /> Recomendación automática
-                  </div>
-                  <div className="mt-2 text-sm text-gray-700">
-                    Según tus respuestas, el sistema recomendado es:{' '}
-                    <b className="text-gray-900">{systemLabel}</b>
-                  </div>
-                  <div className="mt-2 text-xs text-gray-500">
-                    *Esto es una sugerencia. La visita técnica puede ajustar por factibilidad y layout.
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          )}
-
-          {step === 3 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Elige tus cámaras (catálogo)</h2>
-              <p className="text-gray-600 mt-1">
-                Selecciona cantidades. Se sumará el total neto y la instalación ($
-                {INSTALL_PER_CAMERA.toLocaleString('es-CL')} por cámara).
-              </p>
-
-              {cameraCandidates.length === 0 ? (
-                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
-                  No encontré cámaras para mostrar con el filtro actual.
-                  <div className="text-sm mt-2">
-                    Tip: agrega tags <b>camera_ip</b> / <b>camera_analog</b> y para color noche <b>camera_color_night</b>.
-                    Si no, al menos que en <b>features</b> venga “cámara”, “PTZ”, “bullet”, etc.
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-5 grid lg:grid-cols-2 gap-3">
-                  {cameraCandidates.map((p: any) => {
-                    const id = String(p?.id);
-                    const qty = cart[id] ?? 0;
-
-                    return (
-                      <div key={id} className="rounded-2xl border border-gray-200 p-4">
-                        <div className="flex gap-4">
-                          <div className="w-24 h-20 rounded-xl bg-gray-100 overflow-hidden shrink-0">
-                            {p?.imageUrl ? (
-                              <img src={p.imageUrl} alt={p?.name || 'Producto'} className="w-full h-full object-cover" />
-                            ) : null}
-                          </div>
-
-                          <div className="flex-1">
-                            <div className="font-extrabold text-gray-900">{p?.name}</div>
-                            <div className="text-sm text-gray-600">{[p?.brand, p?.model].filter(Boolean).join(' ')}</div>
-                            <div className="mt-2 text-sm font-semibold text-gray-900">
-                              Neto: ${Number(p?.priceNet ?? 0).toLocaleString('es-CL')}
-                            </div>
-
-                            <div className="mt-3 flex items-center gap-2">
-                              <button
-                                onClick={() => setQty(id, qty - 1)}
-                                className="p-2 rounded-xl border border-gray-200 hover:border-gray-400"
-                              >
-                                <Minus size={16} />
-                              </button>
-
-                              <div className="min-w-[48px] text-center font-bold">{qty}</div>
-
-                              <button
-                                onClick={() => setQty(id, qty + 1)}
-                                className="p-2 rounded-xl border border-gray-200 hover:border-gray-400"
-                              >
-                                <Plus size={16} />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {Array.isArray(p?.features) && p.features.length > 0 ? (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {p.features.slice(0, 6).map((f: string, i: number) => (
-                              <span key={i} className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                                {f}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Sugeridos */}
-              <div className="mt-7 rounded-2xl border border-gray-200 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="font-bold text-gray-900">Equipos sugeridos automáticamente</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      Basado en tus respuestas y en el número de cámaras ({camerasCount}). Sistema sugerido: <b>{systemLabel}</b>
-                    </div>
-                  </div>
-                </div>
-
-                {camerasCount <= 0 ? (
-                  <div className="mt-3 text-sm text-gray-600">Primero elige al menos 1 cámara para calcular sugerencias.</div>
-                ) : suggestionsWithProduct.length === 0 ? (
-                  <div className="mt-3 text-sm text-gray-600">
-                    No encontré productos para sugerir (probablemente faltan tags en tu catálogo).
-                    <div className="text-xs text-gray-500 mt-1">
-                      Recomendado: taggear grabadores con <b>recorder_nvr</b>/<b>recorder_dvr</b> y canales <b>channels_4/8/16</b>,
-                      switches con <b>switch</b>/<b>switch_poe</b> y fuentes <b>power_supply_12v_5a</b>.
+                {cameraCandidates.length === 0 ? (
+                  <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-800">
+                    No encontré cámaras para mostrar con el filtro actual.
+                    <div className="text-sm mt-2">
+                      Tip: agrega tags <b>camera_ip</b> / <b>camera_analog</b> y para color noche <b>camera_color_night</b>.
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-4 grid lg:grid-cols-2 gap-3">
-                    {suggestionsWithProduct.map((s) => {
-                      const id = String(s.p?.id);
-                      const inCartQty = cart[id] ?? 0;
-
-                      const badge =
-                        s.bucket === 'required'
-                          ? 'Obligatorio'
-                          : s.bucket === 'recommended'
-                          ? 'Recomendado'
-                          : 'Opcional';
+                  <div className="mt-5 grid lg:grid-cols-2 gap-3">
+                    {cameraCandidates.map((p: any) => {
+                      const id = String(p?.id);
+                      const qty = cart[id] ?? 0;
 
                       return (
-                        <div key={`${s.bucket}-${id}`} className="rounded-2xl border border-gray-200 p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">{badge}</span>
-                                <div className="text-xs text-gray-500 truncate">{[s.p?.brand, s.p?.model].filter(Boolean).join(' ')}</div>
-                              </div>
+                        <div
+                          key={id}
+                          className="rounded-2xl border border-gray-200 p-4 bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-[1px]"
+                        >
+                          <div className="flex gap-4">
+                            <div className="w-24 h-20 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                              {p?.imageUrl ? (
+                                <img src={p.imageUrl} alt={p?.name || 'Producto'} className="w-full h-full object-cover" />
+                              ) : null}
+                            </div>
 
-                              <div className="mt-1 font-extrabold text-gray-900 truncate">{s.p?.name}</div>
-                              <div className="mt-1 text-sm text-gray-600">{s.reason}</div>
+                            <div className="flex-1">
+                              <div className="font-extrabold text-gray-900">{p?.name}</div>
+                              <div className="text-sm text-gray-600">{[p?.brand, p?.model].filter(Boolean).join(' ')}</div>
 
                               <div className="mt-2 text-sm font-semibold text-gray-900">
-                                Neto: ${Number(s.p?.priceNet ?? 0).toLocaleString('es-CL')}
+                                Neto: <span className="text-black">${Number(p?.priceNet ?? 0).toLocaleString('es-CL')}</span>
+                              </div>
+
+                              <div className="mt-3 flex items-center gap-2">
+                                <button
+                                  onClick={() => setQty(id, qty - 1)}
+                                  className="p-2 rounded-xl border border-gray-200 hover:border-black hover:bg-gray-50 transition"
+                                >
+                                  <Minus size={16} />
+                                </button>
+
+                                <div className="min-w-[48px] text-center font-black">{qty}</div>
+
+                                <button
+                                  onClick={() => setQty(id, qty + 1)}
+                                  className="p-2 rounded-xl border border-gray-200 hover:border-black hover:bg-gray-50 transition"
+                                >
+                                  <Plus size={16} />
+                                </button>
+
+                                {qty > 0 ? (
+                                  <span className="ml-2 text-xs px-2 py-1 rounded-full bg-yellow-50 text-yellow-800 border border-yellow-100">
+                                    Seleccionado
+                                  </span>
+                                ) : null}
                               </div>
                             </div>
-
-                            <div className="shrink-0 text-right">
-                              <button
-                                onClick={() => addSuggestion(id, s.qty)}
-                                className="rounded-2xl bg-black text-white px-3 py-2 text-sm font-bold"
-                              >
-                                Agregar {s.qty}
-                              </button>
-                              <div className="mt-2 text-xs text-gray-500">En carrito: <b>{inCartQty}</b></div>
-                            </div>
                           </div>
+
+                          {Array.isArray(p?.features) && p.features.length > 0 ? (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {p.features.slice(0, 6).map((f: string, i: number) => (
+                                <span key={i} className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                                  {f}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
                         </div>
                       );
                     })}
                   </div>
                 )}
-              </div>
 
-              {/* Resumen */}
-              <div className="mt-6 rounded-2xl border border-gray-200 p-4 bg-gray-50">
-                <div className="font-bold text-gray-900">Resumen</div>
-                <div className="mt-2 text-sm text-gray-700">
-                  Cámaras: <b>{camerasCount}</b> | Equipos neto: <b>${subtotalNet.toLocaleString('es-CL')}</b> | Instalación:{' '}
-                  <b>${installCost.toLocaleString('es-CL')}</b> | Total neto: <b>${totalNet.toLocaleString('es-CL')}</b>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Finalizar</h2>
-              <p className="text-gray-600 mt-1">Revisa tu resumen y envíanos la solicitud.</p>
-
-              <div className="mt-5 rounded-2xl border border-gray-200 p-4">
-                <div className="text-sm text-gray-700 space-y-1">
-                  <div><b>Negocio:</b> {bizLabel || '—'}</div>
-                  <div><b>Prioridad:</b> {priorityLabel || '—'}</div>
-                  <div><b>Internet:</b> {internetLabel || '—'}</div>
-                  <div>
-                    <b>Grabador e internet mismo lugar:</b>{' '}
-                    {internetType === 'none'
-                      ? 'No aplica (sin internet)'
-                      : recorderSameAsInternet === 'yes'
-                      ? 'Sí'
-                      : recorderSameAsInternet === 'no'
-                      ? 'No'
-                      : '—'}
+                {/* Sugeridos */}
+                <div className="mt-7 rounded-3xl border border-gray-200 p-5 bg-gradient-to-b from-white to-gray-50">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-xs font-black text-blue-700">AUTOCONFIG</div>
+                      <div className="mt-1 font-black text-gray-900">Equipos sugeridos automáticamente</div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Basado en tus respuestas y en el número de cámaras ({camerasCount}). Sistema sugerido:{' '}
+                        <b className="text-gray-900">{systemLabel}</b>
+                      </div>
+                    </div>
+                    <div className="hidden md:flex items-center gap-2 text-xs px-3 py-2 rounded-full bg-black text-white">
+                      <Sparkles size={16} className="text-yellow-400" />
+                      Recomendación pro
+                    </div>
                   </div>
-                  <div><b>Distancia:</b> {distLabel || '—'}</div>
-                  <div><b>Cableado:</b> {diffLabel || '—'}</div>
-                  <div><b>Noche:</b> {nightMode ? nightLabel : '—'}</div>
-                  <div><b>Alertas inteligentes:</b> {smartAlerts ? 'Sí' : 'No'}</div>
-                  <div><b>UPS:</b> {wantUps ? 'Sí' : 'No'}</div>
-                  <div className="pt-2">
-                    <b>Sistema sugerido:</b> <span className="font-extrabold text-gray-900">{systemLabel}</span>
-                  </div>
-                </div>
 
-                <div className="mt-4">
-                  <div className="font-bold text-gray-900">Selección</div>
-                  {cartItemsAll.length === 0 ? (
-                    <div className="text-sm text-gray-600 mt-2">No seleccionaste productos.</div>
+                  {camerasCount <= 0 ? (
+                    <div className="mt-3 text-sm text-gray-600">Primero elige al menos 1 cámara para calcular sugerencias.</div>
+                  ) : suggestionsWithProduct.length === 0 ? (
+                    <div className="mt-3 text-sm text-gray-600">
+                      No encontré productos para sugerir (probablemente faltan tags en tu catálogo).
+                      <div className="text-xs text-gray-500 mt-1">
+                        Recomendado: grabadores con <b>recorder_nvr</b>/<b>recorder_dvr</b> + <b>channels_4/8/16</b>, switches con <b>switch</b>/<b>switch_poe</b>.
+                      </div>
+                    </div>
                   ) : (
-                    <ul className="mt-2 space-y-2 text-sm text-gray-700">
-                      {cartItemsAll.map((it) => (
-                        <li key={String(it.p?.id)} className="flex items-start justify-between gap-4">
-                          <div className="min-w-0">
-                            <b>{it.qty}x</b> {it.p?.name}{' '}
-                            <span className="text-gray-500">({[it.p?.brand, it.p?.model].filter(Boolean).join(' ')})</span>
+                    <div className="mt-4 grid lg:grid-cols-2 gap-3">
+                      {suggestionsWithProduct.map((s) => {
+                        const id = String(s.p?.id);
+                        const inCartQty = cart[id] ?? 0;
+
+                        const badge =
+                          s.bucket === 'required'
+                            ? { text: 'Obligatorio', cls: 'bg-black text-white border-black' }
+                            : s.bucket === 'recommended'
+                            ? { text: 'Recomendado', cls: 'bg-blue-50 text-blue-700 border-blue-100' }
+                            : { text: 'Opcional', cls: 'bg-yellow-50 text-yellow-800 border-yellow-100' };
+
+                        return (
+                          <div
+                            key={`${s.bucket}-${id}`}
+                            className="rounded-2xl border border-gray-200 p-4 bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-[1px]"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className={['text-xs px-2 py-1 rounded-full border font-bold', badge.cls].join(' ')}>
+                                    {badge.text}
+                                  </span>
+                                  <div className="text-xs text-gray-500 truncate">{[s.p?.brand, s.p?.model].filter(Boolean).join(' ')}</div>
+                                </div>
+
+                                <div className="mt-1 font-extrabold text-gray-900 truncate">{s.p?.name}</div>
+                                <div className="mt-1 text-sm text-gray-600">{s.reason}</div>
+
+                                <div className="mt-2 text-sm font-semibold text-gray-900">
+                                  Neto: ${Number(s.p?.priceNet ?? 0).toLocaleString('es-CL')}
+                                </div>
+                              </div>
+
+                              <div className="shrink-0 text-right">
+                                <button
+                                  onClick={() => addSuggestion(id, s.qty)}
+                                  className="rounded-2xl bg-black text-white px-3 py-2 text-sm font-black hover:opacity-95"
+                                >
+                                  Agregar {s.qty}
+                                </button>
+                                <div className="mt-2 text-xs text-gray-500">
+                                  En carrito: <b className="text-gray-900">{inCartQty}</b>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div className="font-semibold">
-                            ${(Number(it.p?.priceNet ?? 0) * it.qty).toLocaleString('es-CL')}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
 
-                <div className="mt-5 border-t pt-4 text-sm text-gray-800">
-                  <div className="flex justify-between">
-                    <span>Subtotal neto equipos</span>
-                    <b>${subtotalNet.toLocaleString('es-CL')}</b>
+                {/* Resumen */}
+                <div className="mt-6 rounded-3xl border border-gray-200 p-5 bg-black text-white">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <div className="text-xs text-white/60 font-black">RESUMEN</div>
+                      <div className="mt-1 text-sm text-white/80">
+                        Cámaras: <b className="text-yellow-400">{camerasCount}</b> · Equipos neto:{' '}
+                        <b className="text-yellow-400">${subtotalNet.toLocaleString('es-CL')}</b> · Instalación:{' '}
+                        <b className="text-yellow-400">${installCost.toLocaleString('es-CL')}</b>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-white/60 font-black">TOTAL NETO</div>
+                      <div className="text-2xl font-black text-yellow-400">${totalNet.toLocaleString('es-CL')}</div>
+                    </div>
                   </div>
-                  <div className="flex justify-between mt-1">
-                    <span>Instalación ({camerasCount} x ${INSTALL_PER_CAMERA.toLocaleString('es-CL')})</span>
-                    <b>${installCost.toLocaleString('es-CL')}</b>
-                  </div>
-                  <div className="flex justify-between mt-2 text-base">
-                    <span>Total neto</span>
-                    <b>${totalNet.toLocaleString('es-CL')}</b>
-                  </div>
-
-                  <div className="text-xs text-gray-500 mt-2">
-                    *Valores netos, sin IVA. El total final puede variar según factibilidad, cableados, altura y condiciones del lugar.
-                  </div>
-                </div>
-
-                <div className="mt-5 flex flex-col sm:flex-row gap-3">
-                  <a
-                    href={`${waBase}?text=${waMessage}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-black text-white px-4 py-3 font-bold"
-                  >
-                    <MessageCircle size={18} /> Enviar por WhatsApp
-                  </a>
                 </div>
               </div>
+            )}
+
+            {step === 4 && (
+              <div>
+                <div className="text-xs font-black text-blue-700">PASO 4</div>
+                <h2 className="mt-1 text-xl font-black text-gray-900">Finalizar</h2>
+                <p className="text-gray-600 mt-1">Revisa tu resumen y envíanos la solicitud.</p>
+
+                <div className="mt-5 rounded-3xl border border-gray-200 p-5 bg-white">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="rounded-2xl border border-gray-200 p-4 bg-gray-50">
+                      <div className="text-xs font-black text-blue-700">DETALLES</div>
+                      <div className="mt-2 text-sm text-gray-700 space-y-1">
+                        <div><b>Negocio:</b> {bizLabel || '—'}</div>
+                        <div><b>Prioridad:</b> {priority.length ? priorityLabel : '—'}</div>
+                        <div><b>Internet:</b> {internetLabel || '—'}</div>
+                        <div>
+                          <b>Grabador e internet mismo lugar:</b>{' '}
+                          {internetType === 'none'
+                            ? 'No aplica (sin internet)'
+                            : recorderSameAsInternet === 'yes'
+                            ? 'Sí'
+                            : recorderSameAsInternet === 'no'
+                            ? 'No'
+                            : '—'}
+                        </div>
+                        <div><b>Distancia:</b> {distLabel || '—'}</div>
+                        <div><b>Cableado:</b> {diffLabel || '—'}</div>
+                        <div><b>Noche:</b> {nightMode.length ? nightLabel : '—'}</div>
+                        <div><b>Alertas inteligentes:</b> {smartAlerts ? 'Sí' : 'No'}</div>
+                        <div><b>UPS:</b> {wantUps ? 'Sí' : 'No'}</div>
+                        <div className="pt-2">
+                          <b>Sistema sugerido:</b>{' '}
+                          <span className="font-black text-red-600">{systemLabel}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-gray-200 p-4">
+                      <div className="text-xs font-black text-blue-700">SELECCIÓN</div>
+                      {cartItemsAll.length === 0 ? (
+                        <div className="text-sm text-gray-600 mt-2">No seleccionaste productos.</div>
+                      ) : (
+                        <ul className="mt-2 space-y-2 text-sm text-gray-700">
+                          {cartItemsAll.map((it) => (
+                            <li key={String(it.p?.id)} className="flex items-start justify-between gap-4">
+                              <div className="min-w-0">
+                                <b>{it.qty}x</b> {it.p?.name}{' '}
+                                <span className="text-gray-500">({[it.p?.brand, it.p?.model].filter(Boolean).join(' ')})</span>
+                              </div>
+                              <div className="font-semibold">
+                                ${(Number(it.p?.priceNet ?? 0) * it.qty).toLocaleString('es-CL')}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      <div className="mt-4 rounded-2xl bg-black text-white p-4">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/70">Subtotal neto equipos</span>
+                          <b className="text-yellow-400">${subtotalNet.toLocaleString('es-CL')}</b>
+                        </div>
+                        <div className="flex justify-between text-sm mt-1">
+                          <span className="text-white/70">
+                            Instalación ({camerasCount} x ${INSTALL_PER_CAMERA.toLocaleString('es-CL')})
+                          </span>
+                          <b className="text-yellow-400">${installCost.toLocaleString('es-CL')}</b>
+                        </div>
+                        <div className="flex justify-between mt-3 text-base">
+                          <span className="font-black">Total neto</span>
+                          <b className="text-2xl font-black text-yellow-400">${totalNet.toLocaleString('es-CL')}</b>
+                        </div>
+
+                        <div className="text-xs text-white/60 mt-2">
+                          *Valores netos, sin IVA. El total final puede variar según factibilidad, cableados, altura y condiciones del lugar.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-col sm:flex-row gap-3">
+                    <a
+                      href={`${waBase}?text=${waMessage}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-black text-white px-4 py-3 font-black hover:opacity-95"
+                    >
+                      <MessageCircle size={18} className="text-yellow-400" /> Enviar por WhatsApp
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 flex items-center justify-between">
+              <button
+                onClick={prevStep}
+                disabled={step === 1}
+                className={[
+                  'rounded-2xl px-4 py-3 font-black border transition',
+                  step === 1 ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50' : 'border-gray-300 hover:border-black bg-white',
+                ].join(' ')}
+              >
+                Atrás
+              </button>
+
+              <button
+                onClick={nextStep}
+                disabled={!canGoNext || step === 4}
+                className={[
+                  'rounded-2xl px-4 py-3 font-black transition',
+                  !canGoNext || step === 4 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-black text-white hover:opacity-95',
+                ].join(' ')}
+              >
+                {step === 3 ? 'Continuar' : step === 4 ? 'Listo' : 'Siguiente'}
+              </button>
             </div>
-          )}
+          </div>
+        </div>
 
-          <div className="mt-8 flex items-center justify-between">
-            <button
-              onClick={prevStep}
-              disabled={step === 1}
-              className={[
-                'rounded-2xl px-4 py-3 font-bold border',
-                step === 1 ? 'border-gray-200 text-gray-400 cursor-not-allowed' : 'border-gray-300 hover:border-gray-500',
-              ].join(' ')}
-            >
-              Atrás
-            </button>
-
-            <button
-              onClick={nextStep}
-              disabled={!canGoNext || step === 4}
-              className={[
-                'rounded-2xl px-4 py-3 font-bold',
-                !canGoNext || step === 4 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-black text-white',
-              ].join(' ')}
-            >
-              {step === 3 ? 'Continuar' : step === 4 ? 'Listo' : 'Siguiente'}
-            </button>
+        {/* Micro “trust bar” */}
+        <div className="mt-6 grid md:grid-cols-3 gap-3 text-sm">
+          <div className="rounded-2xl border border-gray-200 p-4 bg-white">
+            <div className="font-black text-gray-900">Cotización clara</div>
+            <div className="text-gray-600 mt-1">Valores netos, sin letra chica rara.</div>
+          </div>
+          <div className="rounded-2xl border border-gray-200 p-4 bg-white">
+            <div className="font-black text-gray-900">Recomendación automática</div>
+            <div className="text-gray-600 mt-1">Te sugerimos lo esencial según tu caso.</div>
+          </div>
+          <div className="rounded-2xl border border-gray-200 p-4 bg-white">
+            <div className="font-black text-gray-900">Asesoría real</div>
+            <div className="text-gray-600 mt-1">La visita técnica termina de afinarlo.</div>
           </div>
         </div>
       </div>
