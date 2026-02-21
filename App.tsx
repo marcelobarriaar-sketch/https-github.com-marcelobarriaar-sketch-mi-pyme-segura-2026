@@ -1,22 +1,15 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation, useParams } from 'react-router-dom';
 import {
-  ShieldCheck,
   Menu,
   X,
   Settings,
   Lock,
-  Key,
-  LogOut,
-  Phone,
   Save,
   CheckCircle,
-  Star,
-  Plus,
-  AlertCircle,
-  CloudDownload,
   Loader2,
   MessageCircle,
+  ArrowLeft,
 } from 'lucide-react';
 
 import Home from './pages/Home';
@@ -27,10 +20,14 @@ import CreateProject from './pages/CreateProject';
 import Suscripcion from './pages/Suscripcion';
 import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard';
+
+// ✅ NUEVO: Wizard Tradicional
+import TraditionalBuilder from './pages/TraditionalBuilder';
+
 import { SiteData, AdminState } from './types';
 
 const RED_LOCK_LOGO =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB8klEQVR4nO2YvUoDQRSFv7NBEAsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsL/8A3vH8K6R0fXNoAAAAASUVORK5CYII=';
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB8klEQVR4nO2YvUoDQRSFv7NBEAsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsL/8A3vH8K6R0fXNoAAAAASUVORK5CYII=';
 
 const INITIAL_DATA: SiteData = {
   branding: {
@@ -42,8 +39,6 @@ const INITIAL_DATA: SiteData = {
     siteNameColor: '#000000',
     fontFamily: "'Inter', sans-serif",
     globalBackground: '#F9FAFB',
-
-    // ✅ editable desde panel
     footerTagline: 'Líderes en seguridad inteligente para PYMES.',
   },
   whatsappConfig: {
@@ -54,7 +49,8 @@ const INITIAL_DATA: SiteData = {
     heroTitle: 'SEGURIDAD INTELIGENTE PARA TU NEGOCIO',
     heroSubtitle:
       'Protegemos tu inversión con tecnología de vanguardia y sistemas autónomos diseñados para la realidad de hoy.',
-    featuredImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1600',
+    featuredImage:
+      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1600',
     heroBgColor: '#111827',
     heroTextColor: '#FFFFFF',
   },
@@ -62,9 +58,12 @@ const INITIAL_DATA: SiteData = {
     title: 'Sobre Mi Pyme Segura',
     content:
       'En Mi Pyme Segura llevamos más de una década dedicados a un propósito claro: proteger lo que más importa. Nacimos desde la realidad que nos rodea y desde el sur de Chile levantamos una propuesta seria, moderna y al alcance de todos.',
-    mission: 'Proteger a personas, hogares y organizaciones mediante soluciones de seguridad inteligentes.',
-    vision: 'Ser referentes en el sur de Chile en soluciones de seguridad inteligentes.',
-    aboutImage: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80&w=800',
+    mission:
+      'Proteger a personas, hogares y organizaciones mediante soluciones de seguridad inteligentes.',
+    vision:
+      'Ser referentes en el sur de Chile en soluciones de seguridad inteligentes.',
+    aboutImage:
+      'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80&w=800',
     bgColor: '#FFFFFF',
     textColor: '#1F2937',
   },
@@ -107,8 +106,10 @@ const INITIAL_DATA: SiteData = {
     {
       id: 'eq1',
       title: 'Cámara Bullet Solar 4K',
-      description: 'Autonomía total con panel solar integrado y conectividad 4G. Ideal para perímetros rurales.',
-      imageUrl: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&q=80&w=800',
+      description:
+        'Autonomía total con panel solar integrado y conectividad 4G. Ideal para perímetros rurales.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&q=80&w=800',
       category: 'Cámaras',
     },
   ],
@@ -118,34 +119,40 @@ const INITIAL_DATA: SiteData = {
       title: 'Instalación en Bodega Industrial',
       description:
         'Implementación de circuito cerrado con IA para detección de intrusos en tiempo real en la zona sur.',
-      imageUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200',
+      imageUrl:
+        'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200',
     },
   ],
   brands: [
     {
       id: 'b1',
       name: 'Hikvision',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Hikvision_logo.svg/1200px-Hikvision_logo.svg.png',
+      logo:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Hikvision_logo.svg/1200px-Hikvision_logo.svg.png',
     },
     {
       id: 'b2',
       name: 'Dahua',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Dahua_Technology_logo.svg/1200px-Dahua_Technology_logo.svg.png',
+      logo:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Dahua_Technology_logo.svg/1200px-Dahua_Technology_logo.svg.png',
     },
     {
       id: 'b3',
       name: 'Ubiquiti',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Ubiquiti_Networks_logo.svg/1200px-Ubiquiti_Networks_logo.svg.png',
+      logo:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Ubiquiti_Networks_logo.svg/1200px-Ubiquiti_Networks_logo.svg.png',
     },
     {
       id: 'b4',
       name: 'Ruijie',
-      logo: 'https://www.ruijienetworks.com/resources/kindeditor/attached/image/20211124/20211124112933_349.png',
+      logo:
+        'https://www.ruijienetworks.com/resources/kindeditor/attached/image/20211124/20211124112933_349.png',
     },
     {
       id: 'b5',
       name: 'Bosch',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Bosch-logo.svg/1200px-Bosch-logo.svg.png',
+      logo:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Bosch-logo.svg/1200px-Bosch-logo.svg.png',
     },
   ],
   customPages: [],
@@ -271,7 +278,7 @@ const Navbar = () => {
     { name: 'Inicio', path: '/' },
     { name: 'Sobre Nosotros', path: '/about' },
     { name: 'Equipos', path: '/equipment' },
-    { name: 'Proyectos', path: '/projects' }, // ✅ antes: "Proyectos Ejecutados"
+    { name: 'Proyectos', path: '/projects' },
     { name: 'Crea tu Proyecto', path: '/create-project' },
     { name: 'Seguridad por Suscripción', path: '/suscripcion' },
     { name: 'Contacto', path: '/contact' },
@@ -390,7 +397,6 @@ const Navbar = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-[3rem] p-10 max-w-sm w-full shadow-2xl border-4 border-black relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-16 -mt-16" />
-
             <h2 className="text-4xl font-black text-black tracking-tight mb-2 uppercase">
               Acceso <span className="text-brand">Admin</span>
             </h2>
@@ -410,6 +416,7 @@ const Navbar = () => {
                   required
                 />
               </div>
+
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Contraseña</label>
                 <input
@@ -428,6 +435,7 @@ const Navbar = () => {
               >
                 ENTRAR AL SISTEMA
               </button>
+
               <button
                 type="button"
                 onClick={() => setShowLogin(false)}
@@ -445,7 +453,6 @@ const Navbar = () => {
 
 const Footer = () => {
   const { data } = useSiteData();
-
   return (
     <footer className="bg-black text-white py-16 px-4 border-t-8 border-brand">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -461,7 +468,6 @@ const Footer = () => {
                 }}
               />
             </div>
-
             <span className="ml-3 text-2xl font-black tracking-tighter uppercase text-site-name">
               {data?.branding?.siteName || 'Mi Pyme Segura'}
             </span>
@@ -471,8 +477,6 @@ const Footer = () => {
             {data?.branding?.footerTagline?.trim() || 'Líderes en seguridad inteligente para PYMES.'}
           </p>
         </div>
-
-        {/* acá sigue el resto de tu footer si quieres (links, contacto, etc) */}
       </div>
     </footer>
   );
@@ -487,7 +491,6 @@ const App = () => {
   useEffect(() => {
     const loadData = async () => {
       setIsCloudSyncing(true);
-
       try {
         const res = await fetch(
           'https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/site_data.json?ts=' +
@@ -512,11 +515,9 @@ const App = () => {
         localStorage.setItem('site_data', JSON.stringify(INITIAL_DATA));
       } catch (err) {
         console.error('Error cargando configuración, usando backup local/inicial:', err);
-
         const saved = localStorage.getItem('site_data');
-        if (saved) {
-          setData(JSON.parse(saved));
-        } else {
+        if (saved) setData(JSON.parse(saved));
+        else {
           setData(INITIAL_DATA);
           localStorage.setItem('site_data', JSON.stringify(INITIAL_DATA));
         }
@@ -551,7 +552,6 @@ const App = () => {
       <AdminContext.Provider value={{ isAdmin, setIsAdmin, showLogin, setShowLogin }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&family=Montserrat:wght@300;400;700;900&family=Playfair+Display:wght@400;700;900&family=Fira+Code:wght@300;400;700&display=swap');
-
           :root {
             --brand-primary: ${data.branding.primaryColor};
             --brand-secondary: ${data.branding.secondaryColor};
@@ -559,29 +559,24 @@ const App = () => {
             --site-name-color: ${data.branding.siteNameColor};
             --global-font: ${data.branding.fontFamily};
           }
-
           body {
             font-family: var(--global-font);
             background-color: ${data.branding.globalBackground};
             color: var(--site-text);
           }
-
           @keyframes bounce-slow {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
           }
           .animate-bounce-slow { animation: bounce-slow 3s infinite ease-in-out; }
-
           .text-brand { color: var(--brand-primary) !important; }
           .bg-brand { background-color: var(--brand-primary) !important; }
           .border-brand { border-color: var(--brand-primary) !important; }
           .text-site-name { color: var(--site-name-color) !important; }
-
           .hover\\:text-brand:hover { color: var(--brand-primary) !important; }
           .hover\\:bg-brand:hover { background-color: var(--brand-primary) !important; }
           .hover\\:border-brand:hover { border-color: var(--brand-primary) !important; }
           .focus\\:border-brand:focus { border-color: var(--brand-primary) !important; }
-
           .selection\\:bg-brand::selection { background-color: var(--brand-primary); color: white; }
         `}</style>
 
@@ -594,6 +589,7 @@ const App = () => {
         <HashRouter>
           <div className="min-h-screen flex flex-col relative selection:bg-brand selection:text-white">
             <Navbar />
+
             <main className="flex-grow">
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -601,12 +597,17 @@ const App = () => {
                 <Route path="/equipment" element={<Equipment />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/create-project" element={<CreateProject />} />
+
+                {/* ✅ NUEVO: Ruta del flujo Tradicional */}
+                <Route path="/create-project/tradicional" element={<TraditionalBuilder />} />
+
                 <Route path="/suscripcion" element={<Suscripcion />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/p/:slug" element={<CustomPage />} />
               </Routes>
             </main>
+
             <Footer />
             <FloatingSaveButton />
             <WhatsAppButton />
