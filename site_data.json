@@ -258,28 +258,28 @@
       "title": "Nuevo proyecto",
       "description": "",
       "imageUrl": "",
-      "public": false
+      "public": true
     },
     {
       "id": "proj-1771661623594-fec1593a402ae",
       "title": "Nuevo proyecto",
       "description": "",
       "imageUrl": "",
-      "public": false
+      "public": true
     },
     {
       "id": "1769460618466",
       "title": "Aseguramos Hospitales, clinicas y centros médicos",
       "description": "Proyecto Hospitales: Servicio de actualización tecnológica e implementación de sistemas CCTV en los Hospitales de Fresia, Frutillar, Llanquihue y Maullín. Incluye modernización de equipos, cableado, configuración de red, calibración de cámaras y puesta en marcha.\nProyecto Centro Médico: Instalación y configuración de cámaras de seguridad en el Centro Médico San Sebastián (Purranque), con equipamiento acorde a los requerimientos del recinto y su operación.",
       "imageUrl": "https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=500",
-      "public": false
+      "public": true
     },
     {
       "id": "pr1",
       "title": "Instalación en Lecherías ",
       "description": "Implementación de circuito cerrado con IA para monitoreo de procesos.",
       "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200",
-      "public": false
+      "public": true
     }
   ],
   "brands": [
@@ -344,7 +344,7 @@
             "description": "",
             "imageUrl": "",
             "tags": [],
-            "public": false
+            "public": true
           },
           {
             "id": "proj-1771661623594-fec1593a402ae",
@@ -354,7 +354,7 @@
             "description": "",
             "imageUrl": "",
             "tags": [],
-            "public": false
+            "public": true
           },
           {
             "id": "1769460618466",
@@ -364,7 +364,7 @@
             "description": "Proyecto Hospitales: Servicio de actualización tecnológica e implementación de sistemas CCTV en los Hospitales de Fresia, Frutillar, Llanquihue y Maullín. Incluye modernización de equipos, cableado, configuración de red, calibración de cámaras y puesta en marcha.\nProyecto Centro Médico: Instalación y configuración de cámaras de seguridad en el Centro Médico San Sebastián (Purranque), con equipamiento acorde a los requerimientos del recinto y su operación.",
             "imageUrl": "https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=500",
             "tags": [],
-            "public": false
+            "public": true
           },
           {
             "id": "pr1",
@@ -374,7 +374,7 @@
             "description": "Implementación de circuito cerrado con IA para monitoreo de procesos.",
             "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200",
             "tags": [],
-            "public": false
+            "public": true
           }
         ]
       }
