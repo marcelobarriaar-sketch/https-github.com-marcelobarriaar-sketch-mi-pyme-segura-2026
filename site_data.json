@@ -237,9 +237,7 @@
   },
   "projectsHeader": {
     "title": "Proyectos Instalados",
-    "subtitle": "Historias reales de seguridad y crecimiento.",
-    "bgColor": "#FFFFFF",
-    "textColor": "#1F2937"
+    "subtitle": "Historias reales de seguridad y crecimiento."
   },
   "createProjectHeader": {
     "title": "Crea tu propio Proyecto",
@@ -257,15 +255,17 @@
   "projects": [
     {
       "id": "1769460618466",
-      "title": "Trabajos en Hospitales y centros Médicos",
+      "title": "Aseguramos Hospitales, clinicas y centros médicos",
       "description": "Proyecto Hospitales: Servicio de actualización tecnológica e implementación de sistemas CCTV en los Hospitales de Fresia, Frutillar, Llanquihue y Maullín. Incluye modernización de equipos, cableado, configuración de red, calibración de cámaras y puesta en marcha.\nProyecto Centro Médico: Instalación y configuración de cámaras de seguridad en el Centro Médico San Sebastián (Purranque), con equipamiento acorde a los requerimientos del recinto y su operación.",
-      "imageUrl": "https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=500"
+      "imageUrl": "https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=500",
+      "public": false
     },
     {
       "id": "pr1",
-      "title": "Instalación en Bodega Industrial",
-      "description": "Implementación de circuito cerrado con IA para detección de intrusos en tiempo real en la zona sur.",
-      "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200"
+      "title": "Instalación en Lecherías ",
+      "description": "Implementación de circuito cerrado con IA para monitoreo de procesos.",
+      "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200",
+      "public": false
     }
   ],
   "brands": [
@@ -313,5 +313,37 @@
     "repo": "https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026",
     "branch": "main"
   },
-  "__equipmentMigrated": true
+  "__equipmentMigrated": true,
+  "pages": {
+    "projects": {
+      "pageTitle": "Proyectos Instalados",
+      "pageSubtitle": "Historias reales de seguridad y crecimiento.",
+      "installed": {
+        "title": "Trabajos en el sector Salud",
+        "subtitle": "Seguridad con un solo clic",
+        "items": [
+          {
+            "id": "1769460618466",
+            "name": "Aseguramos Hospitales, clinicas y centros médicos",
+            "location": "Sur de Chile",
+            "year": "2025",
+            "description": "Proyecto Hospitales: Servicio de actualización tecnológica e implementación de sistemas CCTV en los Hospitales de Fresia, Frutillar, Llanquihue y Maullín. Incluye modernización de equipos, cableado, configuración de red, calibración de cámaras y puesta en marcha.\nProyecto Centro Médico: Instalación y configuración de cámaras de seguridad en el Centro Médico San Sebastián (Purranque), con equipamiento acorde a los requerimientos del recinto y su operación.",
+            "imageUrl": "https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=500",
+            "tags": [],
+            "public": false
+          },
+          {
+            "id": "pr1",
+            "name": "Instalación en Lecherías ",
+            "location": "Seguridad Rural ",
+            "year": "2024",
+            "description": "Implementación de circuito cerrado con IA para monitoreo de procesos.",
+            "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200",
+            "tags": [],
+            "public": false
+          }
+        ]
+      }
+    }
+  }
 }
