@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
+import type { SecurityProjectProfile as AdvisorSecurityProjectProfile } from '../../lib/securityAdvisor';
 
 // =======================
 // 1) Schemas (Zod)
@@ -131,7 +132,7 @@ const SecurityProjectProfileSchema = z.object({
 
   pricing: z
     .object({
-      currency: z.literal('CLP'),
+      currency: z.literal('CLP').optional(),
       subtotalNet: z.number().optional(),
       iva: z.number().optional(),
       total: z.number().optional(),
@@ -282,7 +283,7 @@ function normalizeQty(value: unknown): number {
 
 function normalizeSolutionItems(
   items: Array<{ productId?: string; qty?: number; notes?: string }> | undefined
-) {
+): Array<{ productId: string; qty: number; notes?: string }> {
   return (items ?? [])
     .filter(
       (item): item is { productId: string; qty?: number; notes?: string } =>
@@ -297,9 +298,23 @@ function normalizeSolutionItems(
     }));
 }
 
+function normalizeBasicSolutionItems(
+  items: Array<{ productId?: string; qty?: number }> | undefined
+): Array<{ productId: string; qty: number }> {
+  return (items ?? [])
+    .filter(
+      (item): item is { productId: string; qty?: number } =>
+        !!item && typeof item.productId === 'string' && item.productId.trim().length > 0
+    )
+    .map((item) => ({
+      productId: item.productId.trim(),
+      qty: normalizeQty(item.qty),
+    }));
+}
+
 function normalizeSolutionItemsWithPlacement(
   items: Array<{ productId?: string; qty?: number; placementNotes?: string }> | undefined
-) {
+): Array<{ productId: string; qty: number; placementNotes?: string }> {
   return (items ?? [])
     .filter(
       (item): item is { productId: string; qty?: number; placementNotes?: string } =>
@@ -398,6 +413,84 @@ function mergeProfiles(
   };
 }
 
+function normalizeProfileForAdvisor(
+  profile: SecurityProjectProfile
+): AdvisorSecurityProjectProfile {
+  return {
+    ...profile,
+
+    meta: {
+      createdAt: profile.meta?.createdAt ?? new Date().toISOString(),
+      version:
+        typeof profile.meta?.version === 'number' && Number.isFinite(profile.meta.version)
+          ? Math.max(1, Math.floor(profile.meta.version))
+          : 1,
+      source: 'MPS_GUARDIAN',
+    },
+
+    client: profile.client
+      ? {
+          ...profile.client,
+          contact: profile.client.contact
+            ? {
+                phone: profile.client.contact.phone,
+                email: profile.client.contact.email,
+              }
+            : undefined,
+        }
+      : undefined,
+
+    site: profile.site
+      ? {
+          ...profile.site,
+        }
+      : undefined,
+
+    constraints: profile.constraints
+      ? {
+          ...profile.constraints,
+          preference: profile.constraints.preference
+            ? {
+                ...profile.constraints.preference,
+              }
+            : undefined,
+        }
+      : undefined,
+
+    risk: profile.risk
+      ? {
+          level: profile.risk.level,
+          reasons: dedupeStrings(profile.risk.reasons) ?? [],
+        }
+      : undefined,
+
+    solution: {
+      cameras: normalizeSolutionItemsWithPlacement(profile.solution?.cameras),
+      nvrDvr: normalizeBasicSolutionItems(profile.solution?.nvrDvr),
+      storage: normalizeSolutionItems(profile.solution?.storage),
+      alarm: normalizeSolutionItems(profile.solution?.alarm),
+      accessControl: normalizeSolutionItems(profile.solution?.accessControl),
+      network: normalizeSolutionItems(profile.solution?.network ?? profile.solution?.networking),
+      power: normalizeSolutionItems(profile.solution?.power),
+      extras: normalizeSolutionItems(profile.solution?.extras ?? profile.solution?.accessories),
+    },
+
+    pricing: profile.pricing
+      ? {
+          currency: 'CLP',
+          subtotalNet: profile.pricing.subtotalNet,
+          iva: profile.pricing.iva,
+          total: profile.pricing.total,
+          notes: dedupeStrings(profile.pricing.notes),
+        }
+      : undefined,
+
+    openQuestions: dedupeStrings(profile.openQuestions),
+    assumptions: dedupeStrings(profile.assumptions),
+    nextSteps: dedupeStrings(profile.nextSteps),
+  };
+}
+
 // =======================
 // 3) Handler
 // =======================
@@ -442,41 +535,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })),
     };
 
-    const normalizedProfile = {
-      ...safeCurrentProfile,
-      meta: {
-        createdAt: safeCurrentProfile?.meta?.createdAt ?? new Date().toISOString(),
-        version:
-          typeof safeCurrentProfile?.meta?.version === 'number' &&
-          Number.isFinite(safeCurrentProfile.meta.version)
-            ? Math.max(1, Math.floor(safeCurrentProfile.meta.version))
-            : 1,
-        source: 'MPS_GUARDIAN' as const,
-      },
-      risk: safeCurrentProfile?.risk
-        ? {
-            ...safeCurrentProfile.risk,
-            reasons: dedupeStrings(safeCurrentProfile.risk.reasons),
-          }
-        : undefined,
-      solution: {
-        cameras: normalizeSolutionItemsWithPlacement(safeCurrentProfile?.solution?.cameras),
-        nvrDvr: normalizeSolutionItems(safeCurrentProfile?.solution?.nvrDvr),
-        storage: normalizeSolutionItems(safeCurrentProfile?.solution?.storage),
-        alarm: normalizeSolutionItems(safeCurrentProfile?.solution?.alarm),
-        accessControl: normalizeSolutionItems(safeCurrentProfile?.solution?.accessControl),
-        network: normalizeSolutionItems(
-          safeCurrentProfile?.solution?.network ?? safeCurrentProfile?.solution?.networking
-        ),
-        power: normalizeSolutionItems(safeCurrentProfile?.solution?.power),
-        extras: normalizeSolutionItems(
-          safeCurrentProfile?.solution?.extras ?? safeCurrentProfile?.solution?.accessories
-        ),
-      },
-      openQuestions: dedupeStrings(safeCurrentProfile?.openQuestions),
-      assumptions: dedupeStrings(safeCurrentProfile?.assumptions),
-      nextSteps: dedupeStrings(safeCurrentProfile?.nextSteps),
-    };
+    const normalizedProfile = normalizeProfileForAdvisor(safeCurrentProfile);
 
     const technicalBase = generateSecurityProject(
       normalizedProfile,
@@ -651,7 +710,7 @@ IMPORTANTE:
     );
 
     const finalTechnical = generateSecurityProject(
-      mergedProfile,
+      normalizeProfileForAdvisor(mergedProfile),
       advisorCatalog,
       mode ?? 'residencial'
     );
