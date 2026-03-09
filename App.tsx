@@ -493,7 +493,7 @@ const App = () => {
       setIsCloudSyncing(true);
       try {
         const res = await fetch(
-          'https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/site_data.json?ts=' +
+          'https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/data/site_data.json?ts=' +
             Date.now()
         );
 
