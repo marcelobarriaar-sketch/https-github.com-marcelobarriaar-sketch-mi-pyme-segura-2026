@@ -117,10 +117,16 @@ const SecurityProjectProfileSchema = z.object({
       network: z
         .array(z.object({ productId: z.string(), qty: z.number(), notes: z.string().optional() }))
         .optional(),
+      networking: z
+        .array(z.object({ productId: z.string(), qty: z.number(), notes: z.string().optional() }))
+        .optional(),
       power: z
         .array(z.object({ productId: z.string(), qty: z.number(), notes: z.string().optional() }))
         .optional(),
       extras: z
+        .array(z.object({ productId: z.string(), qty: z.number(), notes: z.string().optional() }))
+        .optional(),
+      accessories: z
         .array(z.object({ productId: z.string(), qty: z.number(), notes: z.string().optional() }))
         .optional(),
     })
@@ -165,6 +171,15 @@ type Catalog = z.infer<typeof CatalogSchema>;
 type SecurityProjectProfile = z.infer<typeof SecurityProjectProfileSchema>;
 type GuardianRequest = z.infer<typeof GuardianRequestSchema>;
 type GuardianResponse = z.infer<typeof GuardianResponseSchema>;
+
+type AdvisorProfile = Parameters<typeof generateSecurityProject>[0];
+type AdvisorCatalog = Parameters<typeof generateSecurityProject>[1];
+type AdvisorMode = Parameters<typeof generateSecurityProject>[2];
+
+type OpenAIChatMessage = {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+};
 
 // =======================
 // 2) Helpers
@@ -238,6 +253,165 @@ async function loadLocalCatalog(): Promise<Catalog | null> {
   }
 }
 
+function dedupeStrings(items?: string[]): string[] | undefined {
+  if (!items || items.length === 0) return undefined;
+  return [...new Set(items.map((x) => x.trim()).filter(Boolean))];
+}
+
+function combineOpenQuestions(a?: string[], b?: string[]): string[] | undefined {
+  return dedupeStrings([...(a ?? []), ...(b ?? [])]);
+}
+
+function normalizeMessages(
+  messages: Array<{ role?: 'system' | 'user' | 'assistant'; content?: string }> = []
+): OpenAIChatMessage[] {
+  return messages
+    .filter(
+      (msg): msg is OpenAIChatMessage =>
+        !!msg &&
+        (msg.role === 'system' || msg.role === 'user' || msg.role === 'assistant') &&
+        typeof msg.content === 'string' &&
+        msg.content.trim().length > 0
+    )
+    .map((msg) => ({
+      role: msg.role,
+      content: msg.content.trim(),
+    }));
+}
+
+function normalizeQty(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
+    ? Math.max(1, Math.floor(value))
+    : 1;
+}
+
+function normalizeSolutionItems(
+  items:
+    | Array<{ productId?: string; qty?: number; notes?: string }>
+    | undefined
+) {
+  return (items ?? [])
+    .filter(
+      (item): item is { productId: string; qty?: number; notes?: string } =>
+        !!item && typeof item.productId === 'string' && item.productId.trim().length > 0
+    )
+    .map((item) => ({
+      productId: item.productId.trim(),
+      qty: normalizeQty(item.qty),
+      ...(typeof item.notes === 'string' && item.notes.trim()
+        ? { notes: item.notes.trim() }
+        : {}),
+    }));
+}
+
+function normalizeSolutionItemsWithPlacement(
+  items:
+    | Array<{ productId?: string; qty?: number; placementNotes?: string }>
+    | undefined
+) {
+  return (items ?? [])
+    .filter(
+      (item): item is { productId: string; qty?: number; placementNotes?: string } =>
+        !!item && typeof item.productId === 'string' && item.productId.trim().length > 0
+    )
+    .map((item) => ({
+      productId: item.productId.trim(),
+      qty: normalizeQty(item.qty),
+      ...(typeof item.placementNotes === 'string' && item.placementNotes.trim()
+        ? { placementNotes: item.placementNotes.trim() }
+        : {}),
+    }));
+}
+
+function normalizeCatalogForAdvisor(catalog: Catalog): AdvisorCatalog {
+  return {
+    categories: catalog.categories ?? [],
+    products: catalog.products.map((p) => ({
+      ...p,
+      active: p.active ?? true,
+      features: p.features ?? [],
+    })),
+  } as AdvisorCatalog;
+}
+
+function normalizeProfileForAdvisor(
+  profile: SecurityProjectProfile | undefined
+): AdvisorProfile {
+  const solution = profile?.solution;
+
+  return {
+    ...profile,
+
+    meta: {
+      createdAt: profile?.meta?.createdAt ?? new Date().toISOString(),
+      version:
+        typeof profile?.meta?.version === 'number' && Number.isFinite(profile.meta.version)
+          ? Math.max(1, Math.floor(profile.meta.version))
+          : 1,
+      source: 'MPS_GUARDIAN',
+    },
+
+    client: profile?.client
+      ? {
+          ...profile.client,
+          contact: profile.client.contact
+            ? {
+                phone: profile.client.contact.phone,
+                email: profile.client.contact.email,
+              }
+            : undefined,
+        }
+      : undefined,
+
+    site: profile?.site
+      ? {
+          ...profile.site,
+        }
+      : undefined,
+
+    constraints: profile?.constraints
+      ? {
+          ...profile.constraints,
+          preference: profile.constraints.preference
+            ? {
+                ...profile.constraints.preference,
+              }
+            : undefined,
+        }
+      : undefined,
+
+    risk: profile?.risk
+      ? {
+          ...profile.risk,
+          reasons: dedupeStrings(profile.risk.reasons),
+        }
+      : undefined,
+
+    solution: {
+      cameras: normalizeSolutionItemsWithPlacement(solution?.cameras),
+      nvrDvr: normalizeSolutionItems(solution?.nvrDvr),
+      storage: normalizeSolutionItems(solution?.storage),
+      alarm: normalizeSolutionItems(solution?.alarm),
+      accessControl: normalizeSolutionItems(solution?.accessControl),
+      networking: normalizeSolutionItems(solution?.networking ?? solution?.network),
+      power: normalizeSolutionItems(solution?.power),
+      accessories: normalizeSolutionItems(solution?.accessories ?? solution?.extras),
+    },
+
+    pricing: profile?.pricing
+      ? {
+          ...profile.pricing,
+          currency: 'CLP' as const,
+          notes: dedupeStrings(profile.pricing.notes),
+        }
+      : undefined,
+
+    openQuestions: dedupeStrings(profile?.openQuestions),
+    assumptions: dedupeStrings(profile?.assumptions),
+    nextSteps: dedupeStrings(profile?.nextSteps),
+  } as AdvisorProfile;
+}
+
 function mergeProfiles(
   currentProfile: SecurityProjectProfile | undefined,
   patch: SecurityProjectProfile | undefined
@@ -250,7 +424,7 @@ function mergeProfiles(
       ...currentProfile?.meta,
       ...patch?.meta,
       createdAt: currentProfile?.meta?.createdAt ?? new Date().toISOString(),
-      version: Math.max(currentProfile?.meta?.version ?? 0, patch?.meta?.version ?? 0),
+      version: Math.max(currentProfile?.meta?.version ?? 0, patch?.meta?.version ?? 0, 1),
       source: 'MPS_GUARDIAN',
     },
 
@@ -292,8 +466,10 @@ function mergeProfiles(
       alarm: patch?.solution?.alarm ?? currentProfile?.solution?.alarm,
       accessControl: patch?.solution?.accessControl ?? currentProfile?.solution?.accessControl,
       network: patch?.solution?.network ?? currentProfile?.solution?.network,
+      networking: patch?.solution?.networking ?? currentProfile?.solution?.networking,
       power: patch?.solution?.power ?? currentProfile?.solution?.power,
       extras: patch?.solution?.extras ?? currentProfile?.solution?.extras,
+      accessories: patch?.solution?.accessories ?? currentProfile?.solution?.accessories,
     },
 
     pricing: patch?.pricing ?? currentProfile?.pricing,
@@ -315,18 +491,9 @@ function buildFallbackProfile(currentProfile?: SecurityProjectProfile): Security
   );
 }
 
-function getLatestUserMessage(messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>): string {
+function getLatestUserMessage(messages: OpenAIChatMessage[]): string {
   const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
   return lastUserMessage?.content ?? '';
-}
-
-function dedupeStrings(items?: string[]): string[] | undefined {
-  if (!items || items.length === 0) return undefined;
-  return [...new Set(items.map((x) => x.trim()).filter(Boolean))];
-}
-
-function combineOpenQuestions(a?: string[], b?: string[]): string[] | undefined {
-  return dedupeStrings([...(a ?? []), ...(b ?? [])]);
 }
 
 // =======================
@@ -348,6 +515,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { messages, currentProfile, catalog: requestCatalog, mode }: GuardianRequest = parsed.data;
 
+    const normalizedMessages = normalizeMessages(messages);
+    const safeCurrentProfile = buildFallbackProfile(currentProfile);
+
     const localCatalog = await loadLocalCatalog();
     const catalog = requestCatalog ?? localCatalog;
 
@@ -358,10 +528,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    const advisorCatalog = normalizeCatalogForAdvisor(catalog);
+    const advisorMode = (mode ?? 'residencial') as AdvisorMode;
+
     const technicalBase = generateSecurityProject(
-      buildFallbackProfile(currentProfile),
-      catalog,
-      mode ?? 'residencial'
+      normalizeProfileForAdvisor(safeCurrentProfile),
+      advisorCatalog,
+      advisorMode
     );
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -404,19 +577,14 @@ IMPORTANTE:
 - No pongas texto antes ni después del JSON.
 `.trim();
 
-    const contextMsg = {
-      role: 'user' as const,
+    const contextMsg: OpenAIChatMessage = {
+      role: 'user',
       content: JSON.stringify(
         {
           instruction:
             'Conversa y actualiza el perfil. Puedes mejorar, afinar o reducir la propuesta base si la conversación lo justifica.',
-          latestUserMessage: getLatestUserMessage(messages),
-          currentProfile: currentProfile ?? {
-            meta: {
-              source: 'MPS_GUARDIAN',
-              version: 1,
-            },
-          },
+          latestUserMessage: getLatestUserMessage(normalizedMessages),
+          currentProfile: safeCurrentProfile,
           technicalBase,
           catalog: {
             categories: catalog.categories ?? [],
@@ -443,6 +611,12 @@ IMPORTANTE:
       ),
     };
 
+    const openAIInput: OpenAIChatMessage[] = [
+      { role: 'system', content: system },
+      ...normalizedMessages,
+      contextMsg,
+    ];
+
     const upstream = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
@@ -451,14 +625,7 @@ IMPORTANTE:
       },
       body: JSON.stringify({
         model,
-        input: [
-          { role: 'system', content: system },
-          ...messages.map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-          contextMsg,
-        ],
+        input: openAIInput,
         temperature: 0.2,
         max_output_tokens: 1000,
       }),
@@ -531,14 +698,26 @@ IMPORTANTE:
 
     const aiData: GuardianResponse = validated.data;
 
-    const mergedProfile = mergeProfiles(technicalBase.projectPatch, aiData.projectPatch);
-    const finalTechnical = generateSecurityProject(mergedProfile, catalog, mode ?? 'residencial');
+    const mergedProfile = mergeProfiles(
+      technicalBase.projectPatch as SecurityProjectProfile,
+      aiData.projectPatch
+    );
+
+    const finalTechnical = generateSecurityProject(
+      normalizeProfileForAdvisor(mergedProfile),
+      advisorCatalog,
+      advisorMode
+    );
 
     const finalAssistantMessage =
       aiData.assistantMessage?.trim() || finalTechnical.assistantMessage;
 
     const finalCatalogSelections = [
-      ...aiData.catalogSelections,
+      ...aiData.catalogSelections.map((sel) => ({
+        productId: sel.productId,
+        qty: normalizeQty(sel.qty),
+        ...(sel.reason ? { reason: sel.reason } : {}),
+      })),
       ...finalTechnical.catalogSelections.filter(
         (techSel) =>
           !aiData.catalogSelections.some((aiSel) => aiSel.productId === techSel.productId)
