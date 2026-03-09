@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
-import type { SecurityProjectProfile as AdvisorSecurityProjectProfile } from '../../lib/securityAdvisor';
+import type {
+  SecurityProjectProfile as AdvisorSecurityProjectProfile,
+  Catalog as AdvisorCatalog,
+} from '../../lib/securityAdvisor';
 
 // =======================
 // 1) Schemas (Zod)
@@ -491,6 +494,75 @@ function normalizeProfileForAdvisor(
   };
 }
 
+function normalizeCatalogForAdvisor(catalog: Catalog): AdvisorCatalog {
+  return {
+    categories: (catalog.categories ?? [])
+      .filter(
+        (cat): cat is { id: string; name: string; subcategories?: { id: string; name: string }[] } =>
+          !!cat &&
+          typeof cat.id === 'string' &&
+          cat.id.trim().length > 0 &&
+          typeof cat.name === 'string' &&
+          cat.name.trim().length > 0
+      )
+      .map((cat) => ({
+        id: cat.id.trim(),
+        name: cat.name.trim(),
+        subcategories: (cat.subcategories ?? [])
+          .filter(
+            (sub): sub is { id: string; name: string } =>
+              !!sub &&
+              typeof sub.id === 'string' &&
+              sub.id.trim().length > 0 &&
+              typeof sub.name === 'string' &&
+              sub.name.trim().length > 0
+          )
+          .map((sub) => ({
+            id: sub.id.trim(),
+            name: sub.name.trim(),
+          })),
+      })),
+    products: (catalog.products ?? [])
+      .filter(
+        (p): p is {
+          id: string;
+          name: string;
+          brand?: string;
+          model?: string;
+          sku?: string;
+          categoryId?: string;
+          subcategoryId?: string;
+          priceNet?: number;
+          features?: string[];
+          imageUrl?: string;
+          datasheetUrl?: string;
+          videoUrl?: string;
+          active?: boolean;
+        } =>
+          !!p &&
+          typeof p.id === 'string' &&
+          p.id.trim().length > 0 &&
+          typeof p.name === 'string' &&
+          p.name.trim().length > 0
+      )
+      .map((p) => ({
+        id: p.id.trim(),
+        name: p.name.trim(),
+        brand: p.brand,
+        model: p.model,
+        sku: p.sku,
+        categoryId: p.categoryId,
+        subcategoryId: p.subcategoryId,
+        priceNet: p.priceNet,
+        features: p.features ?? [],
+        imageUrl: p.imageUrl,
+        datasheetUrl: p.datasheetUrl,
+        videoUrl: p.videoUrl,
+        active: p.active ?? true,
+      })),
+  };
+}
+
 // =======================
 // 3) Handler
 // =======================
@@ -526,15 +598,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const securityAdvisorModule = await import('../../lib/securityAdvisor');
     const { generateSecurityProject } = securityAdvisorModule;
 
-    const advisorCatalog = {
-      categories: catalog.categories ?? [],
-      products: catalog.products.map((p) => ({
-        ...p,
-        active: p.active ?? true,
-        features: p.features ?? [],
-      })),
-    };
-
+    const advisorCatalog = normalizeCatalogForAdvisor(catalog);
     const normalizedProfile = normalizeProfileForAdvisor(safeCurrentProfile);
 
     const technicalBase = generateSecurityProject(
