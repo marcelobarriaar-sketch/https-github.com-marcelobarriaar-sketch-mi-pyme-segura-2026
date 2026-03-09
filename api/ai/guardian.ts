@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { generateSecurityProject } from '../../lib/securityAdvisor';
 
 // =======================
 // 1) Schemas (Zod)
@@ -161,10 +162,9 @@ const GuardianRequestSchema = z.object({
 });
 
 type Catalog = z.infer<typeof CatalogSchema>;
-type CatalogProduct = z.infer<typeof CatalogProductSchema>;
 type SecurityProjectProfile = z.infer<typeof SecurityProjectProfileSchema>;
-type GuardianResponse = z.infer<typeof GuardianResponseSchema>;
 type GuardianRequest = z.infer<typeof GuardianRequestSchema>;
+type GuardianResponse = z.infer<typeof GuardianResponseSchema>;
 
 // =======================
 // 2) Helpers
@@ -195,60 +195,47 @@ function extractJsonFromText(text: string): unknown {
   return null;
 }
 
-function pickActiveProducts(catalog: Catalog) {
-  const products = (catalog.products || []).filter((p) => p && (p.active ?? true));
-
-  return products.slice(0, 350).map((p) => ({
-    id: p.id,
-    name: p.name,
-    brand: p.brand ?? '',
-    model: p.model ?? '',
-    sku: p.sku ?? '',
-    categoryId: p.categoryId ?? '',
-    subcategoryId: p.subcategoryId ?? '',
-    priceNet: typeof p.priceNet === 'number' ? p.priceNet : undefined,
-    features: p.features ?? [],
-  }));
+function tryParseCatalogCandidate(candidate: unknown): Catalog | null {
+  const parsed = CatalogSchema.safeParse(candidate);
+  return parsed.success ? parsed.data : null;
 }
 
-function computePricing(profile: SecurityProjectProfile, catalogProducts: CatalogProduct[]) {
-  const all = [
-    ...(profile.solution?.cameras ?? []),
-    ...(profile.solution?.nvrDvr ?? []),
-    ...(profile.solution?.storage ?? []),
-    ...(profile.solution?.alarm ?? []),
-    ...(profile.solution?.accessControl ?? []),
-    ...(profile.solution?.network ?? []),
-    ...(profile.solution?.power ?? []),
-    ...(profile.solution?.extras ?? []),
-  ];
+function extractCatalogFromUnknownSiteData(siteData: unknown): Catalog | null {
+  if (!isObject(siteData)) return null;
 
-  let subtotal = 0;
-  const notes: string[] = [];
+  const directCatalog = tryParseCatalogCandidate(siteData.catalog);
+  if (directCatalog) return directCatalog;
 
-  for (const item of all) {
-    const prod = catalogProducts.find((p) => p.id === item.productId);
-    const qty = Number(item.qty ?? 0) || 0;
-    const price = typeof prod?.priceNet === 'number' ? prod.priceNet : null;
+  const directTopLevel = tryParseCatalogCandidate({
+    categories: siteData.categories,
+    products: siteData.products,
+  });
+  if (directTopLevel) return directTopLevel;
 
-    if (price == null) {
-      notes.push(`Sin precio neto para producto ${item.productId}`);
-      continue;
-    }
+  if (isObject(siteData.siteData)) {
+    const nestedCatalog = tryParseCatalogCandidate(siteData.siteData.catalog);
+    if (nestedCatalog) return nestedCatalog;
 
-    subtotal += price * qty;
+    const nestedTopLevel = tryParseCatalogCandidate({
+      categories: siteData.siteData.categories,
+      products: siteData.siteData.products,
+    });
+    if (nestedTopLevel) return nestedTopLevel;
   }
 
-  const iva = Math.round(subtotal * 0.19);
-  const total = subtotal + iva;
+  return null;
+}
 
-  return {
-    currency: 'CLP' as const,
-    subtotalNet: subtotal,
-    iva,
-    total,
-    notes: notes.length ? notes : undefined,
-  };
+async function loadLocalCatalog(): Promise<Catalog | null> {
+  const filePath = path.join(process.cwd(), 'data', 'site_data.json');
+
+  try {
+    const raw = await fs.readFile(filePath, 'utf-8');
+    const json = safeJsonParse(raw);
+    return extractCatalogFromUnknownSiteData(json);
+  } catch {
+    return null;
+  }
 }
 
 function mergeProfiles(
@@ -263,7 +250,7 @@ function mergeProfiles(
       ...currentProfile?.meta,
       ...patch?.meta,
       createdAt: currentProfile?.meta?.createdAt ?? new Date().toISOString(),
-      version: (currentProfile?.meta?.version ?? 0) + 1,
+      version: Math.max(currentProfile?.meta?.version ?? 0, patch?.meta?.version ?? 0),
       source: 'MPS_GUARDIAN',
     },
 
@@ -316,47 +303,30 @@ function mergeProfiles(
   };
 }
 
-function tryParseCatalogCandidate(candidate: unknown): Catalog | null {
-  const parsed = CatalogSchema.safeParse(candidate);
-  return parsed.success ? parsed.data : null;
+function buildFallbackProfile(currentProfile?: SecurityProjectProfile): SecurityProjectProfile {
+  return (
+    currentProfile ?? {
+      meta: {
+        source: 'MPS_GUARDIAN',
+        version: 1,
+        createdAt: new Date().toISOString(),
+      },
+    }
+  );
 }
 
-function extractCatalogFromUnknownSiteData(siteData: unknown): Catalog | null {
-  if (!isObject(siteData)) return null;
-
-  const directCatalog = tryParseCatalogCandidate(siteData.catalog);
-  if (directCatalog) return directCatalog;
-
-  const directTopLevel = tryParseCatalogCandidate({
-    categories: siteData.categories,
-    products: siteData.products,
-  });
-  if (directTopLevel) return directTopLevel;
-
-  if (isObject(siteData.siteData)) {
-    const nestedCatalog = tryParseCatalogCandidate(siteData.siteData.catalog);
-    if (nestedCatalog) return nestedCatalog;
-
-    const nestedTopLevel = tryParseCatalogCandidate({
-      categories: siteData.siteData.categories,
-      products: siteData.siteData.products,
-    });
-    if (nestedTopLevel) return nestedTopLevel;
-  }
-
-  return null;
+function getLatestUserMessage(messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>): string {
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
+  return lastUserMessage?.content ?? '';
 }
 
-async function loadLocalCatalog(): Promise<Catalog | null> {
-  const filePath = path.join(process.cwd(), 'data', 'site_data.json');
+function dedupeStrings(items?: string[]): string[] | undefined {
+  if (!items || items.length === 0) return undefined;
+  return [...new Set(items.map((x) => x.trim()).filter(Boolean))];
+}
 
-  try {
-    const raw = await fs.readFile(filePath, 'utf-8');
-    const json = safeJsonParse(raw);
-    return extractCatalogFromUnknownSiteData(json);
-  } catch {
-    return null;
-  }
+function combineOpenQuestions(a?: string[], b?: string[]): string[] | undefined {
+  return dedupeStrings([...(a ?? []), ...(b ?? [])]);
 }
 
 // =======================
@@ -384,42 +354,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!catalog) {
       return res.status(500).json({
         error: 'Catalog not found',
-        details:
-          'No llegó catalog en el request y tampoco se pudo leer data/site_data.json',
+        details: 'No llegó catalog en el request y tampoco se pudo leer data/site_data.json',
       });
     }
+
+    const technicalBase = generateSecurityProject(
+      buildFallbackProfile(currentProfile),
+      catalog,
+      mode ?? 'residencial'
+    );
 
     const apiKey = process.env.OPENAI_API_KEY;
     const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
 
     if (!apiKey) {
-      return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
+      return res.status(200).json({
+        assistantMessage: technicalBase.assistantMessage,
+        projectPatch: technicalBase.projectPatch,
+        catalogSelections: technicalBase.catalogSelections,
+        openQuestions: technicalBase.openQuestions,
+        assumptions: technicalBase.assumptions,
+        nextSteps: technicalBase.nextSteps,
+        _warning: 'Missing OPENAI_API_KEY - returned technical fallback only',
+      });
     }
 
-    const catalogSlim = pickActiveProducts(catalog);
-
     const system = `
-Eres "MPS Guardian", asesor experto instalador de seguridad para casas, parcelas y pymes en Chile.
-Tu misión es conversar, entender la necesidad del cliente y actualizar un PERFIL DE PROYECTO en formato JSON.
+Eres "MPS Guardian", asesor experto de seguridad para Mi Pyme Segura en Chile.
+Tu misión es conversar con el cliente, entender su necesidad y proponer una actualización JSON para el proyecto.
 
 REGLAS CRÍTICAS:
-1) USA SOLO productos del catálogo entregado (por id). NO inventes marcas, modelos ni productos.
-2) Si falta información crítica, pregunta antes. Haz máximo 1 a 3 preguntas por turno, cortas y útiles.
-3) Devuelve SIEMPRE una respuesta FINAL en JSON válido con esta forma exacta:
+1) USA SOLO productos del catálogo entregado (por id). NO inventes productos.
+2) Si falta información crítica, pregunta antes. Máximo 1 a 3 preguntas por turno.
+3) Devuelve SIEMPRE un JSON válido con esta forma exacta:
 {
   "assistantMessage": "...",
   "projectPatch": { ... },
   "catalogSelections": [{ "productId": "...", "qty": 1, "reason": "..." }],
   "openQuestions": ["..."]
 }
-4) "projectPatch" debe respetar el schema del perfil. Si no sabes un valor, omítelo.
-5) Si sugieres algo sin tener producto exacto, NO lo pongas en solution. Déjalo en openQuestions o assumptions.
-6) Tono: español chileno, cercano, claro y profesional.
-7) Prioriza soluciones realistas, instalables y coherentes con presupuesto, energía, internet y nivel de riesgo.
-8) Modo actual: ${mode ?? 'residencial'}.
+4) "projectPatch" debe respetar el schema entregado. Si no sabes algo, omítelo.
+5) Si no existe un producto exacto en catálogo, no lo inventes ni lo metas en solution.
+6) Tono: español chileno, claro, cercano, profesional y aterrizado.
+7) Modo actual: ${mode ?? 'residencial'}.
 
 IMPORTANTE:
-- Responde SOLO con JSON válido.
+- Responde SOLO con JSON.
 - No uses markdown.
 - No pongas texto antes ni después del JSON.
 `.trim();
@@ -429,16 +409,34 @@ IMPORTANTE:
       content: JSON.stringify(
         {
           instruction:
-            'Actualiza el perfil según lo conversado. Propón solución solo si hay datos suficientes. Prioriza coherencia técnica, seguridad, factibilidad de instalación y claridad para el cliente.',
+            'Conversa y actualiza el perfil. Puedes mejorar, afinar o reducir la propuesta base si la conversación lo justifica.',
+          latestUserMessage: getLatestUserMessage(messages),
           currentProfile: currentProfile ?? {
             meta: {
               source: 'MPS_GUARDIAN',
               version: 1,
             },
           },
-          catalog: catalogSlim,
+          technicalBase,
+          catalog: {
+            categories: catalog.categories ?? [],
+            products: catalog.products
+              .filter((p) => p.active ?? true)
+              .slice(0, 350)
+              .map((p) => ({
+                id: p.id,
+                name: p.name,
+                brand: p.brand ?? '',
+                model: p.model ?? '',
+                sku: p.sku ?? '',
+                categoryId: p.categoryId ?? '',
+                subcategoryId: p.subcategoryId ?? '',
+                priceNet: typeof p.priceNet === 'number' ? p.priceNet : undefined,
+                features: p.features ?? [],
+              })),
+          },
           note:
-            'Usa solo productId existentes. Si no existe el producto exacto, no lo inventes.',
+            'La propuesta técnica base sirve como apoyo. Si la conversación indica algo más preciso, ajusta el JSON, pero siempre usando solo productId reales del catálogo.',
         },
         null,
         2
@@ -461,16 +459,22 @@ IMPORTANTE:
           })),
           contextMsg,
         ],
-        temperature: 0.3,
-        max_output_tokens: 900,
+        temperature: 0.2,
+        max_output_tokens: 1000,
       }),
     });
 
     if (!upstream.ok) {
       const txt = await upstream.text();
-      return res.status(502).json({
-        error: 'Upstream error',
-        details: txt,
+      return res.status(200).json({
+        assistantMessage: technicalBase.assistantMessage,
+        projectPatch: technicalBase.projectPatch,
+        catalogSelections: technicalBase.catalogSelections,
+        openQuestions: technicalBase.openQuestions,
+        assumptions: technicalBase.assumptions,
+        nextSteps: technicalBase.nextSteps,
+        _warning: 'OpenAI upstream error - returned technical fallback',
+        _upstream: txt,
       });
     }
 
@@ -498,18 +502,13 @@ IMPORTANTE:
 
     if (!json) {
       return res.status(200).json({
-        assistantMessage:
-          'Ya, me faltaron un par de datos clave para dejarte una propuesta firme. ¿Me confirmas tipo de inmueble, cantidad de accesos y si tienes internet estable?',
-        projectPatch: currentProfile ?? {
-          meta: {
-            source: 'MPS_GUARDIAN',
-            version: 1,
-            createdAt: new Date().toISOString(),
-          },
-        },
-        catalogSelections: [],
-        openQuestions: ['Tipo de inmueble', 'Cantidad de accesos', 'Internet estable'],
-        _warning: 'Model output was not valid JSON',
+        assistantMessage: technicalBase.assistantMessage,
+        projectPatch: technicalBase.projectPatch,
+        catalogSelections: technicalBase.catalogSelections,
+        openQuestions: technicalBase.openQuestions,
+        assumptions: technicalBase.assumptions,
+        nextSteps: technicalBase.nextSteps,
+        _warning: 'Model output was not valid JSON - returned technical fallback',
         _raw: outputText,
       });
     }
@@ -518,32 +517,47 @@ IMPORTANTE:
 
     if (!validated.success) {
       return res.status(200).json({
-        assistantMessage:
-          'Te entendí, pero todavía me falta dejar la propuesta cerrada. ¿Me confirmas cuántos pisos tiene el lugar, qué zonas quieres cubrir y si hay cortes de luz frecuentes?',
-        projectPatch: currentProfile ?? {
-          meta: {
-            source: 'MPS_GUARDIAN',
-            version: 1,
-            createdAt: new Date().toISOString(),
-          },
-        },
-        catalogSelections: [],
-        openQuestions: ['Cantidad de pisos', 'Zonas a cubrir', 'Cortes de luz frecuentes'],
-        _warning: 'Model JSON did not match schema',
+        assistantMessage: technicalBase.assistantMessage,
+        projectPatch: technicalBase.projectPatch,
+        catalogSelections: technicalBase.catalogSelections,
+        openQuestions: technicalBase.openQuestions,
+        assumptions: technicalBase.assumptions,
+        nextSteps: technicalBase.nextSteps,
+        _warning: 'Model JSON did not match schema - returned technical fallback',
         _schemaError: validated.error.flatten(),
         _raw: json,
       });
     }
 
-    const mergedProfile = mergeProfiles(currentProfile, validated.data.projectPatch);
-    mergedProfile.pricing = computePricing(mergedProfile, catalog.products || []);
+    const aiData: GuardianResponse = validated.data;
 
-    const response: GuardianResponse & { projectPatch: SecurityProjectProfile } = {
-      ...validated.data,
-      projectPatch: mergedProfile,
-    };
+    const mergedProfile = mergeProfiles(technicalBase.projectPatch, aiData.projectPatch);
+    const finalTechnical = generateSecurityProject(mergedProfile, catalog, mode ?? 'residencial');
 
-    return res.status(200).json(response);
+    const finalAssistantMessage =
+      aiData.assistantMessage?.trim() || finalTechnical.assistantMessage;
+
+    const finalCatalogSelections = [
+      ...aiData.catalogSelections,
+      ...finalTechnical.catalogSelections.filter(
+        (techSel) =>
+          !aiData.catalogSelections.some((aiSel) => aiSel.productId === techSel.productId)
+      ),
+    ];
+
+    const finalOpenQuestions = combineOpenQuestions(
+      aiData.openQuestions,
+      finalTechnical.openQuestions
+    );
+
+    return res.status(200).json({
+      assistantMessage: finalAssistantMessage,
+      projectPatch: finalTechnical.projectPatch,
+      catalogSelections: finalCatalogSelections,
+      openQuestions: finalOpenQuestions,
+      assumptions: finalTechnical.assumptions,
+      nextSteps: finalTechnical.nextSteps,
+    });
   } catch (err: unknown) {
     const details = err instanceof Error ? err.message : String(err);
     return res.status(500).json({
