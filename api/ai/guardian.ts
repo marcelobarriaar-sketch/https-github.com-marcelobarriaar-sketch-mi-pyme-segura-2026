@@ -1,8 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { generateSecurityProject } from '../../lib/securityAdvisor';
 
 // =======================
 // 1) Schemas (Zod)
@@ -172,10 +169,6 @@ type SecurityProjectProfile = z.infer<typeof SecurityProjectProfileSchema>;
 type GuardianRequest = z.infer<typeof GuardianRequestSchema>;
 type GuardianResponse = z.infer<typeof GuardianResponseSchema>;
 
-type AdvisorProfile = Parameters<typeof generateSecurityProject>[0];
-type AdvisorCatalog = Parameters<typeof generateSecurityProject>[1];
-type AdvisorMode = Parameters<typeof generateSecurityProject>[2];
-
 type OpenAIChatMessage = {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -242,9 +235,11 @@ function extractCatalogFromUnknownSiteData(siteData: unknown): Catalog | null {
 }
 
 async function loadLocalCatalog(): Promise<Catalog | null> {
-  const filePath = path.join(process.cwd(), 'data', 'site_data.json');
-
   try {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+
+    const filePath = path.join(process.cwd(), 'data', 'site_data.json');
     const raw = await fs.readFile(filePath, 'utf-8');
     const json = safeJsonParse(raw);
     return extractCatalogFromUnknownSiteData(json);
@@ -286,9 +281,7 @@ function normalizeQty(value: unknown): number {
 }
 
 function normalizeSolutionItems(
-  items:
-    | Array<{ productId?: string; qty?: number; notes?: string }>
-    | undefined
+  items: Array<{ productId?: string; qty?: number; notes?: string }> | undefined
 ) {
   return (items ?? [])
     .filter(
@@ -305,9 +298,7 @@ function normalizeSolutionItems(
 }
 
 function normalizeSolutionItemsWithPlacement(
-  items:
-    | Array<{ productId?: string; qty?: number; placementNotes?: string }>
-    | undefined
+  items: Array<{ productId?: string; qty?: number; placementNotes?: string }> | undefined
 ) {
   return (items ?? [])
     .filter(
@@ -323,93 +314,21 @@ function normalizeSolutionItemsWithPlacement(
     }));
 }
 
-function normalizeCatalogForAdvisor(catalog: Catalog): AdvisorCatalog {
-  return {
-    categories: catalog.categories ?? [],
-    products: catalog.products.map((p) => ({
-      ...p,
-      active: p.active ?? true,
-      features: p.features ?? [],
-    })),
-  } as AdvisorCatalog;
+function buildFallbackProfile(currentProfile?: SecurityProjectProfile): SecurityProjectProfile {
+  return (
+    currentProfile ?? {
+      meta: {
+        source: 'MPS_GUARDIAN',
+        version: 1,
+        createdAt: new Date().toISOString(),
+      },
+    }
+  );
 }
 
-function normalizeProfileForAdvisor(
-  profile: SecurityProjectProfile | undefined
-): AdvisorProfile {
-  const solution = profile?.solution;
-
-  return {
-    ...profile,
-
-    meta: {
-      createdAt: profile?.meta?.createdAt ?? new Date().toISOString(),
-      version:
-        typeof profile?.meta?.version === 'number' && Number.isFinite(profile.meta.version)
-          ? Math.max(1, Math.floor(profile.meta.version))
-          : 1,
-      source: 'MPS_GUARDIAN',
-    },
-
-    client: profile?.client
-      ? {
-          ...profile.client,
-          contact: profile.client.contact
-            ? {
-                phone: profile.client.contact.phone,
-                email: profile.client.contact.email,
-              }
-            : undefined,
-        }
-      : undefined,
-
-    site: profile?.site
-      ? {
-          ...profile.site,
-        }
-      : undefined,
-
-    constraints: profile?.constraints
-      ? {
-          ...profile.constraints,
-          preference: profile.constraints.preference
-            ? {
-                ...profile.constraints.preference,
-              }
-            : undefined,
-        }
-      : undefined,
-
-    risk: profile?.risk
-      ? {
-          ...profile.risk,
-          reasons: dedupeStrings(profile.risk.reasons),
-        }
-      : undefined,
-
-    solution: {
-      cameras: normalizeSolutionItemsWithPlacement(solution?.cameras),
-      nvrDvr: normalizeSolutionItems(solution?.nvrDvr),
-      storage: normalizeSolutionItems(solution?.storage),
-      alarm: normalizeSolutionItems(solution?.alarm),
-      accessControl: normalizeSolutionItems(solution?.accessControl),
-      networking: normalizeSolutionItems(solution?.networking ?? solution?.network),
-      power: normalizeSolutionItems(solution?.power),
-      accessories: normalizeSolutionItems(solution?.accessories ?? solution?.extras),
-    },
-
-    pricing: profile?.pricing
-      ? {
-          ...profile.pricing,
-          currency: 'CLP' as const,
-          notes: dedupeStrings(profile.pricing.notes),
-        }
-      : undefined,
-
-    openQuestions: dedupeStrings(profile?.openQuestions),
-    assumptions: dedupeStrings(profile?.assumptions),
-    nextSteps: dedupeStrings(profile?.nextSteps),
-  } as AdvisorProfile;
+function getLatestUserMessage(messages: OpenAIChatMessage[]): string {
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
+  return lastUserMessage?.content ?? '';
 }
 
 function mergeProfiles(
@@ -479,23 +398,6 @@ function mergeProfiles(
   };
 }
 
-function buildFallbackProfile(currentProfile?: SecurityProjectProfile): SecurityProjectProfile {
-  return (
-    currentProfile ?? {
-      meta: {
-        source: 'MPS_GUARDIAN',
-        version: 1,
-        createdAt: new Date().toISOString(),
-      },
-    }
-  );
-}
-
-function getLatestUserMessage(messages: OpenAIChatMessage[]): string {
-  const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
-  return lastUserMessage?.content ?? '';
-}
-
 // =======================
 // 3) Handler
 // =======================
@@ -528,13 +430,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const advisorCatalog = normalizeCatalogForAdvisor(catalog);
-    const advisorMode = (mode ?? 'residencial') as AdvisorMode;
+    const securityAdvisorModule = await import('../../lib/securityAdvisor');
+    const { generateSecurityProject } = securityAdvisorModule;
+
+    const advisorCatalog = {
+      categories: catalog.categories ?? [],
+      products: catalog.products.map((p) => ({
+        ...p,
+        active: p.active ?? true,
+        features: p.features ?? [],
+      })),
+    };
+
+    const normalizedProfile = {
+      ...safeCurrentProfile,
+      meta: {
+        createdAt: safeCurrentProfile?.meta?.createdAt ?? new Date().toISOString(),
+        version:
+          typeof safeCurrentProfile?.meta?.version === 'number' &&
+          Number.isFinite(safeCurrentProfile.meta.version)
+            ? Math.max(1, Math.floor(safeCurrentProfile.meta.version))
+            : 1,
+        source: 'MPS_GUARDIAN' as const,
+      },
+      risk: safeCurrentProfile?.risk
+        ? {
+            ...safeCurrentProfile.risk,
+            reasons: dedupeStrings(safeCurrentProfile.risk.reasons),
+          }
+        : undefined,
+      solution: {
+        cameras: normalizeSolutionItemsWithPlacement(safeCurrentProfile?.solution?.cameras),
+        nvrDvr: normalizeSolutionItems(safeCurrentProfile?.solution?.nvrDvr),
+        storage: normalizeSolutionItems(safeCurrentProfile?.solution?.storage),
+        alarm: normalizeSolutionItems(safeCurrentProfile?.solution?.alarm),
+        accessControl: normalizeSolutionItems(safeCurrentProfile?.solution?.accessControl),
+        network: normalizeSolutionItems(
+          safeCurrentProfile?.solution?.network ?? safeCurrentProfile?.solution?.networking
+        ),
+        power: normalizeSolutionItems(safeCurrentProfile?.solution?.power),
+        extras: normalizeSolutionItems(
+          safeCurrentProfile?.solution?.extras ?? safeCurrentProfile?.solution?.accessories
+        ),
+      },
+      openQuestions: dedupeStrings(safeCurrentProfile?.openQuestions),
+      assumptions: dedupeStrings(safeCurrentProfile?.assumptions),
+      nextSteps: dedupeStrings(safeCurrentProfile?.nextSteps),
+    };
 
     const technicalBase = generateSecurityProject(
-      normalizeProfileForAdvisor(safeCurrentProfile),
+      normalizedProfile,
       advisorCatalog,
-      advisorMode
+      mode ?? 'residencial'
     );
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -704,9 +651,9 @@ IMPORTANTE:
     );
 
     const finalTechnical = generateSecurityProject(
-      normalizeProfileForAdvisor(mergedProfile),
+      mergedProfile,
       advisorCatalog,
-      advisorMode
+      mode ?? 'residencial'
     );
 
     const finalAssistantMessage =
