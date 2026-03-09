@@ -510,7 +510,7 @@ const App = () => {
           return;
         }
 
-        console.warn('No se encontró site_data.json en GitHub, usando INITIAL_DATA');
+        console.warn('No se encontró data/site_data.json en GitHub, usando INITIAL_DATA');
         setData(INITIAL_DATA);
         localStorage.setItem('site_data', JSON.stringify(INITIAL_DATA));
       } catch (err) {
