@@ -256,7 +256,7 @@ export type CatalogData = {
 };
 
 // =========================
-// NUEVO SITE_DATA.JSON SCHEMA (OTROS)
+// NUEVO DATA/SITE_DATA.JSON SCHEMA (OTROS)
 // =========================
 
 export type MediaAssets = {
