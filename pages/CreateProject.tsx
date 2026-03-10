@@ -70,12 +70,41 @@ const CreateProject = () => {
         content: msg.text,
       }));
 
+      const catalogPayload =
+        (data as any)?.catalog && Array.isArray((data as any)?.catalog?.products)
+          ? {
+              categories: Array.isArray((data as any)?.catalog?.categories)
+                ? (data as any).catalog.categories
+                : [],
+              products: (data as any).catalog.products,
+            }
+          : {
+              categories: Array.isArray((data as any)?.categories)
+                ? (data as any).categories
+                : [],
+              products: Array.isArray((data as any)?.products)
+                ? (data as any).products
+                : [],
+            };
+
+      if (!Array.isArray(catalogPayload.products) || catalogPayload.products.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'ai',
+            text: `⚠️ ${ROBOT_NAME} no encontró productos en el catálogo cargado del sitio. Revisa site_data.json o la estructura de datos del catálogo.`,
+          },
+        ]);
+        return;
+      }
+
       const res = await fetch('/api/ai/guardian', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: guardianMessages,
           mode: 'pyme',
+          catalog: catalogPayload,
         }),
       });
 
