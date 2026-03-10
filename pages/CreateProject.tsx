@@ -27,10 +27,11 @@ const CreateProject = () => {
   const { isAdmin } = useAdmin();
 
   const [mode, setMode] = useState<'selection' | 'ai' | 'finished'>('selection');
+  const [currentProfile, setCurrentProfile] = useState<any>(null);
 
   const initialAIMessage = data.aiSettings.isBetaEnabled
-    ? `¡Bienvenido a la experiencia Beta de Mi Pyme Segura! Soy ${ROBOT_NAME}, tu asistente avanzado en seguridad. Cuéntame qué tipo de propiedad o negocio quieres proteger y qué riesgos te preocupan más.`
-    : `¡Hola! Soy ${ROBOT_NAME}, tu asistente experto en seguridad. ¿Qué tipo de negocio o propiedad quieres proteger hoy? Cuéntame un poco para darte una recomendación más aterrizada.`;
+    ? `¡Bienvenido a la experiencia Beta de Mi Pyme Segura! Soy ${ROBOT_NAME}, tu asistente avanzado en seguridad. Antes de proponerte equipos, te voy a hacer algunas preguntas cortitas para entender bien tu proyecto. Partamos simple: ¿qué tipo de lugar o negocio quieres proteger?`
+    : `¡Hola! Soy ${ROBOT_NAME}, tu asistente experto en seguridad. Antes de recomendarte una solución, te haré unas preguntas breves para entender bien tu proyecto. Partamos por lo primero: ¿qué tipo de lugar o negocio quieres proteger?`;
 
   const [messages, setMessages] = useState<UIMessage[]>([
     { role: 'ai', text: initialAIMessage },
@@ -92,7 +93,7 @@ const CreateProject = () => {
           ...prev,
           {
             role: 'ai',
-            text: `⚠️ ${ROBOT_NAME} no encontró productos en el catálogo cargado del sitio. Revisa site_data.json o la estructura de datos del catálogo.`,
+            text: `⚠️ ${ROBOT_NAME} no encontró productos en el catálogo cargado del sitio. Revisa site_data.json o la estructura del catálogo.`,
           },
         ]);
         return;
@@ -105,6 +106,7 @@ const CreateProject = () => {
           messages: guardianMessages,
           mode: 'pyme',
           catalog: catalogPayload,
+          currentProfile: currentProfile ?? undefined,
         }),
       });
 
@@ -136,6 +138,10 @@ const CreateProject = () => {
         return;
       }
 
+      if (dataRes?.projectPatch) {
+        setCurrentProfile(dataRes.projectPatch);
+      }
+
       const aiText =
         dataRes?.assistantMessage ||
         dataRes?.reply ||
@@ -162,7 +168,6 @@ const CreateProject = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-16 text-black">
-      {/* Header */}
       <div className="mb-12 space-y-4 text-center">
         {isAdmin ? (
           <div className="space-y-4">
@@ -198,7 +203,6 @@ const CreateProject = () => {
         )}
       </div>
 
-      {/* Mode Selection */}
       {mode === 'selection' && (
         <div className="grid md:grid-cols-2 gap-10 animate-in fade-in duration-500 pt-8">
           <Link
@@ -260,8 +264,7 @@ const CreateProject = () => {
                   data.aiSettings.isBetaEnabled ? 'text-gray-400' : 'text-blue-100'
                 }`}
               >
-                Conversa con {ROBOT_NAME}, el cerebro técnico de seguridad de Mi Pyme
-                Segura.
+                Conversa con {ROBOT_NAME}, el cerebro técnico de seguridad de Mi Pyme Segura.
               </p>
             </div>
 
@@ -276,7 +279,6 @@ const CreateProject = () => {
         </div>
       )}
 
-      {/* AI Chat Flow */}
       {mode === 'ai' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col h-[700px]">
           <button
@@ -297,7 +299,6 @@ const CreateProject = () => {
                 : 'bg-white border-black'
             }`}
           >
-            {/* Top bar */}
             <div
               className={`px-8 py-5 border-b-4 flex items-center justify-between ${
                 data.aiSettings.isBetaEnabled
@@ -346,7 +347,6 @@ const CreateProject = () => {
               </div>
             </div>
 
-            {/* Chat Area */}
             <div className="flex-1 p-8 overflow-y-auto space-y-8 scrollbar-thin scrollbar-thumb-gray-800">
               {messages.map((msg, i) => (
                 <div
@@ -419,7 +419,6 @@ const CreateProject = () => {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Input Area */}
             <div
               className={`p-8 border-t-4 ${
                 data.aiSettings.isBetaEnabled
@@ -486,7 +485,6 @@ const CreateProject = () => {
         </div>
       )}
 
-      {/* Finished Screen */}
       {mode === 'finished' && (
         <div className="text-center space-y-10 animate-in zoom-in-95 duration-500 bg-white p-20 rounded-[4rem] shadow-2xl border-4 border-black">
           <div className="bg-yellow-400 text-black w-28 h-28 rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl rotate-12">
@@ -499,8 +497,7 @@ const CreateProject = () => {
               <span className="text-red-600">CONSOLIDADO</span>
             </h2>
             <p className="text-xl text-gray-500 font-bold max-w-md mx-auto leading-relaxed">
-              Nuestro equipo ha recibido tu diseño. En menos de 24 horas te
-              contactaremos.
+              Nuestro equipo ha recibido tu diseño. En menos de 24 horas te contactaremos.
             </p>
           </div>
 
