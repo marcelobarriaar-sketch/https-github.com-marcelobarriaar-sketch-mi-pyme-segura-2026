@@ -142,13 +142,12 @@ const CreateProject = () => {
         setCurrentProfile(dataRes.projectPatch);
       }
 
-      const aiText =
-        dataRes?.assistantMessage ||
-        dataRes?.reply ||
-        (dataRes?._warning
-          ? `${ROBOT_NAME} respondió en modo de respaldo.\n\n${dataRes._warning}`
-          : null) ||
-        `${ROBOT_NAME} no pudo generar una respuesta útil en este intento.`;
+     const aiText =
+  dataRes?._warning
+    ? `${ROBOT_NAME} respondió en modo de respaldo.\n\n${dataRes._warning}\n\n${dataRes?.assistantMessage || ''}`
+    : dataRes?.assistantMessage ||
+      dataRes?.reply ||
+      `${ROBOT_NAME} no pudo generar una respuesta útil en este intento.`;
 
       setMessages((prev) => [...prev, { role: 'ai', text: aiText }]);
     } catch (error: any) {
