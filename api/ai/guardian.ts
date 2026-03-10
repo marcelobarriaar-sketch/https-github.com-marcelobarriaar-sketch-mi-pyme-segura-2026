@@ -595,7 +595,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const securityAdvisorModule = await import('../../lib/securityAdvisor');
+    const securityAdvisorModule = await import('../../lib/securityAdvisor.js');
     const { generateSecurityProject } = securityAdvisorModule;
 
     const advisorCatalog = normalizeCatalogForAdvisor(catalog);
