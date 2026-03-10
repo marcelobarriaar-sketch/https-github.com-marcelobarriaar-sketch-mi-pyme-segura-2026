@@ -80,8 +80,8 @@ const CreateProject = () => {
       });
 
       const rawText = await res.text();
-      let dataRes: any = null;
 
+      let dataRes: any = null;
       try {
         dataRes = rawText ? JSON.parse(rawText) : null;
       } catch {
@@ -90,25 +90,40 @@ const CreateProject = () => {
 
       if (!res.ok) {
         console.error('Error en /api/ai/guardian:', rawText);
-        throw new Error(
+
+        const backendMessage =
+          dataRes?.details ||
           dataRes?.error ||
-            `Respuesta no OK del servidor (${res.status})`
-        );
+          rawText ||
+          `Respuesta no OK del servidor (${res.status})`;
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'ai',
+            text: `⚠️ ${ROBOT_NAME} encontró un problema técnico:\n${backendMessage}`,
+          },
+        ]);
+        return;
       }
 
       const aiText =
         dataRes?.assistantMessage ||
         dataRes?.reply ||
+        (dataRes?._warning
+          ? `${ROBOT_NAME} respondió en modo de respaldo.\n\n${dataRes._warning}`
+          : null) ||
         `${ROBOT_NAME} no pudo generar una respuesta útil en este intento.`;
 
       setMessages((prev) => [...prev, { role: 'ai', text: aiText }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error llamando a /api/ai/guardian:', error);
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'ai',
-          text: `Tuve un problema para responder como ${ROBOT_NAME}. Intenta nuevamente en unos segundos.`,
+          text: `Tuve un problema para responder como ${ROBOT_NAME}.\n\nDetalle: ${error?.message || 'Error desconocido'}`,
         },
       ]);
     } finally {
@@ -157,7 +172,6 @@ const CreateProject = () => {
       {/* Mode Selection */}
       {mode === 'selection' && (
         <div className="grid md:grid-cols-2 gap-10 animate-in fade-in duration-500 pt-8">
-          {/* Tradicional */}
           <Link
             to="/create-project/tradicional"
             className="group bg-white p-12 rounded-[4rem] border-4 border-black shadow-2xl hover:-translate-y-2 transition-all text-left space-y-8 relative overflow-hidden"
@@ -179,7 +193,6 @@ const CreateProject = () => {
             </div>
           </Link>
 
-          {/* Asesoría IA */}
           <button
             onClick={() => setMode('ai')}
             className={`group p-12 rounded-[4rem] shadow-2xl transition-all text-left space-y-8 relative overflow-hidden hover:-translate-y-2 border-4 ${
