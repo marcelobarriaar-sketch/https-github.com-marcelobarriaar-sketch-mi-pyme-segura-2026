@@ -465,10 +465,11 @@ function normalizeProfileForAdvisor(
       : undefined,
 
     site: profile.site
-      ? {
-          ...profile.site,
-        }
-      : undefined,
+  ? {
+      ...profile.site,
+      type: normalizeSiteType(profile.site.type),
+    }
+  : undefined,
 
     constraints: profile.constraints
       ? {
