@@ -9,7 +9,6 @@ import {
   Send,
   Sparkles,
   ArrowLeft,
-  Loader2,
   Zap,
   ShieldCheck,
   Download,
@@ -59,6 +58,166 @@ const CreateProject = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  const normalizeText = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+  const inferSiteTypeFromText = (text: string): string | null => {
+    const t = normalizeText(text);
+
+    if (t.includes('local comercial')) return 'local';
+    if (t.includes('comercio')) return 'comercio';
+    if (t.includes('tienda')) return 'retail';
+    if (t.includes('oficina')) return 'oficina';
+    if (t.includes('restaurant') || t.includes('restaurante')) return 'restaurant';
+    if (t.includes('cafe')) return 'cafe';
+    if (t.includes('taller')) return 'taller';
+    if (t.includes('centro de salud') || t.includes('clinica') || t.includes('posta'))
+      return 'centro_salud';
+    if (t.includes('colegio') || t.includes('liceo') || t.includes('escuela'))
+      return 'educacion';
+    if (t.includes('condominio')) return 'condominio';
+    if (t.includes('comunidad')) return 'comunidad';
+    if (t.includes('campo')) return 'campo';
+    if (t.includes('obra')) return 'obra';
+    if (t.includes('casa')) return 'casa';
+    if (t.includes('departamento')) return 'departamento';
+    if (t.includes('parcela')) return 'parcela';
+    if (t.includes('bodega')) return 'bodega';
+
+    return null;
+  };
+
+  const inferCableDifficultyFromText = (text: string): string | null => {
+    const t = normalizeText(text);
+
+    if (
+      t.includes('facil') ||
+      t.includes('sencillo') ||
+      t.includes('simple') ||
+      t.includes('sin dificultad') ||
+      t.includes('poco cableado')
+    ) {
+      return 'facil';
+    }
+
+    if (
+      t.includes('regular') ||
+      t.includes('normal') ||
+      t.includes('intermedio') ||
+      t.includes('media dificultad') ||
+      t.includes('mas o menos')
+    ) {
+      return 'regular';
+    }
+
+    if (
+      t.includes('dificil') ||
+      t.includes('complejo') ||
+      t.includes('complicado') ||
+      t.includes('larga distancia') ||
+      t.includes('hay que perforar') ||
+      t.includes('mucho cableado') ||
+      t.includes('cableado dificil')
+    ) {
+      return 'dificil';
+    }
+
+    return null;
+  };
+
+  const inferConnectivityFromText = (text: string): string | null => {
+    const t = normalizeText(text);
+
+    if (
+      t.includes('starlink') ||
+      t.includes('fibra') ||
+      t.includes('fibra optica') ||
+      t.includes('wifi') ||
+      t.includes('internet hogar') ||
+      t.includes('tengo internet') ||
+      t.includes('router')
+    ) {
+      return 'fibra';
+    }
+
+    if (
+      t.includes('internet movil') ||
+      t.includes('chip') ||
+      t.includes('4g') ||
+      t.includes('5g') ||
+      t.includes('modem') ||
+      t.includes('bam')
+    ) {
+      return 'movil';
+    }
+
+    if (
+      t.includes('sin internet') ||
+      t.includes('no tengo internet') ||
+      t.includes('no hay internet')
+    ) {
+      return 'sin_internet';
+    }
+
+    if (
+      t.includes('no se') ||
+      t.includes('no sé') ||
+      t.includes('por definir')
+    ) {
+      return 'no_sabe';
+    }
+
+    return null;
+  };
+
+  const inferDistanceFromText = (text: string): number | null => {
+    const t = normalizeText(text);
+    const match = t.match(/(\d+)\s*metros?/);
+    if (!match) return null;
+    return Number(match[1]);
+  };
+
+  const applyLocalInferences = (baseProfile: any, userText: string) => {
+    const inferredSiteType = inferSiteTypeFromText(userText);
+    const inferredCableDifficulty = inferCableDifficultyFromText(userText);
+    const inferredConnectivity = inferConnectivityFromText(userText);
+    const inferredDistance = inferDistanceFromText(userText);
+
+    const nextProfile = {
+      ...(baseProfile || {}),
+      site: {
+        ...(baseProfile?.site || {}),
+      },
+      constraints: {
+        ...(baseProfile?.constraints || {}),
+      },
+      risk: {
+        ...(baseProfile?.risk || {}),
+      },
+    };
+
+    if (inferredSiteType && !nextProfile.site?.type) {
+      nextProfile.site.type = inferredSiteType;
+    }
+
+    if (inferredDistance !== null) {
+      nextProfile.distanceMeters = inferredDistance;
+    }
+
+    if (inferredCableDifficulty) {
+      nextProfile.constraints.cableDifficulty = inferredCableDifficulty;
+    }
+
+    if (inferredConnectivity) {
+      nextProfile.constraints.internet = inferredConnectivity;
+    }
+
+    return nextProfile;
+  };
+
   const extractSummaryFromProfile = (profile: any) => {
     const siteTypeRaw = profile?.site?.type;
     const distanceRaw = profile?.distanceMeters || profile?.site?.distanceMeters || null;
@@ -97,7 +256,7 @@ const CreateProject = () => {
     };
 
     const connectivityMap: Record<string, string> = {
-      fibra: 'Fibra',
+      fibra: 'Internet disponible',
       movil: 'Internet móvil',
       sin_internet: 'Sin internet',
       no_sabe: 'Por definir',
@@ -161,7 +320,6 @@ const CreateProject = () => {
     if (!userInput.trim() || isTyping) return;
 
     const userMsg = userInput.trim();
-    const lowerUserMsg = userMsg.toLowerCase();
 
     const newMessages: UIMessage[] = [...messages, { role: 'user', text: userMsg }];
 
@@ -242,39 +400,26 @@ const CreateProject = () => {
         return;
       }
 
-      if (dataRes?.projectPatch) {
-        const mergedProfile = {
-          ...(currentProfile || {}),
-          ...(dataRes.projectPatch || {}),
-          site: {
-            ...(currentProfile?.site || {}),
-            ...(dataRes.projectPatch?.site || {}),
-          },
-          constraints: {
-            ...(currentProfile?.constraints || {}),
-            ...(dataRes.projectPatch?.constraints || {}),
-          },
-          risk: {
-            ...(currentProfile?.risk || {}),
-            ...(dataRes.projectPatch?.risk || {}),
-          },
-        };
+      let mergedProfile = {
+        ...(currentProfile || {}),
+        ...((dataRes?.projectPatch || {}) as any),
+        site: {
+          ...(currentProfile?.site || {}),
+          ...(dataRes?.projectPatch?.site || {}),
+        },
+        constraints: {
+          ...(currentProfile?.constraints || {}),
+          ...(dataRes?.projectPatch?.constraints || {}),
+        },
+        risk: {
+          ...(currentProfile?.risk || {}),
+          ...(dataRes?.projectPatch?.risk || {}),
+        },
+      };
 
-        const distanceMatch = lowerUserMsg.match(/(\d+)\s*metros?/);
-        if (distanceMatch) {
-          mergedProfile.distanceMeters = Number(distanceMatch[1]);
-        }
+      mergedProfile = applyLocalInferences(mergedProfile, userMsg);
 
-        setCurrentProfile(mergedProfile);
-      } else {
-        const distanceMatch = lowerUserMsg.match(/(\d+)\s*metros?/);
-        if (distanceMatch) {
-          setCurrentProfile((prev: any) => ({
-            ...(prev || {}),
-            distanceMeters: Number(distanceMatch[1]),
-          }));
-        }
-      }
+      setCurrentProfile(mergedProfile);
 
       const aiText = dataRes?._warning
         ? `${ROBOT_NAME} respondió en modo de respaldo.\n\n${dataRes._warning}\n\n${dataRes?.assistantMessage || ''}`
@@ -285,6 +430,9 @@ const CreateProject = () => {
       setMessages((prev) => [...prev, { role: 'ai', text: aiText }]);
     } catch (error: any) {
       console.error('Error llamando a /api/ai/guardian:', error);
+
+      const fallbackProfile = applyLocalInferences(currentProfile || {}, userMsg);
+      setCurrentProfile(fallbackProfile);
 
       setMessages((prev) => [
         ...prev,
