@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronRight,
@@ -12,6 +12,9 @@ import {
   Loader2,
   Zap,
   ShieldCheck,
+  Download,
+  Wrench,
+  Settings2,
 } from 'lucide-react';
 import { useSiteData, useAdmin } from '../App';
 
@@ -21,6 +24,8 @@ type UIMessage = {
 };
 
 const ROBOT_NAME = 'MPS Guardian';
+const ROBOT_URL =
+  'https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/refs/heads/main/public/images/MASCOTA%20MPS.png';
 
 const CreateProject = () => {
   const { data, updateData } = useSiteData();
@@ -54,10 +59,77 @@ const CreateProject = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  const extractSummaryFromProfile = (profile: any) => {
+    const siteTypeRaw = profile?.site?.type;
+    const distanceRaw = profile?.distanceMeters || profile?.site?.distanceMeters || null;
+    const cableRaw =
+      profile?.constraints?.cableDifficulty ||
+      profile?.site?.cableDifficulty ||
+      profile?.cableDifficulty ||
+      null;
+    const internetRaw = profile?.constraints?.internet || null;
+
+    const siteTypeMap: Record<string, string> = {
+      comercio: 'Comercio',
+      retail: 'Retail',
+      oficina: 'Oficina',
+      restaurant: 'Restaurant',
+      cafe: 'Café',
+      taller: 'Taller',
+      centro_salud: 'Centro de salud',
+      educacion: 'Educación',
+      condominio: 'Condominio',
+      comunidad: 'Comunidad',
+      campo: 'Campo',
+      obra: 'Obra',
+      casa: 'Casa',
+      departamento: 'Departamento',
+      parcela: 'Parcela',
+      local: 'Local comercial',
+      bodega: 'Bodega',
+      otro: 'Otro',
+    };
+
+    const difficultyMap: Record<string, string> = {
+      facil: 'Fácil',
+      regular: 'Regular',
+      dificil: 'Difícil',
+    };
+
+    const connectivityMap: Record<string, string> = {
+      fibra: 'Fibra',
+      movil: 'Internet móvil',
+      sin_internet: 'Sin internet',
+      no_sabe: 'Por definir',
+    };
+
+    let progress = 20;
+    if (siteTypeRaw) progress += 20;
+    if (distanceRaw) progress += 20;
+    if (cableRaw) progress += 20;
+    if (internetRaw) progress += 20;
+
+    return {
+      siteType: siteTypeMap[siteTypeRaw] || siteTypeRaw || 'Pendiente',
+      distance: distanceRaw ? `${distanceRaw} metros` : 'Pendiente',
+      cableDifficulty: difficultyMap[cableRaw] || cableRaw || 'Pendiente',
+      connectivity: connectivityMap[internetRaw] || internetRaw || 'Pendiente',
+      progress,
+    };
+  };
+
+  const summary = useMemo(
+    () => extractSummaryFromProfile(currentProfile),
+    [currentProfile]
+  );
+
+  const showFinalRobot = (summary.progress ?? 0) >= 80 || mode === 'finished';
+
   const sendMessage = async () => {
     if (!userInput.trim() || isTyping) return;
 
     const userMsg = userInput.trim();
+    const lowerUserMsg = userMsg.toLowerCase();
 
     const newMessages: UIMessage[] = [...messages, { role: 'user', text: userMsg }];
 
@@ -139,15 +211,45 @@ const CreateProject = () => {
       }
 
       if (dataRes?.projectPatch) {
-        setCurrentProfile(dataRes.projectPatch);
+        const mergedProfile = {
+          ...(currentProfile || {}),
+          ...(dataRes.projectPatch || {}),
+          site: {
+            ...(currentProfile?.site || {}),
+            ...(dataRes.projectPatch?.site || {}),
+          },
+          constraints: {
+            ...(currentProfile?.constraints || {}),
+            ...(dataRes.projectPatch?.constraints || {}),
+          },
+          risk: {
+            ...(currentProfile?.risk || {}),
+            ...(dataRes.projectPatch?.risk || {}),
+          },
+        };
+
+        // apoyo visual extra para detectar distancia desde texto del usuario
+        const distanceMatch = lowerUserMsg.match(/(\d+)\s*metros?/);
+        if (distanceMatch) {
+          mergedProfile.distanceMeters = Number(distanceMatch[1]);
+        }
+
+        setCurrentProfile(mergedProfile);
+      } else {
+        const distanceMatch = lowerUserMsg.match(/(\d+)\s*metros?/);
+        if (distanceMatch) {
+          setCurrentProfile((prev: any) => ({
+            ...(prev || {}),
+            distanceMeters: Number(distanceMatch[1]),
+          }));
+        }
       }
 
-     const aiText =
-  dataRes?._warning
-    ? `${ROBOT_NAME} respondió en modo de respaldo.\n\n${dataRes._warning}\n\n${dataRes?.assistantMessage || ''}`
-    : dataRes?.assistantMessage ||
-      dataRes?.reply ||
-      `${ROBOT_NAME} no pudo generar una respuesta útil en este intento.`;
+      const aiText = dataRes?._warning
+        ? `${ROBOT_NAME} respondió en modo de respaldo.\n\n${dataRes._warning}\n\n${dataRes?.assistantMessage || ''}`
+        : dataRes?.assistantMessage ||
+          dataRes?.reply ||
+          `${ROBOT_NAME} no pudo generar una respuesta útil en este intento.`;
 
       setMessages((prev) => [...prev, { role: 'ai', text: aiText }]);
     } catch (error: any) {
@@ -165,8 +267,20 @@ const CreateProject = () => {
     }
   };
 
+  const handleDownloadPdf = () => {
+    alert('Aquí luego conectaremos la descarga del proyecto en PDF.');
+  };
+
+  const handleRequestInstall = () => {
+    window.location.href = '#/contact';
+  };
+
+  const handleAdjustParams = () => {
+    setMode('ai');
+  };
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-16 text-black">
+    <div className="max-w-7xl mx-auto px-4 py-16 text-black">
       <div className="mb-12 space-y-4 text-center">
         {isAdmin ? (
           <div className="space-y-4">
@@ -279,7 +393,7 @@ const CreateProject = () => {
       )}
 
       {mode === 'ai' && (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col h-[700px]">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <button
             onClick={() => setMode('selection')}
             className={`mb-6 flex items-center gap-2 font-black uppercase text-xs transition-colors ${
@@ -291,221 +405,437 @@ const CreateProject = () => {
             <ArrowLeft size={16} /> CAMBIAR MODO
           </button>
 
-          <div
-            className={`flex-1 rounded-[4rem] shadow-2xl border-4 flex flex-col overflow-hidden ${
-              data.aiSettings.isBetaEnabled
-                ? 'bg-black border-yellow-400'
-                : 'bg-white border-black'
-            }`}
-          >
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-6 items-start">
             <div
-              className={`px-8 py-5 border-b-4 flex items-center justify-between ${
+              className={`rounded-[3rem] shadow-2xl border-4 flex flex-col overflow-hidden min-h-[760px] ${
                 data.aiSettings.isBetaEnabled
-                  ? 'border-white/10 bg-white/5'
-                  : 'border-black bg-gray-50'
+                  ? 'bg-black border-yellow-400'
+                  : 'bg-white border-black'
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
-                    data.aiSettings.isBetaEnabled
-                      ? 'bg-yellow-400 text-black'
-                      : 'bg-red-600 text-white'
-                  }`}
-                >
-                  {data.aiSettings.isBetaEnabled ? <Zap size={24} /> : <ShieldCheck size={24} />}
+              <div
+                className={`px-8 py-6 border-b-4 flex items-center justify-between gap-6 ${
+                  data.aiSettings.isBetaEnabled
+                    ? 'border-white/10 bg-white/5'
+                    : 'border-black bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-full bg-white shadow-xl p-2 shrink-0">
+                    <img
+                      src={ROBOT_URL}
+                      alt={ROBOT_NAME}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  <div>
+                    <p
+                      className={`text-xs uppercase tracking-[0.22em] font-black ${
+                        data.aiSettings.isBetaEnabled ? 'text-yellow-400' : 'text-red-600'
+                      }`}
+                    >
+                      Asistente activo
+                    </p>
+                    <h3
+                      className={`text-3xl font-black tracking-tight ${
+                        data.aiSettings.isBetaEnabled ? 'text-white' : 'text-black'
+                      }`}
+                    >
+                      {ROBOT_NAME}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
+                      <span
+                        className={`text-sm font-bold ${
+                          data.aiSettings.isBetaEnabled ? 'text-green-300' : 'text-green-600'
+                        }`}
+                      >
+                        Asesor técnico virtual · En línea
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p
-                    className={`text-xs uppercase tracking-[0.2em] font-black ${
+
+                {showFinalRobot && (
+                  <div className="hidden md:flex items-end justify-end">
+                    <img
+                      src={ROBOT_URL}
+                      alt={`${ROBOT_NAME} completo`}
+                      className="w-36 lg:w-44 object-contain drop-shadow-[0_20px_30px_rgba(181,26,0,0.25)]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 p-8 overflow-y-auto space-y-8 scrollbar-thin scrollbar-thumb-gray-800 bg-gradient-to-b from-white to-gray-50">
+                {messages.map((msg, i) => (
+                  <div
+                    key={i}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`flex gap-4 max-w-[88%] ${
+                        msg.role === 'user' ? 'flex-row-reverse' : ''
+                      }`}
+                    >
+                      {msg.role === 'ai' ? (
+                        <div className="w-14 h-14 rounded-full bg-white shadow-lg p-2 shrink-0">
+                          <img
+                            src={ROBOT_URL}
+                            alt={ROBOT_NAME}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xl bg-red-600 text-white">
+                          <User size={24} />
+                        </div>
+                      )}
+
+                      <div
+                        className={`p-6 rounded-[2rem] text-sm font-bold leading-relaxed whitespace-pre-wrap ${
+                          msg.role === 'user'
+                            ? 'bg-red-50 text-black border-2 border-red-100 rounded-tr-none'
+                            : data.aiSettings.isBetaEnabled
+                            ? 'bg-white/5 text-white border-2 border-white/10 rounded-tl-none'
+                            : 'bg-white text-black border-2 border-slate-200 shadow-sm rounded-tl-none'
+                        }`}
+                      >
+                        {msg.role === 'ai' && (
+                          <div className="flex items-center gap-3 mb-3">
+                            <span className="font-black text-lg">{ROBOT_NAME}</span>
+                            <span className="text-xs uppercase tracking-widest text-gray-400 font-black">
+                              Diagnóstico técnico
+                            </span>
+                          </div>
+                        )}
+                        {msg.text}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="flex gap-4 max-w-[85%] items-center">
+                      <div className="w-14 h-14 rounded-full bg-white shadow-lg p-2 shrink-0">
+                        <img
+                          src={ROBOT_URL}
+                          alt={ROBOT_NAME}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+
+                      <div
+                        className={`p-6 rounded-[2rem] font-black text-xs uppercase tracking-widest ${
+                          data.aiSettings.isBetaEnabled
+                            ? 'bg-white/5 text-yellow-400 border border-white/10'
+                            : 'bg-white text-gray-500 border border-slate-200 shadow-sm'
+                        }`}
+                      >
+                        {ROBOT_NAME} analizando proyecto...
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {showFinalRobot && (
+                  <div
+                    className={`rounded-[2rem] border-2 p-6 ${
                       data.aiSettings.isBetaEnabled
-                        ? 'text-yellow-400'
-                        : 'text-red-600'
+                        ? 'bg-white/5 border-white/10 text-white'
+                        : 'bg-white border-slate-200 shadow-sm'
                     }`}
                   >
-                    Asistente activo
-                  </p>
-                  <h3
-                    className={`text-lg font-black ${
-                      data.aiSettings.isBetaEnabled ? 'text-white' : 'text-black'
-                    }`}
-                  >
-                    {ROBOT_NAME}
-                  </h3>
-                </div>
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className="w-14 h-14 rounded-full bg-white shadow-lg p-2 shrink-0">
+                        <img
+                          src={ROBOT_URL}
+                          alt={ROBOT_NAME}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-black">Propuesta preliminar de seguridad</h4>
+                        <p className="text-sm font-bold text-gray-400">
+                          {ROBOT_NAME} · Resultado técnico inicial
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`rounded-[1.5rem] border p-5 ${
+                        data.aiSettings.isBetaEnabled
+                          ? 'bg-white/5 border-yellow-400/20'
+                          : 'bg-red-50 border-red-100'
+                      }`}
+                    >
+                      <p className="font-bold leading-relaxed">
+                        <span className="font-black">Importante:</span> Los valores mostrados
+                        corresponden a una <span className="font-black">estimación técnica inicial</span>{' '}
+                        basada en la información entregada.
+                      </p>
+
+                      <p className="font-bold leading-relaxed mt-3">
+                        El valor final puede variar según:
+                      </p>
+
+                      <ul className="mt-3 grid md:grid-cols-2 gap-2 list-disc pl-5 font-bold">
+                        <li>condiciones reales del lugar</li>
+                        <li>dificultad de instalación</li>
+                        <li>distancia efectiva del cableado</li>
+                        <li>infraestructura existente</li>
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 mt-5">
+                      <button
+                        onClick={handleDownloadPdf}
+                        className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition-all font-black"
+                      >
+                        <Download size={18} />
+                        Descargar proyecto PDF
+                      </button>
+
+                      <button
+                        onClick={handleRequestInstall}
+                        className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition-all font-black"
+                      >
+                        <Wrench size={18} />
+                        Solicitar instalación
+                      </button>
+
+                      <button
+                        onClick={handleAdjustParams}
+                        className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition-all font-black"
+                      >
+                        <Settings2 size={18} />
+                        Ajustar parámetros
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={chatEndRef} />
               </div>
 
               <div
-                className={`text-[10px] px-3 py-2 rounded-xl font-black uppercase tracking-widest ${
+                className={`p-8 border-t-4 ${
                   data.aiSettings.isBetaEnabled
-                    ? 'bg-yellow-400 text-black'
-                    : 'bg-black text-white'
+                    ? 'border-white/10 bg-white/5'
+                    : 'border-black bg-gray-50'
                 }`}
               >
-                {data.aiSettings.isBetaEnabled ? 'Modo Beta' : 'Seguridad Inteligente'}
+                <form
+                  className="relative"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMessage();
+                  }}
+                >
+                  <input
+                    type="text"
+                    className={`w-full border-4 rounded-[2rem] p-5 pr-24 outline-none transition-all font-bold ${
+                      data.aiSettings.isBetaEnabled
+                        ? 'bg-black border-yellow-400/30 text-white focus:border-yellow-400 placeholder-white/20'
+                        : 'bg-white border-black text-black focus:border-blue-600 placeholder-gray-400'
+                    }`}
+                    placeholder={`Escribe tu consulta para ${ROBOT_NAME}...`}
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    disabled={isTyping}
+                  />
+                  <button
+                    type="submit"
+                    disabled={isTyping || !userInput.trim()}
+                    className={`absolute right-3 top-3 p-3 rounded-2xl transition-all disabled:opacity-50 text-white shadow-xl ${
+                      data.aiSettings.isBetaEnabled
+                        ? 'bg-yellow-400 text-black hover:scale-105'
+                        : 'bg-blue-600 hover:bg-black'
+                    }`}
+                  >
+                    <Send size={28} />
+                  </button>
+                </form>
+
+                <div className="flex justify-between items-center mt-6 gap-4">
+                  <p
+                    className={`text-[10px] uppercase font-black tracking-widest ${
+                      data.aiSettings.isBetaEnabled ? 'text-yellow-400' : 'text-gray-400'
+                    }`}
+                  >
+                    {data.aiSettings.isBetaEnabled
+                      ? `${ROBOT_NAME} · Sistema Beta`
+                      : `${ROBOT_NAME} · Core IA Mi Pyme Segura`}
+                  </p>
+
+                  <button
+                    onClick={() => setMode('finished')}
+                    className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                      data.aiSettings.isBetaEnabled
+                        ? 'bg-white/10 text-white hover:bg-yellow-400 hover:text-black'
+                        : 'bg-black text-white hover:bg-red-600'
+                    }`}
+                  >
+                    Finalizar
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="flex-1 p-8 overflow-y-auto space-y-8 scrollbar-thin scrollbar-thumb-gray-800">
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`flex gap-4 max-w-[85%] ${
-                      msg.role === 'user' ? 'flex-row-reverse' : ''
-                    }`}
-                  >
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xl ${
-                        msg.role === 'user'
-                          ? 'bg-red-600 text-white'
-                          : data.aiSettings.isBetaEnabled
-                          ? 'bg-yellow-400 text-black'
-                          : 'bg-blue-600 text-white'
-                      }`}
-                    >
-                      {msg.role === 'user' ? (
-                        <User size={24} />
-                      ) : data.aiSettings.isBetaEnabled ? (
-                        <Zap size={24} />
-                      ) : (
-                        <Bot size={24} />
-                      )}
-                    </div>
+            <aside className="xl:sticky xl:top-24">
+              <div className="rounded-[3rem] border-4 border-black bg-white shadow-2xl p-6 space-y-6">
+                <div>
+                  <h3 className="text-4xl font-black tracking-tight">Estado del Proyecto</h3>
+                </div>
 
-                    <div
-                      className={`p-6 rounded-[2rem] text-sm font-bold leading-relaxed whitespace-pre-wrap ${
-                        msg.role === 'user'
-                          ? 'bg-red-50 text-black border-2 border-red-100 rounded-tr-none'
-                          : data.aiSettings.isBetaEnabled
-                          ? 'bg-white/5 text-white border-2 border-white/10 rounded-tl-none'
-                          : 'bg-blue-50 text-black border-2 border-blue-100 rounded-tl-none'
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
+                <div className="space-y-4">
+                  <div className="rounded-[1.5rem] border border-slate-200 p-4">
+                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
+                      Tipo de lugar
+                    </p>
+                    <p className="text-2xl font-black">{summary.siteType}</p>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-slate-200 p-4">
+                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
+                      Distancia grabador - cámaras
+                    </p>
+                    <p className="text-2xl font-black">{summary.distance}</p>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-slate-200 p-4">
+                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
+                      Dificultad de cableado
+                    </p>
+                    <p className="text-2xl font-black">{summary.cableDifficulty}</p>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-slate-200 p-4">
+                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
+                      Conectividad
+                    </p>
+                    <p className="text-2xl font-black">{summary.connectivity}</p>
                   </div>
                 </div>
-              ))}
 
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="flex gap-4 max-w-[85%] items-center">
+                <div className="rounded-[2rem] bg-gray-50 border border-slate-200 p-5">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="font-black">Avance del diagnóstico</span>
+                    <span className="font-black text-red-600">{summary.progress}%</span>
+                  </div>
+                  <div className="w-full h-4 rounded-full bg-gray-200 overflow-hidden">
                     <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                        data.aiSettings.isBetaEnabled
-                          ? 'bg-yellow-400 text-black'
-                          : 'bg-blue-600 text-white'
-                      }`}
-                    >
-                      <Loader2 size={24} className="animate-spin" />
-                    </div>
-                    <div
-                      className={`p-6 rounded-[2rem] font-black italic text-xs uppercase tracking-widest ${
-                        data.aiSettings.isBetaEnabled
-                          ? 'bg-white/5 text-yellow-400'
-                          : 'bg-gray-100 text-gray-500'
-                      }`}
-                    >
-                      {ROBOT_NAME} analizando riesgos...
-                    </div>
+                      className="h-full rounded-full bg-gradient-to-r from-red-700 to-red-500 transition-all duration-500"
+                      style={{ width: `${summary.progress}%` }}
+                    />
                   </div>
                 </div>
-              )}
 
-              <div ref={chatEndRef} />
-            </div>
-
-            <div
-              className={`p-8 border-t-4 ${
-                data.aiSettings.isBetaEnabled
-                  ? 'border-white/10 bg-white/5'
-                  : 'border-black bg-gray-50'
-              }`}
-            >
-              <form
-                className="relative"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  sendMessage();
-                }}
-              >
-                <input
-                  type="text"
-                  className={`w-full border-4 rounded-[2rem] p-5 pr-20 outline-none transition-all font-bold ${
-                    data.aiSettings.isBetaEnabled
-                      ? 'bg-black border-yellow-400/30 text-white focus:border-yellow-400 placeholder-white/20'
-                      : 'bg-white border-black text-black focus:border-blue-600 placeholder-gray-400'
-                  }`}
-                  placeholder={`Escribe tu consulta para ${ROBOT_NAME}...`}
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  disabled={isTyping}
-                />
-                <button
-                  type="submit"
-                  disabled={isTyping || !userInput.trim()}
-                  className={`absolute right-3 top-3 p-3 rounded-2xl transition-all disabled:opacity-50 text-white shadow-xl ${
-                    data.aiSettings.isBetaEnabled
-                      ? 'bg-yellow-400 text-black hover:scale-105'
-                      : 'bg-blue-600 hover:bg-black'
-                  }`}
-                >
-                  <Send size={28} />
-                </button>
-              </form>
-
-              <div className="flex justify-between items-center mt-6 gap-4">
-                <p
-                  className={`text-[10px] uppercase font-black tracking-widest ${
-                    data.aiSettings.isBetaEnabled ? 'text-yellow-400' : 'text-gray-400'
-                  }`}
-                >
-                  {data.aiSettings.isBetaEnabled
-                    ? `${ROBOT_NAME} · Sistema Beta`
-                    : `${ROBOT_NAME} · Core IA Mi Pyme Segura`}
-                </p>
+                {showFinalRobot && (
+                  <div className="rounded-[2rem] bg-gradient-to-b from-red-50 to-white border border-red-100 p-4 text-center">
+                    <img
+                      src={ROBOT_URL}
+                      alt={`${ROBOT_NAME} cuerpo completo`}
+                      className="w-40 mx-auto object-contain drop-shadow-[0_14px_24px_rgba(181,26,0,0.20)]"
+                    />
+                    <p className="mt-3 text-sm font-black text-red-600 uppercase tracking-widest">
+                      Proyecto calculado
+                    </p>
+                    <p className="text-sm font-bold text-gray-500 mt-1">
+                      Valores finales referenciales y sujetos a validación técnica.
+                    </p>
+                  </div>
+                )}
 
                 <button
                   onClick={() => setMode('finished')}
-                  className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                    data.aiSettings.isBetaEnabled
-                      ? 'bg-white/10 text-white hover:bg-yellow-400 hover:text-black'
-                      : 'bg-black text-white hover:bg-red-600'
-                  }`}
+                  className="w-full bg-gradient-to-r from-red-700 to-red-500 text-white py-4 rounded-[1.5rem] font-black uppercase tracking-widest hover:scale-[1.01] transition-all"
                 >
                   Finalizar
                 </button>
               </div>
-            </div>
+            </aside>
           </div>
         </div>
       )}
 
       {mode === 'finished' && (
-        <div className="text-center space-y-10 animate-in zoom-in-95 duration-500 bg-white p-20 rounded-[4rem] shadow-2xl border-4 border-black">
-          <div className="bg-yellow-400 text-black w-28 h-28 rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl rotate-12">
-            <Check size={56} className="font-black" />
-          </div>
+        <div className="text-center space-y-10 animate-in zoom-in-95 duration-500 bg-white p-12 md:p-20 rounded-[4rem] shadow-2xl border-4 border-black">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_340px] gap-10 items-center text-left">
+            <div className="space-y-8">
+              <div className="flex items-center gap-4">
+                <div className="bg-yellow-400 text-black w-24 h-24 rounded-[2rem] flex items-center justify-center shadow-2xl rotate-12">
+                  <Check size={50} className="font-black" />
+                </div>
 
-          <div className="space-y-4">
-            <h2 className="text-5xl font-black text-black tracking-tighter uppercase">
-              PROYECTO <br />
-              <span className="text-red-600">CONSOLIDADO</span>
-            </h2>
-            <p className="text-xl text-gray-500 font-bold max-w-md mx-auto leading-relaxed">
-              Nuestro equipo ha recibido tu diseño. En menos de 24 horas te contactaremos.
-            </p>
-          </div>
+                <div>
+                  <h2 className="text-5xl font-black text-black tracking-tighter uppercase leading-none">
+                    PROYECTO
+                    <br />
+                    <span className="text-red-600">CONSOLIDADO</span>
+                  </h2>
+                </div>
+              </div>
 
-          <button
-            onClick={() => (window.location.href = '#/contact')}
-            className="bg-black text-white px-16 py-6 rounded-[2.5rem] font-black text-2xl hover:bg-red-600 transition-all shadow-2xl shadow-gray-200 transform hover:scale-110"
-          >
-            HABLEMOS AHORA
-          </button>
+              <p className="text-xl text-gray-500 font-bold leading-relaxed">
+                {ROBOT_NAME} preparó una propuesta base según la información ingresada.
+                Recuerda que los valores finales son <span className="text-red-600">aproximados</span>{' '}
+                y pueden variar después de una validación técnica en terreno.
+              </p>
+
+              <div className="rounded-[2rem] border border-red-100 bg-red-50 p-6">
+                <p className="font-black mb-3">Factores que pueden modificar el valor final:</p>
+                <ul className="grid md:grid-cols-2 gap-2 list-disc pl-5 font-bold text-gray-700">
+                  <li>distancia real de cableado</li>
+                  <li>dificultad de instalación</li>
+                  <li>condiciones del lugar</li>
+                  <li>infraestructura existente</li>
+                </ul>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={handleDownloadPdf}
+                  className="bg-black text-white px-8 py-4 rounded-[1.5rem] font-black hover:bg-red-600 transition-all inline-flex items-center gap-2"
+                >
+                  <Download size={20} />
+                  Descargar PDF
+                </button>
+
+                <button
+                  onClick={handleRequestInstall}
+                  className="bg-gray-100 text-black px-8 py-4 rounded-[1.5rem] font-black hover:bg-gray-200 transition-all inline-flex items-center gap-2"
+                >
+                  <Wrench size={20} />
+                  Solicitar instalación
+                </button>
+
+                <button
+                  onClick={() => setMode('ai')}
+                  className="bg-gray-100 text-black px-8 py-4 rounded-[1.5rem] font-black hover:bg-gray-200 transition-all inline-flex items-center gap-2"
+                >
+                  <Settings2 size={20} />
+                  Ajustar proyecto
+                </button>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <img
+                src={ROBOT_URL}
+                alt={`${ROBOT_NAME} cuerpo completo`}
+                className="w-72 mx-auto object-contain drop-shadow-[0_24px_36px_rgba(181,26,0,0.25)]"
+              />
+              <p className="mt-4 text-sm font-black uppercase tracking-widest text-red-600">
+                {ROBOT_NAME}
+              </p>
+              <p className="text-sm font-bold text-gray-500 mt-1">
+                Asesor técnico virtual de Mi Pyme Segura
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>
