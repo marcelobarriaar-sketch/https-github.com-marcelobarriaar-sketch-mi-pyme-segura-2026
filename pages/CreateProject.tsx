@@ -103,18 +103,49 @@ const CreateProject = () => {
       no_sabe: 'Por definir',
     };
 
-    let progress = 20;
-    if (siteTypeRaw) progress += 20;
-    if (distanceRaw) progress += 20;
-    if (cableRaw) progress += 20;
-    if (internetRaw) progress += 20;
+    const siteType = siteTypeMap[siteTypeRaw] || siteTypeRaw || '';
+    const distance = distanceRaw ? `${distanceRaw} metros` : '';
+    const cableDifficulty = difficultyMap[cableRaw] || cableRaw || '';
+    const connectivity = connectivityMap[internetRaw] || internetRaw || '';
+
+    const checklist = [
+      {
+        key: 'siteType',
+        label: 'Tipo de lugar',
+        value: siteType,
+      },
+      {
+        key: 'distance',
+        label: 'Distancia grabador - cámaras',
+        value: distance,
+      },
+      {
+        key: 'cableDifficulty',
+        label: 'Dificultad de cableado',
+        value: cableDifficulty,
+      },
+      {
+        key: 'connectivity',
+        label: 'Conectividad',
+        value: connectivity,
+      },
+    ];
+
+    const completedItems = checklist.filter(
+      (item) => item.value && item.value.trim() !== ''
+    ).length;
+
+    const progress = Math.round((completedItems / checklist.length) * 100);
 
     return {
-      siteType: siteTypeMap[siteTypeRaw] || siteTypeRaw || 'Pendiente',
-      distance: distanceRaw ? `${distanceRaw} metros` : 'Pendiente',
-      cableDifficulty: difficultyMap[cableRaw] || cableRaw || 'Pendiente',
-      connectivity: connectivityMap[internetRaw] || internetRaw || 'Pendiente',
+      siteType: siteType || 'Pendiente',
+      distance: distance || 'Pendiente',
+      cableDifficulty: cableDifficulty || 'Pendiente',
+      connectivity: connectivity || 'Pendiente',
       progress,
+      completedItems,
+      totalItems: checklist.length,
+      checklist,
     };
   };
 
@@ -123,7 +154,8 @@ const CreateProject = () => {
     [currentProfile]
   );
 
-  const showFinalRobot = (summary.progress ?? 0) >= 80 || mode === 'finished';
+  const canFinish = (summary.progress ?? 0) >= 75;
+  const showFinalRobot = canFinish || mode === 'finished';
 
   const sendMessage = async () => {
     if (!userInput.trim() || isTyping) return;
@@ -228,7 +260,6 @@ const CreateProject = () => {
           },
         };
 
-        // apoyo visual extra para detectar distancia desde texto del usuario
         const distanceMatch = lowerUserMsg.match(/(\d+)\s*metros?/);
         if (distanceMatch) {
           mergedProfile.distanceMeters = Number(distanceMatch[1]);
@@ -421,11 +452,11 @@ const CreateProject = () => {
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-white shadow-xl p-2 shrink-0">
+                  <div className="w-20 h-20 rounded-full overflow-hidden bg-white border border-gray-200 shadow-xl shrink-0 flex items-center justify-center">
                     <img
                       src={ROBOT_URL}
                       alt={ROBOT_NAME}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover object-top scale-[1.35]"
                     />
                   </div>
 
@@ -480,11 +511,11 @@ const CreateProject = () => {
                       }`}
                     >
                       {msg.role === 'ai' ? (
-                        <div className="w-14 h-14 rounded-full bg-white shadow-lg p-2 shrink-0">
+                        <div className="w-14 h-14 rounded-full overflow-hidden bg-white border border-gray-200 shadow-lg shrink-0 flex items-center justify-center">
                           <img
                             src={ROBOT_URL}
                             alt={ROBOT_NAME}
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-cover object-top scale-[1.4]"
                           />
                         </div>
                       ) : (
@@ -519,11 +550,11 @@ const CreateProject = () => {
                 {isTyping && (
                   <div className="flex justify-start">
                     <div className="flex gap-4 max-w-[85%] items-center">
-                      <div className="w-14 h-14 rounded-full bg-white shadow-lg p-2 shrink-0">
+                      <div className="w-14 h-14 rounded-full overflow-hidden bg-white border border-gray-200 shadow-lg shrink-0 flex items-center justify-center">
                         <img
                           src={ROBOT_URL}
                           alt={ROBOT_NAME}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover object-top scale-[1.4]"
                         />
                       </div>
 
@@ -549,11 +580,11 @@ const CreateProject = () => {
                     }`}
                   >
                     <div className="flex items-center gap-4 mb-5">
-                      <div className="w-14 h-14 rounded-full bg-white shadow-lg p-2 shrink-0">
+                      <div className="w-14 h-14 rounded-full overflow-hidden bg-white border border-gray-200 shadow-lg shrink-0 flex items-center justify-center">
                         <img
                           src={ROBOT_URL}
                           alt={ROBOT_NAME}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover object-top scale-[1.4]"
                         />
                       </div>
                       <div>
@@ -671,11 +702,16 @@ const CreateProject = () => {
                   </p>
 
                   <button
-                    onClick={() => setMode('finished')}
+                    onClick={() => {
+                      if (canFinish) setMode('finished');
+                    }}
+                    disabled={!canFinish}
                     className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                      data.aiSettings.isBetaEnabled
-                        ? 'bg-white/10 text-white hover:bg-yellow-400 hover:text-black'
-                        : 'bg-black text-white hover:bg-red-600'
+                      canFinish
+                        ? data.aiSettings.isBetaEnabled
+                          ? 'bg-white/10 text-white hover:bg-yellow-400 hover:text-black'
+                          : 'bg-black text-white hover:bg-red-600'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
                     Finalizar
@@ -691,33 +727,45 @@ const CreateProject = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="rounded-[1.5rem] border border-slate-200 p-4">
-                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
-                      Tipo de lugar
-                    </p>
-                    <p className="text-2xl font-black">{summary.siteType}</p>
-                  </div>
+                  {summary.checklist.map((item: any) => {
+                    const isDone = !!item.value && item.value.trim() !== '';
 
-                  <div className="rounded-[1.5rem] border border-slate-200 p-4">
-                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
-                      Distancia grabador - cámaras
-                    </p>
-                    <p className="text-2xl font-black">{summary.distance}</p>
-                  </div>
+                    return (
+                      <div
+                        key={item.key}
+                        className={`rounded-[1.5rem] border p-4 transition-all ${
+                          isDone
+                            ? 'border-green-200 bg-green-50'
+                            : 'border-slate-200 bg-white'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
+                              {item.label}
+                            </p>
+                            <p
+                              className={`text-2xl font-black ${
+                                isDone ? 'text-green-700' : 'text-black'
+                              }`}
+                            >
+                              {isDone ? item.value : 'Pendiente'}
+                            </p>
+                          </div>
 
-                  <div className="rounded-[1.5rem] border border-slate-200 p-4">
-                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
-                      Dificultad de cableado
-                    </p>
-                    <p className="text-2xl font-black">{summary.cableDifficulty}</p>
-                  </div>
-
-                  <div className="rounded-[1.5rem] border border-slate-200 p-4">
-                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
-                      Conectividad
-                    </p>
-                    <p className="text-2xl font-black">{summary.connectivity}</p>
-                  </div>
+                          <div
+                            className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-black text-lg ${
+                              isDone
+                                ? 'bg-green-600 text-white'
+                                : 'bg-gray-100 text-gray-400'
+                            }`}
+                          >
+                            {isDone ? '✓' : '•'}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="rounded-[2rem] bg-gray-50 border border-slate-200 p-5">
@@ -725,12 +773,17 @@ const CreateProject = () => {
                     <span className="font-black">Avance del diagnóstico</span>
                     <span className="font-black text-red-600">{summary.progress}%</span>
                   </div>
+
                   <div className="w-full h-4 rounded-full bg-gray-200 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-red-700 to-red-500 transition-all duration-500"
                       style={{ width: `${summary.progress}%` }}
                     />
                   </div>
+
+                  <p className="mt-3 text-sm font-bold text-gray-500">
+                    {summary.completedItems} de {summary.totalItems} ítems listos
+                  </p>
                 </div>
 
                 {showFinalRobot && (
@@ -750,8 +803,15 @@ const CreateProject = () => {
                 )}
 
                 <button
-                  onClick={() => setMode('finished')}
-                  className="w-full bg-gradient-to-r from-red-700 to-red-500 text-white py-4 rounded-[1.5rem] font-black uppercase tracking-widest hover:scale-[1.01] transition-all"
+                  onClick={() => {
+                    if (canFinish) setMode('finished');
+                  }}
+                  disabled={!canFinish}
+                  className={`w-full py-4 rounded-[1.5rem] font-black uppercase tracking-widest transition-all ${
+                    canFinish
+                      ? 'bg-gradient-to-r from-red-700 to-red-500 text-white hover:scale-[1.01]'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
                 >
                   Finalizar
                 </button>
