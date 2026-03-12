@@ -63,35 +63,35 @@ const SecurityProjectProfileSchema = z.object({
     .optional(),
 
   site: z
-  .object({
-    type: z
-      .enum([
-        'casa',
-        'departamento',
-        'parcela',
-        'local',
-        'bodega',
-        'comercio',
-        'retail',
-        'oficina',
-        'restaurant',
-        'cafe',
-        'taller',
-        'centro_salud',
-        'educacion',
-        'condominio',
-        'comunidad',
-        'campo',
-        'obra',
-        'otro',
-      ])
-      .optional(),
-    floors: z.number().optional(),
-    perimeter: z.enum(['bajo', 'medio', 'alto']).optional(),
-    keyZones: z.array(z.string()).optional(),
-    lighting: z.enum(['buena', 'media', 'mala']).optional(),
-  })
-  .optional(),
+    .object({
+      type: z
+        .enum([
+          'casa',
+          'departamento',
+          'parcela',
+          'local',
+          'bodega',
+          'comercio',
+          'retail',
+          'oficina',
+          'restaurant',
+          'cafe',
+          'taller',
+          'centro_salud',
+          'educacion',
+          'condominio',
+          'comunidad',
+          'campo',
+          'obra',
+          'otro',
+        ])
+        .optional(),
+      floors: z.number().optional(),
+      perimeter: z.enum(['bajo', 'medio', 'alto']).optional(),
+      keyZones: z.array(z.string()).optional(),
+      lighting: z.enum(['buena', 'media', 'mala']).optional(),
+    })
+    .optional(),
 
   constraints: z
     .object({
@@ -437,6 +437,38 @@ function mergeProfiles(
   };
 }
 
+function normalizeSiteType(
+  siteType?: string
+): 'casa' | 'departamento' | 'parcela' | 'local' | 'bodega' | undefined {
+  switch (siteType) {
+    case 'casa':
+      return 'casa';
+    case 'departamento':
+      return 'departamento';
+    case 'parcela':
+    case 'campo':
+    case 'obra':
+      return 'parcela';
+    case 'bodega':
+      return 'bodega';
+    case 'comercio':
+    case 'retail':
+    case 'oficina':
+    case 'restaurant':
+    case 'cafe':
+    case 'taller':
+    case 'centro_salud':
+    case 'educacion':
+    case 'condominio':
+    case 'comunidad':
+    case 'local':
+    case 'otro':
+      return 'local';
+    default:
+      return undefined;
+  }
+}
+
 function normalizeProfileForAdvisor(
   profile: SecurityProjectProfile
 ): AdvisorSecurityProjectProfile {
@@ -465,11 +497,11 @@ function normalizeProfileForAdvisor(
       : undefined,
 
     site: profile.site
-  ? {
-      ...profile.site,
-      type: normalizeSiteType(profile.site.type),
-    }
-  : undefined,
+      ? {
+          ...profile.site,
+          type: normalizeSiteType(profile.site.type),
+        }
+      : undefined,
 
     constraints: profile.constraints
       ? {
