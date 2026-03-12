@@ -63,14 +63,35 @@ const SecurityProjectProfileSchema = z.object({
     .optional(),
 
   site: z
-    .object({
-      type: z.enum(['casa', 'departamento', 'parcela', 'local', 'bodega']).optional(),
-      floors: z.number().optional(),
-      perimeter: z.enum(['bajo', 'medio', 'alto']).optional(),
-      keyZones: z.array(z.string()).optional(),
-      lighting: z.enum(['buena', 'media', 'mala']).optional(),
-    })
-    .optional(),
+  .object({
+    type: z
+      .enum([
+        'casa',
+        'departamento',
+        'parcela',
+        'local',
+        'bodega',
+        'comercio',
+        'retail',
+        'oficina',
+        'restaurant',
+        'cafe',
+        'taller',
+        'centro_salud',
+        'educacion',
+        'condominio',
+        'comunidad',
+        'campo',
+        'obra',
+        'otro',
+      ])
+      .optional(),
+    floors: z.number().optional(),
+    perimeter: z.enum(['bajo', 'medio', 'alto']).optional(),
+    keyZones: z.array(z.string()).optional(),
+    lighting: z.enum(['buena', 'media', 'mala']).optional(),
+  })
+  .optional(),
 
   constraints: z
     .object({
