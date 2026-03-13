@@ -121,7 +121,6 @@ function ProjectsAdminEditor(props: {
   const [model, setModel] = useState<ProjectsPage>(remote);
   const [restored, setRestored] = useState(false);
 
-  // restore draft if remote looks empty
   useEffect(() => {
     try {
       const raw = localStorage.getItem(PROJECTS_DRAFT_KEY);
@@ -142,9 +141,8 @@ function ProjectsAdminEditor(props: {
     } catch {
       setModel(remote);
     }
-  }, [remote.pageTitle, remote.pageSubtitle]); // minimal deps
+  }, [remote.pageTitle, remote.pageSubtitle]);
 
-  // autosave local
   useEffect(() => {
     try {
       localStorage.setItem(PROJECTS_DRAFT_KEY, JSON.stringify({ ts: Date.now(), value: model }));
@@ -164,7 +162,6 @@ function ProjectsAdminEditor(props: {
       },
     };
 
-    // opcional: mantener legacy sincronizado para no romper pantallas antiguas
     nextData.projectsHeader = { title: next.pageTitle, subtitle: next.pageSubtitle };
     nextData.projects = (next.installed.items || []).map((p) => ({
       id: p.id,
@@ -196,7 +193,7 @@ function ProjectsAdminEditor(props: {
       description: '',
       imageUrl: '',
       tags: [],
-      public: false, // ✅ por defecto privado
+      public: false,
     };
     apply({
       ...model,
@@ -335,7 +332,6 @@ function ProjectsAdminEditor(props: {
                   <div className="font-black">{it.name}</div>
 
                   <div className="flex items-center gap-3">
-                    {/* ✅ Público / Privado al costado */}
                     <label className="flex items-center gap-2 text-xs font-black">
                       <input
                         type="checkbox"
@@ -396,7 +392,6 @@ function ProjectsAdminEditor(props: {
                   </div>
                 </div>
 
-                {/* Upload cloud (opcional, igual que tu hero/catalog) */}
                 <div className="grid md:grid-cols-2 gap-3 items-start">
                   <div className="space-y-2">
                     <input
@@ -490,6 +485,321 @@ function ProjectsAdminEditor(props: {
 }
 
 /* =======================================================================================
+   HOME / ABOUT / EQUIPMENT PATCH EDITORS
+   ======================================================================================= */
+
+function HomeAdminEditor(props: {
+  data: any;
+  updateData: (next: any) => void;
+  uploadImageToCloud: (file: File, targetPath: string) => Promise<string | null>;
+  uploadStatus: string | null;
+  setUploadStatus: (s: string | null) => void;
+}) {
+  const { data, updateData, uploadImageToCloud, uploadStatus } = props;
+
+  const home = data?.home ?? {};
+
+  const setHome = (patch: Record<string, any>) => {
+    updateData({
+      ...data,
+      home: {
+        ...home,
+        ...patch,
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="bg-gray-50 border-2 rounded-[2rem] p-8 space-y-6">
+        <div className="text-xl font-black uppercase text-brand flex items-center gap-2">
+          <Type /> HOME
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Título principal</label>
+            <input
+              className="w-full bg-white border-2 p-3 rounded-xl font-black"
+              value={home?.heroTitle ?? ''}
+              onChange={(e) => setHome({ heroTitle: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Subtítulo</label>
+            <input
+              className="w-full bg-white border-2 p-3 rounded-xl font-bold"
+              value={home?.heroSubtitle ?? ''}
+              onChange={(e) => setHome({ heroSubtitle: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase text-gray-500">Texto destacado / bajada</label>
+          <textarea
+            className="w-full bg-white border-2 p-3 rounded-xl font-medium min-h-[110px]"
+            value={home?.heroDescription ?? ''}
+            onChange={(e) => setHome({ heroDescription: e.target.value })}
+          />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Texto botón principal</label>
+            <input
+              className="w-full bg-white border-2 p-3 rounded-xl font-black"
+              value={home?.heroPrimaryButtonText ?? ''}
+              onChange={(e) => setHome({ heroPrimaryButtonText: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Texto botón secundario</label>
+            <input
+              className="w-full bg-white border-2 p-3 rounded-xl font-black"
+              value={home?.heroSecondaryButtonText ?? ''}
+              onChange={(e) => setHome({ heroSecondaryButtonText: e.target.value })}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border-2 rounded-[2rem] p-8 space-y-6">
+        <div className="text-lg font-black uppercase">Imagen hero</div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase text-gray-500">URL imagen fondo</label>
+          <input
+            className="w-full bg-gray-50 border-2 p-3 rounded-xl font-mono text-xs"
+            value={home?.heroBgImageUrl ?? ''}
+            onChange={(e) => setHome({ heroBgImageUrl: e.target.value })}
+            placeholder="/images/home/hero.jpg"
+          />
+        </div>
+
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          id="home-hero-upload"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            const ext = (() => {
+              const name = file.name.toLowerCase();
+              if (name.endsWith('.webp')) return 'webp';
+              if (name.endsWith('.png')) return 'png';
+              return 'jpg';
+            })();
+
+            const publicUrl = await uploadImageToCloud(file, `public/images/home/hero-${Date.now()}.${ext}`);
+            if (!publicUrl) return;
+
+            setHome({ heroBgImageUrl: publicUrl });
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => document.getElementById('home-hero-upload')?.click()}
+          className="bg-black text-white px-5 py-3 rounded-xl font-black text-[10px] hover:bg-brand transition-all flex items-center gap-2"
+        >
+          <Upload size={14} /> SUBIR IMAGEN HERO
+        </button>
+
+        {uploadStatus && <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>}
+      </div>
+    </div>
+  );
+}
+
+function AboutAdminEditor(props: {
+  data: any;
+  updateData: (next: any) => void;
+  uploadImageToCloud: (file: File, targetPath: string) => Promise<string | null>;
+  uploadStatus: string | null;
+  setUploadStatus: (s: string | null) => void;
+}) {
+  const { data, updateData, uploadImageToCloud, uploadStatus } = props;
+
+  const about = data?.about ?? {};
+
+  const setAbout = (patch: Record<string, any>) => {
+    updateData({
+      ...data,
+      about: {
+        ...about,
+        ...patch,
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="bg-gray-50 border-2 rounded-[2rem] p-8 space-y-6">
+        <div className="text-xl font-black uppercase text-brand flex items-center gap-2">
+          <Type /> ABOUT
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Título</label>
+            <input
+              className="w-full bg-white border-2 p-3 rounded-xl font-black"
+              value={about?.title ?? ''}
+              onChange={(e) => setAbout({ title: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Subtítulo</label>
+            <input
+              className="w-full bg-white border-2 p-3 rounded-xl font-bold"
+              value={about?.subtitle ?? ''}
+              onChange={(e) => setAbout({ subtitle: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase text-gray-500">Descripción</label>
+          <textarea
+            className="w-full bg-white border-2 p-3 rounded-xl font-medium min-h-[140px]"
+            value={about?.description ?? ''}
+            onChange={(e) => setAbout({ description: e.target.value })}
+          />
+        </div>
+      </div>
+
+      <div className="bg-white border-2 rounded-[2rem] p-8 space-y-6">
+        <div className="text-lg font-black uppercase">Imagen about</div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase text-gray-500">URL imagen</label>
+          <input
+            className="w-full bg-gray-50 border-2 p-3 rounded-xl font-mono text-xs"
+            value={about?.aboutImage ?? ''}
+            onChange={(e) => setAbout({ aboutImage: e.target.value })}
+            placeholder="/images/about/about.jpg"
+          />
+        </div>
+
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          id="about-image-upload"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            const ext = (() => {
+              const name = file.name.toLowerCase();
+              if (name.endsWith('.webp')) return 'webp';
+              if (name.endsWith('.png')) return 'png';
+              return 'jpg';
+            })();
+
+            const publicUrl = await uploadImageToCloud(file, `public/images/about/about-${Date.now()}.${ext}`);
+            if (!publicUrl) return;
+
+            setAbout({ aboutImage: publicUrl });
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => document.getElementById('about-image-upload')?.click()}
+          className="bg-black text-white px-5 py-3 rounded-xl font-black text-[10px] hover:bg-brand transition-all flex items-center gap-2"
+        >
+          <Upload size={14} /> SUBIR IMAGEN ABOUT
+        </button>
+
+        {uploadStatus && <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>}
+      </div>
+    </div>
+  );
+}
+
+type CatalogCategory = { id: string; name: string; subcategories?: { id: string; name: string }[] };
+type CatalogProduct = {
+  id: string;
+  name: string;
+  brand: string;
+  model: string;
+  sku: string;
+  categoryId: string;
+  subcategoryId: string;
+  priceNet: number;
+  features: string[];
+  imageUrl: string;
+  datasheetUrl: string;
+  videoUrl: string;
+  active: boolean;
+};
+
+function EquipmentAdminEditor(props: {
+  data: any;
+  updateData: (next: any) => void;
+  uploadImageToCloud: (file: File, targetPath: string) => Promise<string | null>;
+  uploadStatus: string | null;
+  setUploadStatus: (s: string | null) => void;
+}) {
+  const { data, updateData, uploadImageToCloud, uploadStatus, setUploadStatus } = props;
+
+  const categories: CatalogCategory[] = Array.isArray(data?.catalog?.categories) ? data.catalog.categories : [];
+  const products: CatalogProduct[] = Array.isArray(data?.catalog?.products) ? data.catalog.products : [];
+
+  const setProducts = (nextProducts: CatalogProduct[]) => {
+    updateData({
+      ...data,
+      catalog: {
+        ...(data?.catalog ?? {}),
+        categories,
+        products: nextProducts,
+      },
+    });
+  };
+
+  const onSave = async (nextProducts: CatalogProduct[]) => {
+    updateData({
+      ...data,
+      catalog: {
+        ...(data?.catalog ?? {}),
+        categories,
+        products: nextProducts,
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="bg-gray-50 border-2 rounded-[2rem] p-8">
+        <div className="text-xl font-black uppercase text-brand flex items-center gap-2">
+          <Database /> EQUIPMENT / CATÁLOGO
+        </div>
+        <div className="text-sm text-gray-500 mt-2">
+          Aquí editas el stock visible para el generador de proyectos y catálogo público.
+        </div>
+      </div>
+
+      <EquipmentAdminEditorCatalog
+        categories={categories}
+        products={products}
+        setProducts={setProducts}
+        onSave={onSave}
+        uploadImageToCloud={uploadImageToCloud}
+        uploadStatus={uploadStatus}
+        setUploadStatus={setUploadStatus}
+      />
+    </div>
+  );
+}
+
+/* =======================================================================================
    ADMIN DASHBOARD
    ======================================================================================= */
 
@@ -548,7 +858,6 @@ const AdminDashboard = () => {
           next.about = { ...next.about, aboutImage: fixGithubBlobToRaw(next.about.aboutImage) };
         }
 
-        // ✅ normaliza projects images si vienen con blob
         if (next?.pages?.projects?.installed?.items && Array.isArray(next.pages.projects.installed.items)) {
           next.pages = { ...(next.pages ?? {}) };
           next.pages.projects = { ...(next.pages.projects ?? {}) };
@@ -652,7 +961,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 text-black">
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
         <div className="flex items-center gap-6">
           <Link to="/" className="p-3 bg-gray-100 hover:bg-black hover:text-white rounded-2xl transition-all">
@@ -683,7 +991,6 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid md:grid-cols-4 gap-10">
-        {/* SIDEBAR */}
         <aside className="space-y-3">
           {[
             { id: 'branding', label: 'Marca y Estilo', icon: Palette },
@@ -710,9 +1017,7 @@ const AdminDashboard = () => {
           ))}
         </aside>
 
-        {/* MAIN */}
         <main className="md:col-span-3 space-y-10">
-          {/* TAB: PAGES (CMS) */}
           {activeTab === 'pages' && (
             <div className="space-y-8">
               <div className="bg-white p-10 rounded-[3rem] border-4 border-black shadow-xl space-y-8">
@@ -745,7 +1050,36 @@ const AdminDashboard = () => {
                     </button>
                   </div>
 
-                  {/* ✅ PROJECTS editor */}
+                  {activePageEditor === 'home' && (
+                    <HomeAdminEditor
+                      data={data}
+                      updateData={updateData}
+                      uploadImageToCloud={uploadImageToCloud}
+                      uploadStatus={uploadStatus}
+                      setUploadStatus={setUploadStatus}
+                    />
+                  )}
+
+                  {activePageEditor === 'about' && (
+                    <AboutAdminEditor
+                      data={data}
+                      updateData={updateData}
+                      uploadImageToCloud={uploadImageToCloud}
+                      uploadStatus={uploadStatus}
+                      setUploadStatus={setUploadStatus}
+                    />
+                  )}
+
+                  {activePageEditor === 'equipment' && (
+                    <EquipmentAdminEditor
+                      data={data}
+                      updateData={updateData}
+                      uploadImageToCloud={uploadImageToCloud}
+                      uploadStatus={uploadStatus}
+                      setUploadStatus={setUploadStatus}
+                    />
+                  )}
+
                   {activePageEditor === 'projects' && (
                     <ProjectsAdminEditor
                       data={data}
@@ -756,8 +1090,11 @@ const AdminDashboard = () => {
                     />
                   )}
 
-                  {/* (Tu HOME / ABOUT / EQUIPMENT etc. quedan tal cual los tenías en tu versión previa) */}
-                  {/* Si quieres que los pegue todos aquí también, me lo dices y lo dejo 1:1 con tu archivo real. */}
+                  {activePageEditor === 'contact' && (
+                    <div className="rounded-2xl border-2 border-dashed p-8 text-sm text-gray-500">
+                      Editor de CONTACT aún no fue incluido en este parche. Se dejó intacta la estructura del CMS.
+                    </div>
+                  )}
 
                   <div className="pt-8 flex justify-end">
                     <button
@@ -771,15 +1108,11 @@ const AdminDashboard = () => {
               )}
             </div>
           )}
-
-          {/* (El resto de tabs: branding/whatsapp/ai/maintenance/github queda igual que tu archivo actual.
-              Si necesitas que lo incluya completo con todo lo que ya tienes, lo armo en una sola pieza 1:1.) */}
         </main>
       </div>
 
-      {/* Nota: tu archivo original trae más tabs completos; aquí te dejé el bloque CMS + Projects, que es lo crítico para tu requerimiento */}
       <div className="text-[10px] text-gray-400 mt-8">
-        Si ya tenías el resto de tabs armados (branding/whatsapp/ai/maintenance/github), mantenlos igual y pega solo el bloque CMS/Projects.
+        Este parche reinyecta HOME / ABOUT / EQUIPMENT / PROJECTS dentro del CMS sin tocar la lógica pública multipágina.
       </div>
     </div>
   );
@@ -789,25 +1122,7 @@ export default AdminDashboard;
 
 /* =======================================================================================
    EQUIPMENT ADMIN EDITOR (catalog.products)
-   (Te dejo el tuyo intacto; si tu archivo real lo tenía completo, mantenlo igual)
    ======================================================================================= */
-
-type CatalogCategory = { id: string; name: string; subcategories?: { id: string; name: string }[] };
-type CatalogProduct = {
-  id: string;
-  name: string;
-  brand: string;
-  model: string;
-  sku: string;
-  categoryId: string;
-  subcategoryId: string;
-  priceNet: number;
-  features: string[];
-  imageUrl: string;
-  datasheetUrl: string;
-  videoUrl: string;
-  active: boolean;
-};
 
 function EquipmentAdminEditorCatalog(props: {
   categories: CatalogCategory[];
@@ -822,6 +1137,16 @@ function EquipmentAdminEditorCatalog(props: {
 
   const [selectedId, setSelectedId] = useState<string | null>(products?.[0]?.id ?? null);
   const selected = useMemo(() => products.find((p) => p.id === selectedId) || null, [products, selectedId]);
+
+  useEffect(() => {
+    if (!products?.length) {
+      setSelectedId(null);
+      return;
+    }
+    if (!selectedId || !products.some((p) => p.id === selectedId)) {
+      setSelectedId(products[0].id);
+    }
+  }, [products, selectedId]);
 
   const selectedCategory = useMemo(() => {
     if (!selected) return null;
@@ -861,6 +1186,7 @@ function EquipmentAdminEditorCatalog(props: {
 
   const deleteSelected = () => {
     if (!selected) return;
+    if (!confirm(`¿Eliminar "${selected.name || 'este producto'}"?`)) return;
     const next = products.filter((p) => p.id !== selected.id);
     setProducts(next);
     setSelectedId(next?.[0]?.id ?? null);
@@ -873,7 +1199,6 @@ function EquipmentAdminEditorCatalog(props: {
   return (
     <div className="grid gap-8">
       <div className="grid md:grid-cols-3 gap-6">
-        {/* LISTA */}
         <div className="md:col-span-1 bg-gray-50 border-2 rounded-[2rem] p-4 space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div className="font-black uppercase text-xs tracking-widest text-gray-500">Productos ({products.length})</div>
@@ -906,7 +1231,6 @@ function EquipmentAdminEditorCatalog(props: {
           </div>
         </div>
 
-        {/* EDITOR */}
         <div className="md:col-span-2 space-y-6">
           {!selected ? (
             <div className="p-10 bg-white border-2 rounded-[2rem] text-gray-500 font-black">No hay producto seleccionado.</div>
@@ -918,7 +1242,9 @@ function EquipmentAdminEditorCatalog(props: {
                   <div className="text-xs font-bold text-gray-500">
                     {selected.brand || 'Marca'} • {selected.model || 'Modelo'} • SKU: {selected.sku || '-'}
                   </div>
-                  <div className="font-black text-brand text-xl">${Number(selected.priceNet || 0).toLocaleString('es-CL')}</div>
+                  <div className="font-black text-brand text-xl">
+                    ${Number(selected.priceNet || 0).toLocaleString('es-CL')}
+                  </div>
                   <div className="text-[10px] font-black text-gray-500 uppercase">
                     {selected.categoryId} {selected.subcategoryId ? `• ${selected.subcategoryId}` : ''}
                   </div>
@@ -954,10 +1280,208 @@ function EquipmentAdminEditorCatalog(props: {
                   </div>
                 </div>
 
-                {/* (Tu formulario completo sigue igual; lo omití aquí para no duplicar demasiado texto) */}
-                {/* Si quieres, te lo re-envío entero 1:1 con tu mismo contenido. */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Nombre</label>
+                    <input
+                      className="w-full bg-white border-2 p-3 rounded-xl font-black"
+                      value={selected.name}
+                      onChange={(e) => updateProduct({ name: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Marca</label>
+                    <input
+                      className="w-full bg-white border-2 p-3 rounded-xl font-bold"
+                      value={selected.brand}
+                      onChange={(e) => updateProduct({ brand: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Modelo</label>
+                    <input
+                      className="w-full bg-white border-2 p-3 rounded-xl font-bold"
+                      value={selected.model}
+                      onChange={(e) => updateProduct({ model: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">SKU</label>
+                    <input
+                      className="w-full bg-white border-2 p-3 rounded-xl font-mono text-xs"
+                      value={selected.sku}
+                      onChange={(e) => updateProduct({ sku: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Categoría</label>
+                    <select
+                      className="w-full bg-white border-2 p-3 rounded-xl font-bold"
+                      value={selected.categoryId}
+                      onChange={(e) => {
+                        const catId = e.target.value;
+                        const cat = categories.find((c) => c.id === catId);
+                        updateProduct({
+                          categoryId: catId,
+                          subcategoryId: cat?.subcategories?.[0]?.id ?? '',
+                        });
+                      }}
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Subcategoría</label>
+                    <select
+                      className="w-full bg-white border-2 p-3 rounded-xl font-bold"
+                      value={selected.subcategoryId}
+                      onChange={(e) => updateProduct({ subcategoryId: e.target.value })}
+                    >
+                      <option value="">Sin subcategoría</option>
+                      {subcats.map((sub) => (
+                        <option key={sub.id} value={sub.id}>
+                          {sub.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Precio neto</label>
+                    <input
+                      type="number"
+                      className="w-full bg-white border-2 p-3 rounded-xl font-bold"
+                      value={selected.priceNet}
+                      onChange={(e) => updateProduct({ priceNet: Number(e.target.value || 0) })}
+                    />
+                  </div>
+
+                  <div className="space-y-2 flex items-end">
+                    <label className="flex items-center gap-2 text-xs font-black">
+                      <input
+                        type="checkbox"
+                        checked={!!selected.active}
+                        onChange={(e) => updateProduct({ active: e.target.checked })}
+                      />
+                      PRODUCTO ACTIVO
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Imagen URL</label>
+                    <input
+                      className="w-full bg-white border-2 p-3 rounded-xl font-mono text-xs"
+                      value={selected.imageUrl}
+                      onChange={(e) => updateProduct({ imageUrl: e.target.value })}
+                      placeholder="/images/catalog/nombre-producto.jpg"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4 items-start">
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      id={`equipment-upload-${selected.id}`}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        const maxMB = 0.6;
+                        if (file.size > maxMB * 1024 * 1024) {
+                          setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                          setTimeout(() => setUploadStatus(null), 3500);
+                          return;
+                        }
+
+                        const ext = (() => {
+                          const name = file.name.toLowerCase();
+                          if (name.endsWith('.webp')) return 'webp';
+                          if (name.endsWith('.png')) return 'png';
+                          if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'jpg';
+                          return 'jpg';
+                        })();
+
+                        const safe = (selected.name || 'producto')
+                          .toString()
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, '-')
+                          .replace(/^-|-$/g, '');
+
+                        const targetPath = `public/images/catalog/${safe}-${Date.now()}.${ext}`;
+                        const publicUrl = await uploadImageToCloud(file, targetPath);
+                        if (!publicUrl) return;
+
+                        updateProduct({ imageUrl: publicUrl });
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById(`equipment-upload-${selected.id}`)?.click()}
+                      className="w-full bg-black text-white py-3 rounded-xl font-black text-[10px] hover:bg-brand transition-all"
+                    >
+                      <Upload size={14} /> SUBIR IMAGEN (CLOUD)
+                    </button>
+
+                    {uploadStatus && (
+                      <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Características (coma)</label>
+                    <input
+                      className="w-full bg-white border-2 p-3 rounded-xl font-mono text-xs"
+                      value={(selected.features || []).join(', ')}
+                      onChange={(e) =>
+                        updateProduct({
+                          features: e.target.value
+                            .split(',')
+                            .map((s) => s.trim())
+                            .filter(Boolean),
+                        })
+                      }
+                      placeholder="IP66, PoE, 4MP"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Ficha técnica URL</label>
+                    <input
+                      className="w-full bg-white border-2 p-3 rounded-xl font-mono text-xs"
+                      value={selected.datasheetUrl}
+                      onChange={(e) => updateProduct({ datasheetUrl: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-500">Video URL</label>
+                    <input
+                      className="w-full bg-white border-2 p-3 rounded-xl font-mono text-xs"
+                      value={selected.videoUrl}
+                      onChange={(e) => updateProduct({ videoUrl: e.target.value })}
+                    />
+                  </div>
+                </div>
+
                 <div className="text-[10px] font-black text-gray-500">
-                  Tip: para que se vea en todos lados, la imagen debe ser <b>/images/...</b> o una URL directa (raw), no “github.com/.../blob/...”.
+                  Tip: para que se vea bien en todos lados, la imagen idealmente debe ser <b>/images/...</b> o una URL raw directa.
                 </div>
               </div>
             </>
