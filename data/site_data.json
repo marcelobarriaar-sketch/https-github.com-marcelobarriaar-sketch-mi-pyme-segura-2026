@@ -262,8 +262,8 @@
         "brand": "Hikvision",
         "model": "IDS-7208HQHI-M1/FA (C)",
         "sku": "040",
-        "categoryId": "camaras",
-        "subcategoryId": "analogas",
+        "categoryId": "grabadores",
+        "subcategoryId": "dvr",
         "priceNet": 210000,
         "features": [
           "- Serie Turbo HD Versión 5.0",
