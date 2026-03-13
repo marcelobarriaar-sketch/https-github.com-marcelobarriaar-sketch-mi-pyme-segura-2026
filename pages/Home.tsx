@@ -105,9 +105,15 @@ const Home = () => {
   };
 
   const features = (d?.home?.features || []) as any[];
-  const processTitle = d?.home?.processTitle || 'Nuestro proceso';
-  const processSubtitle = d?.home?.processSubtitle || 'Instalación clara, rápida y profesional';
-  const processSteps = (d?.home?.processSteps || []) as any[];
+const processTitle = d?.home?.processTitle || 'Nuestro proceso';
+const processSubtitle = d?.home?.processSubtitle || 'Instalación clara, rápida y profesional';
+const processSteps = (d?.home?.processSteps || []) as any[];
+
+const processImages =
+  d?.home?.processImages || [
+    'https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=600',
+    'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=600'
+  ];
 
   return (
     <div className="space-y-0 pb-0">
