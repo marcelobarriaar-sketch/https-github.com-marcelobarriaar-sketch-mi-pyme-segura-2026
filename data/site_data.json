@@ -352,28 +352,28 @@
       "title": "Instalación de cámaras en la ciudad de Fresia",
       "description": "",
       "imageUrl": "https://github.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/blob/main/public/images/Luke%2BAxis%2BSpeaker%2BInstallation-640w.jpg.jpg",
-      "public": true
+      "public": false
     },
     {
       "id": "proj-1771661623594-fec1593a402ae",
       "title": "Instalación de cámaras en supermercado Sarko ",
       "description": "",
       "imageUrl": "",
-      "public": true
+      "public": false
     },
     {
       "id": "1769460618466",
       "title": "Aseguramos Hospitales, clinicas y centros médicos",
       "description": "Proyecto Hospitales: Servicio de actualización tecnológica e implementación de sistemas CCTV en los Hospitales de Fresia, Frutillar, Llanquihue y Maullín. Incluye modernización de equipos, cableado, configuración de red, calibración de cámaras y puesta en marcha.\nProyecto Centro Médico: Instalación y configuración de cámaras de seguridad en el Centro Médico San Sebastián (Purranque), con equipamiento acorde a los requerimientos del recinto y su operación.",
       "imageUrl": "https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=500",
-      "public": true
+      "public": false
     },
     {
       "id": "pr1",
       "title": "Instalación en Lecherías ",
       "description": "Implementación de circuito cerrado con IA para monitoreo de procesos.",
       "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200",
-      "public": true
+      "public": false
     }
   ],
   "brands": [
@@ -427,8 +427,8 @@
       "pageTitle": "Proyectos Instalados",
       "pageSubtitle": "Historias reales de seguridad y crecimiento.",
       "installed": {
-        "title": "Proyectos Instalados",
-        "subtitle": "Historias reales de seguridad y crecimiento.",
+        "title": "",
+        "subtitle": "",
         "items": [
           {
             "id": "proj-1773430551005-b32a512065c66",
@@ -448,7 +448,7 @@
             "description": "",
             "imageUrl": "https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/public/images/Luke%2BAxis%2BSpeaker%2BInstallation-640w.jpg.jpg",
             "tags": [],
-            "public": true
+            "public": false
           },
           {
             "id": "proj-1771661623594-fec1593a402ae",
@@ -458,7 +458,7 @@
             "description": "",
             "imageUrl": "",
             "tags": [],
-            "public": true
+            "public": false
           },
           {
             "id": "1769460618466",
@@ -468,7 +468,7 @@
             "description": "Proyecto Hospitales: Servicio de actualización tecnológica e implementación de sistemas CCTV en los Hospitales de Fresia, Frutillar, Llanquihue y Maullín. Incluye modernización de equipos, cableado, configuración de red, calibración de cámaras y puesta en marcha.\nProyecto Centro Médico: Instalación y configuración de cámaras de seguridad en el Centro Médico San Sebastián (Purranque), con equipamiento acorde a los requerimientos del recinto y su operación.",
             "imageUrl": "https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=500",
             "tags": [],
-            "public": true
+            "public": false
           },
           {
             "id": "pr1",
@@ -478,7 +478,7 @@
             "description": "Implementación de circuito cerrado con IA para monitoreo de procesos.",
             "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200",
             "tags": [],
-            "public": true
+            "public": false
           }
         ]
       }
