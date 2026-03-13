@@ -293,6 +293,32 @@
         "datasheetUrl": "",
         "videoUrl": "",
         "active": true
+      },
+      {
+        "id": "prod-1773429344614",
+        "name": "SWITCH GIGABIT DE 5 BOCAS 10/100/1000MBPS NO ADMINISTRABLE / VISIBLE CLOUD  ",
+        "brand": "RUIJIE",
+        "model": "RG-ES05G-L",
+        "sku": "045",
+        "categoryId": "conectividad",
+        "subcategoryId": "alambrica",
+        "priceNet": 28900,
+        "features": [
+          "- Switch no PoE no administrado",
+          "con 5 puertos 10/100/1000 Mbps",
+          "- Switch no administrado",
+          "visible en Ruijie Cloud",
+          "- Alta confiabilidad de la red",
+          "- Aplicable a varios escenarios",
+          "- Capacidad de switching: 10 Gbps",
+          "- Peso (con empaque incluido): 0.22 kg",
+          "- Velocidad de reenvío: 7.44 Mpps",
+          "- Dimensiones (ANCHO × LARGO × ALTO):  85 mm x 52 mm x 23.5 mm"
+        ],
+        "imageUrl": "https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/public/images/SWICH%20pasivo%205%20bocas.jpg",
+        "datasheetUrl": "",
+        "videoUrl": "",
+        "active": true
       }
     ]
   },
