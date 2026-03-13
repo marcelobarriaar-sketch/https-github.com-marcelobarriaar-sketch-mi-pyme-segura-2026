@@ -236,7 +236,7 @@
       },
       {
         "id": "prod-1773416174722",
-        "name": "CAMARA IP BULLET FULL HD 2MP 1920 X 1080 WIFI 6 COLORVU LENTE 2.8MM IR30METROS C/AUDIO BIDIRECCIONAL ",
+        "name": "CAMARA IP BULLET FULL HD 2MP 1920 X 1080 WIFI 6 COLORVU LENTE 2.8MM IR30METROS C/AUDIO BIDIRECCIONAL IP66",
         "brand": "Hikvision",
         "model": "DS-2CV1023G2-LIDWF(B)",
         "sku": "",
@@ -244,7 +244,8 @@
         "subcategoryId": "ip",
         "priceNet": 89990,
         "features": [
-          "IP66"
+          "Características principales:  Resolución máxima: 2 Megapíxel (1920 x 1080).  Iluminación mínima: color 0.009 lux @ (F1.6; AGC ON).  Dia / Noche Real (filtro ICR).  Lente 2.8 mm (ángulo de apertura 97°).  Cuenta con antena WiFi.  Distancia de infrarrojos: 30 mts IR EXIR.  Distancia de Luz Blanca: 30 mts.  Funciones normales: dWDR / BLC / HLC / 3D DNR.  Compresión:  H.265 / H.264.  Características Físicas y Eléctricas:  Alimentación: 12 Vcc / 7.2 W (No soporta PoE).  Fuente incluida (12 Vcc).  Temperatura de operación: -30°C a 60°C.  Uso en exterior IP66.  Dimensiones: 175.6 x 73.0 x 89.1mm.  Peso: 450 gramos.  Características Destacadas:  Entradas de audio: cuenta con micrófono y bocina interconstruido.  Puerto de red: 1 (10 / 100 Mbps).  Almacenamiento micro SD de hasta 512 GB (memoria no incluida).  Soporta ONVIF / ISAPI / CGI.  Consideraciones: No se puede agregar directamente a la plataforma de Hik-Connect (P2) de manera WiFi",
+          "requiere un NVS. Se puede agregar de manera directa a Hik-Connect de manera cableada (LAN).   Para agregarse de manera WiFi a Hik-Connect (P2P) se tiene que usar el modelo DS-7104NI-S1/W que sirve como modo AP (intermediario entre la cámara WiFi y el modem) para que se pueda ver desde la App de Hik-Connect.  Es posible agregarse a un DVR/NVR también para poder verse por Hik-Connect.   Al usar el  NVS y poder obtener audio de dos vías es recomendable usar DS-7104NI-S1/W"
         ],
         "imageUrl": "https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/public/images/X_photoroom-20241226-1421088745.jpg",
         "datasheetUrl": "",
