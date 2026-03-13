@@ -341,6 +341,13 @@
   "equipment": [],
   "projects": [
     {
+      "id": "proj-1773430551005-b32a512065c66",
+      "title": "Implementación de CCTV en establecimientos educacionales pertenecientes al Servicio Local de Educación Llanquihue ",
+      "description": "Se implementa moderno sistema CCTV en las escuelas: Básica Fresia y San Andrés de Tegualda",
+      "imageUrl": "",
+      "public": false
+    },
+    {
       "id": "proj-1771661631515-2d12a41c3c844",
       "title": "Instalación de cámaras en la ciudad de Fresia",
       "description": "",
@@ -423,6 +430,16 @@
         "title": "",
         "subtitle": "",
         "items": [
+          {
+            "id": "proj-1773430551005-b32a512065c66",
+            "name": "Implementación de CCTV en establecimientos educacionales pertenecientes al Servicio Local de Educación Llanquihue ",
+            "location": "",
+            "year": "2026",
+            "description": "Se implementa moderno sistema CCTV en las escuelas: Básica Fresia y San Andrés de Tegualda",
+            "imageUrl": "",
+            "tags": [],
+            "public": false
+          },
           {
             "id": "proj-1771661631515-2d12a41c3c844",
             "name": "Instalación de cámaras en la ciudad de Fresia",
