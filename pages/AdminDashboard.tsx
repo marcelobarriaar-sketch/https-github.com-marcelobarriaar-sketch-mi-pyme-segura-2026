@@ -1335,20 +1335,19 @@ function EquipmentAdminEditorCatalog(props: {
   const subcats = selectedCategory?.subcategories ?? [];
 
   const normalizeFeaturesInput = (raw: string): string[] => {
-    return raw
-      .replace(/\r/g, '')
-      .split('\n')
-      .map((line) => line.trim())
-      .flatMap((line) => {
-        if (!line) return [];
-        return line
-          .split(',')
-          .map((part) => part.trim())
-          .filter(Boolean);
-      })
-      .map((item) => item.replace(/^[•\-\–\—]\s*/, '').trim())
-      .filter(Boolean);
-  };
+  return raw
+    .replace(/\r/g, '')
+    .split('\n')
+    .map((line) => line.trim())
+    .flatMap((line) => {
+      if (!line) return [];
+      return line
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean);
+    })
+    .filter(Boolean);
+};
 
   const updateProduct = (patch: Partial<CatalogProduct>) => {
     if (!selected) return;
