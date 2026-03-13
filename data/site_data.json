@@ -233,6 +233,23 @@
         "datasheetUrl": "",
         "videoUrl": "",
         "active": true
+      },
+      {
+        "id": "prod-1773416174722",
+        "name": "CAMARA IP BULLET FULL HD 2MP 1920 X 1080 WIFI 6 COLORVU LENTE 2.8MM IR30METROS C/AUDIO BIDIRECCIONAL ",
+        "brand": "Hikvision",
+        "model": "DS-2CV1023G2-LIDWF(B)",
+        "sku": "",
+        "categoryId": "camaras",
+        "subcategoryId": "ip",
+        "priceNet": 89990,
+        "features": [
+          "IP66"
+        ],
+        "imageUrl": "https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/public/images/X_photoroom-20241226-1421088745.jpg",
+        "datasheetUrl": "",
+        "videoUrl": "",
+        "active": true
       }
     ]
   },
