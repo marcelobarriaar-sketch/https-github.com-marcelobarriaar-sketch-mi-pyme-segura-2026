@@ -257,17 +257,17 @@ const processImages =
           </div>
 
           <div className="relative grid grid-cols-2 gap-4">
-            <img
-              src="https://images.unsplash.com/photo-1551703599-6b3e8379aa8b?auto=format&fit=crop&q=80&w=600"
-              className="rounded-3xl shadow-lg mt-6"
-              alt="Cam"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=600"
-              className="rounded-3xl shadow-lg -mt-6"
-              alt="Instalación"
-            />
-          </div>
+  <img
+    src={processImages[0]}
+    className="rounded-3xl shadow-lg mt-6"
+    alt="Cam"
+  />
+  <img
+    src={processImages[1]}
+    className="rounded-3xl shadow-lg -mt-6"
+    alt="Instalación"
+  />
+</div>
 
         </div>
       </section>
