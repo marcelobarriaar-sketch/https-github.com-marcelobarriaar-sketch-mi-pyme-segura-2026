@@ -495,9 +495,10 @@ function HomeAdminEditor(props: {
   uploadStatus: string | null;
   setUploadStatus: (s: string | null) => void;
 }) {
-  const { data, updateData, uploadImageToCloud, uploadStatus } = props;
+  const { data, updateData, uploadImageToCloud, uploadStatus, setUploadStatus } = props;
 
   const home = data?.home ?? {};
+  const processImages = Array.isArray(home?.processImages) ? home.processImages : ['', ''];
 
   const setHome = (patch: Record<string, any>) => {
     updateData({
@@ -611,6 +612,174 @@ function HomeAdminEditor(props: {
         </button>
 
         {uploadStatus && <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>}
+      </div>
+
+      <div className="bg-white border-2 rounded-[2rem] p-8 space-y-6">
+        <div className="text-lg font-black uppercase">Sección proceso / configuración cloud</div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Texto superior pequeño</label>
+            <input
+              className="w-full bg-gray-50 border-2 p-3 rounded-xl font-black"
+              value={home?.processTitle ?? ''}
+              onChange={(e) => setHome({ processTitle: e.target.value })}
+              placeholder="ESTUDIO DE CAMPO"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Título principal sección</label>
+            <input
+              className="w-full bg-gray-50 border-2 p-3 rounded-xl font-black"
+              value={home?.processSubtitle ?? ''}
+              onChange={(e) => setHome({ processSubtitle: e.target.value })}
+              placeholder="CONFIGURACIÓN CLOUD"
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Imagen proceso 1 URL</label>
+            <input
+              className="w-full bg-gray-50 border-2 p-3 rounded-xl font-mono text-xs"
+              value={processImages[0] ?? ''}
+              onChange={(e) => {
+                const nextImages = [...processImages];
+                nextImages[0] = e.target.value;
+                setHome({ processImages: nextImages });
+              }}
+              placeholder="/images/home/process-1.jpg"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-gray-500">Imagen proceso 2 URL</label>
+            <input
+              className="w-full bg-gray-50 border-2 p-3 rounded-xl font-mono text-xs"
+              value={processImages[1] ?? ''}
+              onChange={(e) => {
+                const nextImages = [...processImages];
+                nextImages[1] = e.target.value;
+                setHome({ processImages: nextImages });
+              }}
+              placeholder="/images/home/process-2.jpg"
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4 items-start">
+          <div className="space-y-2">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              id="home-process-image-1-upload"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                const maxMB = 0.6;
+                if (file.size > maxMB * 1024 * 1024) {
+                  setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                  setTimeout(() => setUploadStatus(null), 3500);
+                  return;
+                }
+
+                const ext = (() => {
+                  const name = file.name.toLowerCase();
+                  if (name.endsWith('.webp')) return 'webp';
+                  if (name.endsWith('.png')) return 'png';
+                  return 'jpg';
+                })();
+
+                const publicUrl = await uploadImageToCloud(
+                  file,
+                  `public/images/home/process-1-${Date.now()}.${ext}`
+                );
+                if (!publicUrl) return;
+
+                const nextImages = [...processImages];
+                nextImages[0] = publicUrl;
+                setHome({ processImages: nextImages });
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={() => document.getElementById('home-process-image-1-upload')?.click()}
+              className="w-full bg-black text-white py-3 rounded-xl font-black text-[10px] hover:bg-brand transition-all"
+            >
+              <Upload size={14} /> SUBIR IMAGEN PROCESO 1
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              id="home-process-image-2-upload"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                const maxMB = 0.6;
+                if (file.size > maxMB * 1024 * 1024) {
+                  setUploadStatus(`⚠️ Muy pesada. Ideal < ${maxMB}MB`);
+                  setTimeout(() => setUploadStatus(null), 3500);
+                  return;
+                }
+
+                const ext = (() => {
+                  const name = file.name.toLowerCase();
+                  if (name.endsWith('.webp')) return 'webp';
+                  if (name.endsWith('.png')) return 'png';
+                  return 'jpg';
+                })();
+
+                const publicUrl = await uploadImageToCloud(
+                  file,
+                  `public/images/home/process-2-${Date.now()}.${ext}`
+                );
+                if (!publicUrl) return;
+
+                const nextImages = [...processImages];
+                nextImages[1] = publicUrl;
+                setHome({ processImages: nextImages });
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={() => document.getElementById('home-process-image-2-upload')?.click()}
+              className="w-full bg-black text-white py-3 rounded-xl font-black text-[10px] hover:bg-brand transition-all"
+            >
+              <Upload size={14} /> SUBIR IMAGEN PROCESO 2
+            </button>
+          </div>
+        </div>
+
+        {uploadStatus && <div className="text-[10px] font-black text-gray-600">{uploadStatus}</div>}
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="w-full h-44 bg-gray-50 rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center">
+            {processImages[0] ? (
+              <img src={processImages[0]} className="w-full h-full object-cover" alt="preview proceso 1" />
+            ) : (
+              <div className="text-gray-400 font-black text-xs">SIN IMAGEN 1</div>
+            )}
+          </div>
+
+          <div className="w-full h-44 bg-gray-50 rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center">
+            {processImages[1] ? (
+              <img src={processImages[1]} className="w-full h-full object-cover" alt="preview proceso 2" />
+            ) : (
+              <div className="text-gray-400 font-black text-xs">SIN IMAGEN 2</div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -852,6 +1021,13 @@ const AdminDashboard = () => {
 
         if (next?.home?.heroBgImageUrl) {
           next.home = { ...next.home, heroBgImageUrl: fixGithubBlobToRaw(next.home.heroBgImageUrl) };
+        }
+
+        if (next?.home?.processImages && Array.isArray(next.home.processImages)) {
+          next.home = { ...next.home };
+          next.home.processImages = next.home.processImages.map((img: any) =>
+            typeof img === 'string' ? fixGithubBlobToRaw(img) : img
+          );
         }
 
         if (next?.about?.aboutImage) {
