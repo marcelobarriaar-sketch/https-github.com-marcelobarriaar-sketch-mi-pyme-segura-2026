@@ -342,14 +342,14 @@
   "projects": [
     {
       "id": "proj-1771661631515-2d12a41c3c844",
-      "title": "Nuevo proyecto",
+      "title": "Instalación de cámaras en la ciudad de Fresia",
       "description": "",
       "imageUrl": "https://github.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/blob/main/public/images/Luke%2BAxis%2BSpeaker%2BInstallation-640w.jpg.jpg",
       "public": true
     },
     {
       "id": "proj-1771661623594-fec1593a402ae",
-      "title": "Nuevo proyecto",
+      "title": "Instalación de cámaras en supermercado Sarko ",
       "description": "",
       "imageUrl": "",
       "public": true
@@ -420,14 +420,14 @@
       "pageTitle": "Proyectos Instalados",
       "pageSubtitle": "Historias reales de seguridad y crecimiento.",
       "installed": {
-        "title": "Trabajos en el sector Salud",
-        "subtitle": "Seguridad con un solo clic",
+        "title": "",
+        "subtitle": "",
         "items": [
           {
             "id": "proj-1771661631515-2d12a41c3c844",
-            "name": "Nuevo proyecto",
-            "location": "Hospitales pertenecientes al Servicio de Salud Reloncaví",
-            "year": "2024",
+            "name": "Instalación de cámaras en la ciudad de Fresia",
+            "location": "Aporte en seguridad al radio urbano de la ciudad",
+            "year": "2025",
             "description": "",
             "imageUrl": "https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/public/images/Luke%2BAxis%2BSpeaker%2BInstallation-640w.jpg.jpg",
             "tags": [],
@@ -435,9 +435,9 @@
           },
           {
             "id": "proj-1771661623594-fec1593a402ae",
-            "name": "Nuevo proyecto",
-            "location": "",
-            "year": "2026",
+            "name": "Instalación de cámaras en supermercado Sarko ",
+            "location": "ciudad de Fresia",
+            "year": "2023",
             "description": "",
             "imageUrl": "",
             "tags": [],
