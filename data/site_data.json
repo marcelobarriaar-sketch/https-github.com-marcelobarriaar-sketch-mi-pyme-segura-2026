@@ -25,7 +25,11 @@
     "processTitle": "Monitoreo 24/7",
     "processSubtitle": "TRANQUILIDAD SIN EXCUSAS",
     "processSteps": [],
-    "heroDescription": ""
+    "heroDescription": "",
+    "processImages": [
+      "images/sala_de_ordena_optimizada-2.jpg",
+      "images/construccion_optimizada.jpg"
+    ]
   },
   "about": {
     "title": "Sobre Mi Pyme Segura",
