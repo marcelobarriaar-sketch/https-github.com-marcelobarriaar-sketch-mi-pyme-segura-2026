@@ -508,10 +508,6 @@ const Equipment = () => {
                       {[p.brand, p.model].filter(Boolean).join(' ')}
                     </p>
 
-                    <p className="font-semibold">
-                      ${price.toLocaleString()} <span className="text-xs text-gray-500">+ IVA</span>
-                    </p>
-
                     {!!(p.features?.length ?? 0) && (
                       <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
                         {(p.features ?? []).slice(0, 4).map((f: string, idx: number) => (
