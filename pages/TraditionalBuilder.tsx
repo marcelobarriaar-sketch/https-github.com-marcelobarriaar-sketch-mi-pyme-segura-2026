@@ -1123,9 +1123,11 @@ export default function TraditionalBuilder() {
                                 <div className="mt-1 font-extrabold text-gray-900 truncate">{s.p?.name}</div>
                                 <div className="mt-1 text-sm text-gray-600">{s.reason}</div>
 
-                                <div className="mt-2 text-sm font-semibold text-gray-900">
-                                  Neto: ${Number(s.p?.priceNet ?? 0).toLocaleString('es-CL')}
-                                </div>
+                                {inCartQty > 0 ? (
+                                  <div className="mt-2 text-sm font-semibold text-gray-900">
+                                    Neto: ${Number(s.p?.priceNet ?? 0).toLocaleString('es-CL')}
+                                  </div>
+                                ) : null}
                               </div>
 
                               <div className="shrink-0 text-right">
