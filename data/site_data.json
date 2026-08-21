@@ -374,9 +374,9 @@
     },
     {
       "id": "pr1",
-      "title": "Instalación en Lecherías ",
-      "description": "Implementación de circuito cerrado con IA para monitoreo de procesos.",
-      "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200",
+      "title": "Instalación en Lecherías y Bodegas ",
+      "description": "Se ha desarrollado la implementación de sistemas de circuito cerrado de televisión (CCTV) en lecherías, bodegas de gran envergadura, salas de proceso, oficinas y dependencias multiuso, con el objetivo de fortalecer la seguridad, mejorar el control operativo y resguardar adecuadamente tanto al personal como a la infraestructura crítica. Estas soluciones consideran la instalación de cámaras de alta resolución, monitoreo estratégico de accesos, áreas de producción, patios de carga, sectores de almacenamiento y espacios administrativos, permitiendo una supervisión permanente de los puntos más sensibles de cada operación. A ello se suma la integración con sistemas de grabación y gestión de última generación, diseñados para ofrecer mayor trazabilidad, capacidad de respuesta ante incidentes y apoyo en la administración interna. De esta forma, se entrega una solución tecnológica integral, adaptable a entornos productivos de alta exigencia, aportando seguridad, continuidad operacional y mayor eficiencia en la gestión de recintos de uso industrial y agroproductivo.",
+      "imageUrl": "/images/BODEGAS .png",
       "public": true
     }
   ],
@@ -476,11 +476,11 @@
           },
           {
             "id": "pr1",
-            "name": "Instalación en Lecherías ",
+            "name": "Instalación en Lecherías y Bodegas ",
             "location": "Seguridad Rural ",
             "year": "2024",
-            "description": "Implementación de circuito cerrado con IA para monitoreo de procesos.",
-            "imageUrl": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200",
+            "description": "Se ha desarrollado la implementación de sistemas de circuito cerrado de televisión (CCTV) en lecherías, bodegas de gran envergadura, salas de proceso, oficinas y dependencias multiuso, con el objetivo de fortalecer la seguridad, mejorar el control operativo y resguardar adecuadamente tanto al personal como a la infraestructura crítica. Estas soluciones consideran la instalación de cámaras de alta resolución, monitoreo estratégico de accesos, áreas de producción, patios de carga, sectores de almacenamiento y espacios administrativos, permitiendo una supervisión permanente de los puntos más sensibles de cada operación. A ello se suma la integración con sistemas de grabación y gestión de última generación, diseñados para ofrecer mayor trazabilidad, capacidad de respuesta ante incidentes y apoyo en la administración interna. De esta forma, se entrega una solución tecnológica integral, adaptable a entornos productivos de alta exigencia, aportando seguridad, continuidad operacional y mayor eficiencia en la gestión de recintos de uso industrial y agroproductivo.",
+            "imageUrl": "/images/BODEGAS .png",
             "tags": [],
             "public": true
           }
