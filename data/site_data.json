@@ -354,7 +354,7 @@
     {
       "id": "proj-1771661631515-2d12a41c3c844",
       "title": "Instalación de cámaras en las calles de la ciudad de Fresia ",
-      "description": "",
+      "description": "Se fortaleció el sistema de televigilancia mediante la instalación de 11 nuevas cámaras, combinando equipos PTZ de largo alcance y un moderno sistema ANPR para reconocimiento automático de patentes, integrados además a 8 cámaras instaladas previamente. Toda la infraestructura se encuentra centralizada en un NVR de última generación con capacidad para 64 canales, mientras que la conectividad entre los distintos puntos se realiza mediante enlaces inalámbricos punto a punto, permitiendo cubrir estratégicamente diferentes sectores clave de la ciudad y mejorar significativamente las capacidades de monitoreo y seguridad.",
       "imageUrl": "/images/PROYECTO MUNI FRESIA.PNG",
       "public": true
     },
@@ -449,7 +449,7 @@
             "name": "Instalación de cámaras en las calles de la ciudad de Fresia ",
             "location": "Aporte en seguridad al radio urbano de la ciudad",
             "year": "2025",
-            "description": "",
+            "description": "Se fortaleció el sistema de televigilancia mediante la instalación de 11 nuevas cámaras, combinando equipos PTZ de largo alcance y un moderno sistema ANPR para reconocimiento automático de patentes, integrados además a 8 cámaras instaladas previamente. Toda la infraestructura se encuentra centralizada en un NVR de última generación con capacidad para 64 canales, mientras que la conectividad entre los distintos puntos se realiza mediante enlaces inalámbricos punto a punto, permitiendo cubrir estratégicamente diferentes sectores clave de la ciudad y mejorar significativamente las capacidades de monitoreo y seguridad.",
             "imageUrl": "/images/PROYECTO MUNI FRESIA.PNG",
             "tags": [],
             "public": true
