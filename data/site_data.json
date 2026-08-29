@@ -346,6 +346,31 @@
         "datasheetUrl": "",
         "videoUrl": "",
         "active": true
+      },
+      {
+        "id": "prod-1787969584968",
+        "name": "Camara IP PT 2MP ColorVu Audio Luz 30M",
+        "brand": "Hikvision",
+        "model": "DS-2CD1P27G2-LUF 2.8mm",
+        "sku": "",
+        "categoryId": "camaras",
+        "subcategoryId": "ip",
+        "priceNet": 119900,
+        "features": [
+          "Cámara de red Bullet PT fija ColorVu de 2 MP",
+          "- Imágenes de alta calidad con resolución de 2 MP",
+          "- Imágenes coloridas 24/7",
+          "- Capacidad de giro e inclinación que permite a la cámara capturar áreas más grandes e interesantes",
+          "- Resistente al agua y al polvo (IP66)",
+          "- Tecnología de compresión eficiente H.265+",
+          "- Admite detección de personas y vehículos",
+          "- Sin Fuente de Poder",
+          "- Con Bracket"
+        ],
+        "imageUrl": "/images/camara-ip-pt-2mp-colorvu-audio-luz-30m-ds-2cd1p27g2-luf-28mm-hikvision.jpg",
+        "datasheetUrl": "",
+        "videoUrl": "",
+        "active": true
       }
     ]
   },
