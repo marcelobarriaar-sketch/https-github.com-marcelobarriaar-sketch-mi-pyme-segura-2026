@@ -323,6 +323,29 @@
         "datasheetUrl": "",
         "videoUrl": "",
         "active": true
+      },
+      {
+        "id": "prod-1787964956179",
+        "name": "Camara PT IP WiFi6 2MP Dual Light 25m Audio Bidi  2.8mm ",
+        "brand": "Hikvision",
+        "model": "DS-2DE2C200MWG/W",
+        "sku": "",
+        "categoryId": "camaras",
+        "subcategoryId": "ip",
+        "priceNet": 89990,
+        "features": [
+          "Cámara de red fija para exteriores de 2 MP con luz híbrida inteligente y WIFI (conexión a NVS)",
+          "- Compatible con Wi-Fi 6",
+          "- Luz híbrida inteligente: tecnología avanzada de largo alcance",
+          "- Micrófono y altavoz integrados",
+          "compatible con audio bidireccional",
+          "- Compatible con detección humana y seguimiento automático Lite",
+          "- Resistente al agua y al polvo (IP66)"
+        ],
+        "imageUrl": "public/images/camara-pt-ip-wifi6-2mp-dual-light-25m-audio-bidi-ds-2de2c200mwgw-28mm-hikvision.jpg",
+        "datasheetUrl": "",
+        "videoUrl": "",
+        "active": true
       }
     ]
   },
