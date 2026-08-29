@@ -371,6 +371,35 @@
         "datasheetUrl": "",
         "videoUrl": "",
         "active": true
+      },
+      {
+        "id": "prod-1787969942016",
+        "name": "PTZ IP 2MP 32X IR200M DarkFighter Autotracking",
+        "brand": "Hikvision",
+        "model": "DS-2DE7A232IW-AEB(T5)",
+        "sku": "",
+        "categoryId": "camaras",
+        "subcategoryId": "ip",
+        "priceNet": 726586,
+        "features": [
+          "PTZ IP 2MP",
+          "IR DarkFighter de 7 pulgadas",
+          "32X",
+          "No incluye fuente",
+          "- CMOS de exploración progresiva de 1/2",
+          "8\"",
+          "- Imágenes de alta calidad con resolución de 2 MP",
+          "- Excelente rendimiento con poca luz gracias a la tecnología DarkFighter",
+          "- Alarma audiovisual: la luz blanca intermitente y la advertencia audible pueden activarse por ciertos eventos",
+          "- El zoom óptico de 32 aumentos y el zoom digital de 16 aumentos brindan vistas de cerca en áreas amplias",
+          "- Vista nocturna expansiva con una distancia IR de hasta 200 m",
+          "- Se centra en la clasificación de objetivos humanos y de vehículos basada en el aprendizaje profundo",
+          "- Captura de rostros: hasta 5 rostros capturados al mismo tiempo"
+        ],
+        "imageUrl": "/images/ptz-ip-2mp-32x-ir200m-darkfighter-ds-2de7a232iw-aebt5-hikvision.jpg",
+        "datasheetUrl": "",
+        "videoUrl": "",
+        "active": true
       }
     ]
   },
