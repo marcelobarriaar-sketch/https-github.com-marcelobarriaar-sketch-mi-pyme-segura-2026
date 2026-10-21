@@ -1,0 +1,113 @@
+{
+  "rewrites": [
+    {
+      "source": "/evaluacion",
+      "destination": "/evaluation.html"
+    },
+    {
+      "source": "/evaluacion/",
+      "destination": "/evaluation.html"
+    },
+    {
+      "source": "/evaluacion-resultados",
+      "destination": "/evaluation.html"
+    },
+    {
+      "source": "/evaluacion-resultados/",
+      "destination": "/evaluation.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/evaluacion",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/evaluacion/",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/evaluacion-resultados",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/evaluacion-resultados/",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/evaluation.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/api/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        }
+      ]
+    }
+  ],
+  "functions": {
+    "api/evaluations.ts": {
+      "maxDuration": 60
+    },
+    "api/evaluation-admin.ts": {
+      "maxDuration": 60
+    },
+    "api/evaluation-whatsapp.ts": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/evaluation-whatsapp?action=drain",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}

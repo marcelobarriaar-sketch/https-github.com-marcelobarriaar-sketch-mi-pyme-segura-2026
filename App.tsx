@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 
 import Home from './pages/Home';
+import Evaluation from './pages/Evaluation';
+import EvaluationResults from './pages/EvaluationResults';
 import About from './pages/About';
 import Equipment from './pages/Equipment';
 import Projects from './pages/Projects';
@@ -493,8 +495,8 @@ const App = () => {
       setIsCloudSyncing(true);
       try {
         const res = await fetch(
-          'https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/data/site_data.json?ts=' +
-            Date.now()
+          window.location.pathname.startsWith('/evaluacion') ? '/site_data.json' :
+          'https://raw.githubusercontent.com/marcelobarriaar-sketch/https-github.com-marcelobarriaar-sketch-mi-pyme-segura-2026/main/data/site_data.json?ts=' + Date.now()
         );
 
         if (res.ok) {
@@ -586,7 +588,7 @@ const App = () => {
           </div>
         )}
 
-        <HashRouter>
+        {/^\/evaluacion(?:\/|$)/.test(window.location.pathname) ? <Evaluation data={data} /> : /^\/evaluacion-resultados(?:\/|$)/.test(window.location.pathname) ? <EvaluationResults data={data} /> : <HashRouter>
           <div className="min-h-screen flex flex-col relative selection:bg-brand selection:text-white">
             <Navbar />
 
@@ -612,10 +614,11 @@ const App = () => {
             <FloatingSaveButton />
             <WhatsAppButton />
           </div>
-        </HashRouter>
+        </HashRouter>}
       </AdminContext.Provider>
     </SiteDataContext.Provider>
   );
 };
 
 export default App;
+
