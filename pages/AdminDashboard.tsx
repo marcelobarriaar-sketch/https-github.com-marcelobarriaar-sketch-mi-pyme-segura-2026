@@ -1148,6 +1148,7 @@ const AdminDashboard = () => {
           <h1 className="text-5xl font-black tracking-tighter uppercase text-site-name">
             Gestor <span className="text-brand">Central</span>
           </h1>
+<a href="/evaluacion-resultados" className="inline-flex px-4 py-3 rounded-xl bg-gray-900 text-white font-bold">Consultar evaluaciones del servicio</a>
         </div>
 
         <div className="flex items-center gap-4">
@@ -1692,3 +1693,4 @@ IP66 exterior`}
     </div>
   );
 }
+
