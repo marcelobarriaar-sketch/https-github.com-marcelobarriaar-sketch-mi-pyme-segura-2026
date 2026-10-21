@@ -4,7 +4,7 @@ export class HttpError extends Error { constructor(public status: number, messag
 export function secret(name: string, min = 1) { const v = process.env[name]; if (!v || v.length < min) throw new HttpError(503, 'El servicio está pendiente de configuración. Inténtalo más tarde.'); return v; }
 export const prefix = () => process.env.EVALUATION_NAMESPACE || 'mps:evaluations:v1';
 export async function redis<T = any>(...command: (string | number)[]): Promise<T> {
-  const response = await fetch(secret('UPSTASH_REDIS_REST_URL'), { method: 'POST', headers: { Authorization: `Bearer ${secret('UPSTASH_REDIS_REST_TOKEN')}`, 'Content-Type': 'application/json' }, body: JSON.stringify(command), signal: AbortSignal.timeout(8000) });
+  const response = await fetch(process.env.UPSTASH_REDIS_REST_URL || secret('KV_REST_API_URL'), { method: 'POST', headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN || secret('KV_REST_API_TOKEN')}`, 'Content-Type': 'application/json' }, body: JSON.stringify(command), signal: AbortSignal.timeout(8000) });
   if (!response.ok) throw new HttpError(503, 'No pudimos acceder al registro. Conserva tus respuestas y reintenta.');
   const body = await response.json();
   if (body.error) throw new HttpError(503, 'No pudimos acceder al registro. Conserva tus respuestas y reintenta.');
