@@ -1,10 +1,12 @@
 import { ITEMS, chileDate, type Evaluation } from '../shared/evaluation.js';
 import { claimNotification, setNotification } from './evaluation-store.js';
+import { notifyEmail } from './evaluation-email.js';
 const REQUIRED = ['WHATSAPP_ACCESS_TOKEN', 'WHATSAPP_PHONE_NUMBER_ID', 'WHATSAPP_TEMPLATE_NAME', 'WHATSAPP_TEMPLATE_LANGUAGE', 'WHATSAPP_GRAPH_VERSION'];
 export function templateParameters(row: Evaluation) {
   return [chileDate(row.createdAt), row.reference || 'Sin referencia', ...ITEMS.map(([k]) => row.scores[k] === null ? 'No aplica' : `${row.scores[k]}/5`), row.recommendation, row.comment || 'Sin comentario'].map(text => text.replace(/[\t\r\n]+/g, ' ').replace(/ {4,}/g, ' '));
 }
 export async function notify(id: string) {
+  if (process.env.EVALUATION_NOTIFICATION_CHANNEL === 'email') return notifyEmail(id);
   const row = await claimNotification(id);
   if (!row) return;
   const attempt = row.notification.attempt!;

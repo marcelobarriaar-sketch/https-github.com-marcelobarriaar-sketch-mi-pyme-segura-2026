@@ -8,7 +8,7 @@ export const ITEMS = [
 export type Item = typeof ITEMS[number][0];
 export const LABELS = ['Muy insatisfecho', 'Insatisfecho', 'Ni satisfecho ni insatisfecho', 'Satisfecho', 'Muy satisfecho'];
 export type EvaluationInput = { scores: Record<Item, number | null>; recommendation: 'Sí' | 'Tal vez' | 'No'; reference: string; comment: string };
-export type Evaluation = EvaluationInput & { id: string; createdAt: string; notification: { status: string; attempt?: string; messageId?: string; updatedAt: string; errorCode?: string } };
+export type Evaluation = EvaluationInput & { id: string; createdAt: string; form?: import('./evaluation-form.js').EvaluationForm; notification: { status: string; channel?: string; attempt?: string; messageId?: string; updatedAt: string; errorCode?: string } };
 export function validateInput(value: unknown): EvaluationInput {
   const v = value as EvaluationInput;
   if (!v || typeof v !== 'object' || !v.scores || typeof v.scores !== 'object' || Array.isArray(v.scores)) throw Error('Completa las cinco valoraciones.');

@@ -110,3 +110,9 @@ Upstash puede ofrecer un nivel gratuito sujeto a sus límites; almacenamiento, r
 
 Hola 👋 Gracias por confiar en Mi Pyme Segura. ¿Nos ayudas a evaluar el servicio? Te tomará menos de un minuto: https://www.mipymesegura.cl/evaluacion
 Tu opinión nos ayuda a mejorar. ¡Gracias!
+
+## Edición desde administración y avisos por correo
+
+En `/evaluacion-resultados`, tras ingresar con la contraseña protegida, «Editar encuesta» permite cambiar el título, bienvenida, textos de las cinco preguntas y agradecimiento. Guarda en Redis con control de concurrencia. La escala y los campos opcionales se mantienen. Cada evaluación nueva conserva una copia de los textos y versión respondidos; el CSV incluye los textos históricos. Mantener el significado de los cinco aspectos para comparar promedios.
+
+Correo mediante Resend: `EVALUATION_NOTIFICATION_CHANNEL=email`, `RESEND_API_KEY` (secreto), `EVALUATION_EMAIL_TO` y `EVALUATION_EMAIL_FROM`. El dominio del remitente debe estar verificado. Se envía después de guardar, con fecha de Chile, referencia, cinco puntuaciones, recomendación y comentario completo. La clave idempotente se deriva del ID guardado. La aceptación de Resend se muestra separada de la entrega. «Consultar entrega del correo» consulta el estado del proveedor. Si la respuesta de red es incierta, no se reenvía automáticamente para evitar duplicados; revisar el registro de Resend antes de conciliar. Resend conserva claves idempotentes por 24 horas. WhatsApp permanece desactivado en este proyecto.

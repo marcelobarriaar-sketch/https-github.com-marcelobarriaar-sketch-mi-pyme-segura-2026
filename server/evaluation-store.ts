@@ -32,9 +32,9 @@ function decodeEvaluation(raw: string): Evaluation {
 export async function getEvaluation(id: string): Promise<Evaluation | null> {
   const raw = await redis<string | null>('HGET', `${prefix()}:records`, id); return raw ? decodeEvaluation(raw) : null;
 }
-export async function saveEvaluation(id: string, input: EvaluationInput, fingerprint: string) {
+export async function saveEvaluation(id: string, input: EvaluationInput, fingerprint: string, form?: Evaluation['form']) {
   const now = new Date().toISOString();
-  const row: Evaluation = { ...input, id, createdAt: now, notification: { status: 'pending', updatedAt: now } };
+  const row: Evaluation = { ...input, ...(form ? { form } : {}), id, createdAt: now, notification: { status: 'pending', updatedAt: now } };
   // One atomic durable operation: deduplication, record, chronological index, metrics and outbox.
   const script = `local old=redis.call('HGET',KEYS[1],ARGV[1]);if old then return old end
 local duplicate=redis.call('GET',KEYS[5]);if duplicate then return redis.call('HGET',KEYS[1],duplicate) end
@@ -42,9 +42,9 @@ redis.call('HSET',KEYS[1],ARGV[1],ARGV[2]);redis.call('ZADD',KEYS[2],ARGV[3],ARG
 redis.call('HINCRBY',KEYS[4],'total',1);local r=cjson.decode(ARGV[2]);for k,v in pairs(r.scores) do if type(v)=='number' then redis.call('HINCRBY',KEYS[4],k..':sum',v);redis.call('HINCRBY',KEYS[4],k..':count',1) end end;redis.call('HINCRBY',KEYS[4],'recommend:'..r.recommendation,1);return ARGV[2]`;
   return decodeEvaluation(await redis<string>('EVAL', script, 5, `${prefix()}:records`, `${prefix()}:index`, `${prefix()}:outbox`, `${prefix()}:metrics`, `${prefix()}:duplicate:${fingerprint}`, id, JSON.stringify({ ...row, scores: Object.fromEntries(ITEMS.map(([k]) => [k, row.scores[k] === null ? 'na' : row.scores[k]])) }), Date.now()));
 }
-export async function claimNotification(id: string) {
+export async function claimNotification(id: string, channel = 'whatsapp') {
   const attempt = randomUUID();
-  const result = await redis<string | null>('EVAL', `local s=redis.call('HGET',KEYS[1],ARGV[1]);if not s then return nil end;local r=cjson.decode(s);local st=r.notification.status;if st~='pending' and st~='failed' and st~='not_configured' then return nil end;r.notification={status='sending',attempt=ARGV[2],updatedAt=ARGV[3]};local v=cjson.encode(r);redis.call('HSET',KEYS[1],ARGV[1],v);return v`, 1, `${prefix()}:records`, id, attempt, new Date().toISOString());
+  const result = await redis<string | null>('EVAL', `local s=redis.call('HGET',KEYS[1],ARGV[1]);if not s then return nil end;local r=cjson.decode(s);local st=r.notification.status;if st~='pending' and st~='failed' and st~='not_configured' then return nil end;r.notification={status='sending',attempt=ARGV[2],updatedAt=ARGV[3],channel=ARGV[4]};local v=cjson.encode(r);redis.call('HSET',KEYS[1],ARGV[1],v);return v`, 1, `${prefix()}:records`, id, attempt, new Date().toISOString(), channel);
   return result ? decodeEvaluation(result) : null;
 }
 export async function setNotification(id: string, attempt: string, status: string, messageId = '', errorCode = '') {
