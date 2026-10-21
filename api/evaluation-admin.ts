@@ -4,6 +4,8 @@ import { ITEMS, chileDate, csvCell } from '../shared/evaluation.js';
 import { HttpError, secret, equal, token, rateLimit, ipKey, pageRows, metrics, getEvaluation } from '../server/evaluation-store.js';
 import { headers, sameOrigin, body, fail, requireAdmin } from '../server/evaluation-http.js';
 import { notify } from '../server/evaluation-notify.js';
+import { getForm, updateForm } from '../server/evaluation-form.js';
+import { checkEmail } from '../server/evaluation-email.js';
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   headers(res);
   try {
@@ -19,6 +21,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.json({ success: true });
       }
       requireAdmin(req);
+      if (data.action === 'check_notification' && typeof data.id === 'string') { await rateLimit('admin-notify',30,600); await checkEmail(data.id); return res.json({success:true}); }
+      if (data.action === 'save_form') { await rateLimit('admin-form',30,600); const form = await updateForm(data.form, data.expectedVersion); return res.json({success:true, form}); }
       if (data.action === 'logout') { res.setHeader('Set-Cookie', 'mps_evaluation_session=; HttpOnly; Secure; SameSite=Strict; Path=/api; Max-Age=0'); return res.json({ success: true }); }
       if (data.action === 'retry' && typeof data.id === 'string') {
         const row = await getEvaluation(data.id); if (!row) throw new HttpError(404, 'Evaluación no encontrada.');
@@ -33,10 +37,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!Number.isFinite(until) || until < 0) throw new HttpError(400, 'Fecha de consulta no válida.');
     if (req.query.format === 'csv') {
       res.setHeader('Content-Type', 'text/csv; charset=utf-8'); res.setHeader('Content-Disposition', 'attachment; filename="evaluaciones-mipyme-segura.csv"');
-      res.write('\uFEFF' + ['ID', 'Fecha Chile', 'Referencia', ...ITEMS.map(([,label]) => label), 'Recomendación', 'Comentario', 'Estado WhatsApp'].map(csvCell).join(';') + '\r\n');
+      res.write('\uFEFF' + ['ID', 'Fecha Chile', 'Referencia', ...ITEMS.map(([,label]) => label), 'Recomendación', 'Comentario', 'Estado notificación', 'Versión formulario', ...ITEMS.map(([,label]) => `Pregunta: ${label}`)].map(csvCell).join(';') + '\r\n');
       for (let offset = 0; ; offset += 100) {
         const rows = await pageRows(offset, 100, until);
-        for (const r of rows) res.write([r.id, chileDate(r.createdAt), r.reference, ...ITEMS.map(([k]) => r.scores[k] ?? 'No aplica'), r.recommendation, r.comment, r.notification.status].map(csvCell).join(';') + '\r\n');
+        for (const r of rows) res.write([r.id, chileDate(r.createdAt), r.reference, ...ITEMS.map(([k]) => r.scores[k] ?? 'No aplica'), r.recommendation, r.comment, r.notification.status, r.form?.version || 'original', ...ITEMS.map(([k,label]) => r.form?.labels[k] || label)].map(csvCell).join(';') + '\r\n');
         if (rows.length < 100) break;
       }
       return res.end();
@@ -44,6 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const offset = Number(req.query.offset || 0);
     if (!Number.isSafeInteger(offset) || offset < 0) throw new HttpError(400, 'Página no válida.');
     const [rows, summary] = await Promise.all([pageRows(offset, 50, until), metrics()]);
-    return res.json({ rows, summary, until, nextOffset: rows.length === 50 ? offset + 50 : null });
+    const form = await getForm();
+    return res.json({ rows, summary, form, until, nextOffset: rows.length === 50 ? offset + 50 : null });
   } catch (e) { if (res.headersSent) return res.destroy(); return fail(res, e); }
 }

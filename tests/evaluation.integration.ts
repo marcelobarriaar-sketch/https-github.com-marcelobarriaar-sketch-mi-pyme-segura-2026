@@ -8,6 +8,9 @@ import admin from '../api/evaluation-admin';
 import whatsapp from '../api/evaluation-whatsapp';
 import { token, getEvaluation, metrics, saveEvaluation, pageRows, redis, prefix, claimNotification, setNotification } from '../server/evaluation-store';
 import { notify, templateParameters } from '../server/evaluation-notify';
+import { DEFAULT_FORM } from '../shared/evaluation-form';
+import { getForm } from '../server/evaluation-form';
+import { emailText, checkEmail } from '../server/evaluation-email';
 import { validateInput, csvCell, chileDate } from '../shared/evaluation';
 Object.assign(process.env, JSON.parse(readFileSync(process.env.TEST_ENV_FILE || '../test-env-private.json', 'utf8')));
 process.env.EVALUATION_NAMESPACE += ':integration:' + randomUUID();
@@ -34,7 +37,7 @@ test('Flujo real con Redis temporal: API, persistencia, duplicados, protección,
   const spam = response(); await evaluations(request('POST', { ...payload, website: 'spam' }), spam); assert.equal(spam.statusCode, 400);
   const first = response(), duplicate = response();
   await Promise.all([evaluations(request('POST', payload), first), evaluations(request('POST', payload), duplicate)]);
-  assert.equal(first.value.success, true); assert.equal(duplicate.value.id, first.value.id);
+  assert.equal(first.value.success, true, JSON.stringify(first.value)); assert.equal(duplicate.value.id, first.value.id);
   const row = await getEvaluation(id); assert.equal(row?.comment, input.comment); assert.equal(row?.notification.status, 'not_configured');
   const extra = await saveEvaluation(randomUUID(), input as any, 'duplicate-identical');
   const second = await saveEvaluation(randomUUID(), input as any, 'duplicate-identical'); assert.equal(extra.id, second.id);
@@ -69,7 +72,31 @@ test('Flujo real con Redis temporal: API, persistencia, duplicados, protección,
   function webhookRequest(signature: string) { return Object.assign(Readable.from([webhookBody]), { method: 'POST', headers: { 'x-hub-signature-256': signature }, query: {} }); }
   const rejectedWebhook = response(); await whatsapp(webhookRequest('bad') as any, rejectedWebhook); assert.equal(rejectedWebhook.statusCode, 403);
   const verifiedWebhook = response(); await whatsapp(webhookRequest('sha256=' + createHmac('sha256', process.env.WHATSAPP_APP_SECRET).update(webhookBody).digest('hex')) as any, verifiedWebhook); assert.equal(verifiedWebhook.statusCode, 200); assert.equal((await getEvaluation(id))?.notification.status, 'read');
+  const formDenied = response(); await admin(request('POST',{action:'save_form',form:DEFAULT_FORM,expectedVersion:'original'}),formDenied); assert.equal(formDenied.statusCode,401);
+  const edited = {...DEFAULT_FORM,title:'Tu opinión nos ayuda',labels:{...DEFAULT_FORM.labels,attention:'¿Cómo calificas la atención recibida?'}};
+  const savedForm = response(); await admin(request('POST',{action:'save_form',form:edited,expectedVersion:'original'},cookie),savedForm); assert.equal(savedForm.value.success,true);
+  const version = savedForm.value.form.version; assert.equal((await getForm()).title,edited.title);
+  const conflict = response(); await admin(request('POST',{action:'save_form',form:edited,expectedVersion:'original'},cookie),conflict); assert.equal(conflict.statusCode,409);
+  const formChallenge = response(); await evaluations(request('GET'),formChallenge); assert.equal(formChallenge.value.form.title,edited.title);
+  const emailRow = await saveEvaluation(randomUUID(),input as any,'email-test',await getForm(version));
+  Object.assign(process.env,{EVALUATION_NOTIFICATION_CHANNEL:'email',RESEND_API_KEY:'synthetic',EVALUATION_EMAIL_TO:'recipient@example.test',EVALUATION_EMAIL_FROM:'Mi Pyme <survey@example.test>'});
+  let emails = 0; let reject = true;
+  globalThis.fetch = async (url:any,options?:any) => {
+    if (String(url) === 'https://api.resend.com/emails') {
+      emails++; const body = JSON.parse(options.body); assert.deepEqual(body.to,['recipient@example.test']); assert.equal(options.headers['Idempotency-Key'],`mps-evaluation/${emailRow.id}`); assert.ok(body.text.includes(input.comment)); assert.ok(body.text.includes(edited.labels.attention));
+      return new Response(JSON.stringify(reject ? {name:'validation_error'} : {id:'synthetic-resend-id'}),{status:reject ? 422 : 200});
+    }
+    if (String(url).startsWith('https://api.resend.com/emails/')) return new Response(JSON.stringify({last_event:'delivered'}),{status:200});
+    return originalFetch(url,options);
+  };
+  try {
+    await notify(emailRow.id); assert.equal((await getEvaluation(emailRow.id))?.notification.status,'failed'); assert.equal((await getEvaluation(emailRow.id))?.comment,input.comment);
+    reject = false; await Promise.all([notify(emailRow.id),notify(emailRow.id)]); assert.equal(emails,2); assert.equal((await getEvaluation(emailRow.id))?.notification.channel,'email');
+    await notify(emailRow.id); assert.equal(emails,2); await checkEmail(emailRow.id); assert.equal((await getEvaluation(emailRow.id))?.notification.status,'delivered');
+    assert.ok(emailText((await getEvaluation(emailRow.id))!).includes(input.comment));
+    assert.equal((await getEvaluation(id))?.form?.version,'original'); assert.equal((await getEvaluation(id))?.form?.title,DEFAULT_FORM.title);
+  } finally { globalThis.fetch = originalFetch; delete process.env.EVALUATION_NOTIFICATION_CHANNEL; }
   // No record, metrics or deduplication is ever stored only in the browser.
-  assert.equal((await pageRows(0)).length, 2);
+  assert.equal((await pageRows(0)).length, 3);
   const keys = await redis<string[]>('KEYS', `${prefix()}:*`); if (keys.length) await redis('DEL', ...keys);
 });
